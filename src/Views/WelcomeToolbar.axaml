@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SourceGit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.WelcomeToolbar"
+             x:DataType="vm:Welcome">
+  <Grid ColumnDefinitions="Auto,*,Auto" Margin="4,0">
+    <StackPanel Grid.Column="0" Orientation="Horizontal">
+      <Button Classes="icon_button" Width="32" Command="{Binding Clone}">
+        <ToolTip.Tip>
+          <TextBlock>
+            <Run Text="{DynamicResource Text.Welcome.Clone}"/>
+            <Run Text=" "/>
+            <Run Text="{OnPlatform Ctrl+N, macOS=⌘+N}" FontSize="11" Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"/>
+          </TextBlock>
+        </ToolTip.Tip>
+        <Path Width="16" Height="16" Data="{StaticResource Icons.Clone}" Margin="0,4,0,0"/>
+      </Button>
+
+      <Button Classes="icon_button" Width="32" Command="{Binding OpenLocalRepository}">
+        <ToolTip.Tip>
+          <TextBlock>
+            <Run Text="{DynamicResource Text.Welcome.OpenOrInit}"/>
+            <Run Text=" "/>
+            <Run Text="{OnPlatform Ctrl+Shift+O, macOS=⌘+⇧+O}" FontSize="11" Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"/>
+          </TextBlock>
+        </ToolTip.Tip>
+        <Path Width="14" Height="14" Data="{StaticResource Icons.Folder.Open}" Margin="0,2,0,0"/>
+      </Button>
+
+      <Button Classes="icon_button" Width="32" Command="{Binding OpenTerminal}" ToolTip.Tip="{DynamicResource Text.Welcome.OpenTerminal}">
+        <Path Width="13" Height="13" Data="{StaticResource Icons.Terminal}"/>
+      </Button>
+    </StackPanel>
+
+    <StackPanel Grid.Column="2" Orientation="Horizontal">
+      <Button Classes="icon_button" Width="32" Command="{Binding AddRootNode}" ToolTip.Tip="{DynamicResource Text.Welcome.AddRootFolder}">
+        <Path Width="14" Height="14" Margin="0,2,0,0" Data="{StaticResource Icons.Folder.Add}"/>
+      </Button>
+
+      <Button Classes="icon_button" Width="32" Command="{Binding ScanDefaultCloneDir}" ToolTip.Tip="{DynamicResource Text.Welcome.ScanDefaultCloneDir}">
+        <Path Width="14" Height="14" Data="{StaticResource Icons.Scan}"/>
+      </Button>
+    </StackPanel>
+  </Grid>
+</UserControl>

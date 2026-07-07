@@ -1,0 +1,85 @@
+<v:ChromelessWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:v="using:SourceGit.Views"
+                    xmlns:vm="using:SourceGit.ViewModels"
+                    mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="400"
+                    x:Class="SourceGit.Views.AIAssistant"
+                    x:DataType="vm:AIAssistant"
+                    x:Name="ThisControl"
+                    Icon="/App.ico"
+                    Title="{DynamicResource Text.AIAssistant}"
+                    Width="520" Height="400"
+                    CanResize="True"
+                    WindowStartupLocation="CenterOwner">
+  <Grid RowDefinitions="Auto,*,Auto">
+    <!-- TitleBar -->
+    <Grid Grid.Row="0" Height="28" IsVisible="{Binding !#ThisControl.UseSystemWindowFrame}">
+      <Border Background="{DynamicResource Brush.TitleBar}"
+              BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
+              PointerPressed="BeginMoveWindow"/>
+
+      <Path Width="14" Height="14"
+            Margin="10,0,0,0"
+            HorizontalAlignment="Left"
+            Data="{StaticResource Icons.AIAssist}"
+            IsVisible="{OnPlatform True, macOS=False}"/>
+
+      <TextBlock Classes="bold"
+                 Text="{DynamicResource Text.AIAssistant}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsHitTestVisible="False"/>
+
+      <v:CaptionButtons HorizontalAlignment="Right"
+                        IsCloseButtonOnly="True"
+                        IsVisible="{OnPlatform True, macOS=False}"/>
+    </Grid>
+
+    <!-- AI response -->
+    <v:AIResponseView Grid.Row="1"
+                      Margin="8"
+                      BorderThickness="1"
+                      BorderBrush="{DynamicResource Brush.Border2}"
+                      Background="{DynamicResource Brush.Contents}"
+                      Content="{Binding Text}"/>
+
+    <!-- Options -->
+    <Grid Grid.Row="2" Margin="8,0,8,8" ColumnDefinitions="Auto,*,18,Auto,Auto">
+      <TextBlock Grid.Column="0"
+                 Classes="group_header_label"
+                 Text="{DynamicResource Text.AIAssistant.Model}"/>
+      
+      <ComboBox Grid.Column="1"
+                Height="28"
+                Margin="6,0" Padding="4,0"
+                BorderThickness="0"
+                Background="Transparent"
+                VerticalAlignment="Center"
+                ItemsSource="{Binding AvailableModels, Mode=OneWay}"
+                SelectedItem="{Binding CurrentModel, Mode=TwoWay}"
+                SelectionChanged="OnModelChanged"/>
+      
+      <v:LoadingIcon Grid.Column="2"
+                     Width="14" Height="14"
+                     IsVisible="{Binding IsGenerating}"/>
+
+      <Button Grid.Column="3"
+              Classes="flat primary"
+              Height="28"
+              Margin="8,0" Padding="12,0"
+              Content="{DynamicResource Text.AIAssistant.Use}"
+              IsVisible="{Binding CanUseResponse}"
+              IsEnabled="{Binding Response, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+              Click="OnUseClicked"/>
+      
+      <Button Grid.Column="4"
+              Classes="flat"
+              Height="28"
+              Padding="12,0"
+              Content="{DynamicResource Text.AIAssistant.Regen}"
+              IsEnabled="{Binding !IsGenerating}"
+              Click="OnRegenClicked"/>
+    </Grid>
+  </Grid>
+</v:ChromelessWindow>

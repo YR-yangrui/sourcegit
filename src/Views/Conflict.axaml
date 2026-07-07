@@ -1,0 +1,242 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:SourceGit.Models"
+             xmlns:v="using:SourceGit.Views"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:c="using:SourceGit.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.Conflict"
+             x:DataType="vm:Conflict">
+  <Border Background="{DynamicResource Brush.Window}" BorderThickness="1" BorderBrush="{DynamicResource Brush.Border2}">
+    <Grid>
+      <Grid RowDefinitions="Auto,Auto,*,Auto"
+            Margin="16"
+            IsVisible="{Binding !IsResolved}">
+        <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center">
+          <Path Width="48" Height="48" Data="{StaticResource Icons.Conflict}" Fill="{DynamicResource Brush.FG2}" HorizontalAlignment="Center"/>
+          <TextBlock Margin="0,10,0,8" FontSize="20" FontWeight="Bold" Text="{DynamicResource Text.WorkingCopy.Conflicts}" Foreground="{DynamicResource Brush.FG2}" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+          <Border Height="16" VerticalAlignment="Center" Background="Red" CornerRadius="8">
+            <TextBlock Text="{Binding Marker}" Foreground="White" FontWeight="Bold" Margin="8,0" FontSize="10"/>
+          </Border>
+
+          <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Text="{Binding Description}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2"
+              ColumnDefinitions="*,*"
+              MinHeight="140"
+              Margin="0,0,0,8"
+              IsVisible="{Binding UseHistoryPanel}">
+          <Border Grid.Column="0"
+                  Margin="0,0,4,0"
+                  BorderThickness="1"
+                  BorderBrush="{DynamicResource Brush.Border2}"
+                  Background="{DynamicResource Brush.Contents}">
+            <Grid RowDefinitions="30,*">
+              <Border Grid.Row="0" Padding="8,0" Background="{DynamicResource Brush.Popup}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border2}">
+                <TextBlock Text="{Binding MineHistoryTitle}" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+              </Border>
+
+              <Grid Grid.Row="1">
+                <ListBox ItemsSource="{Binding MineHistories}"
+                         Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="MinHeight" Value="52"/>
+                      <Setter Property="Margin" Value="0"/>
+                      <Setter Property="Padding" Value="0"/>
+                    </Style>
+                  </ListBox.Styles>
+
+                  <ListBox.ItemTemplate>
+                    <DataTemplate DataType="m:FileVersion">
+                      <Border Padding="8,6" BorderBrush="{DynamicResource Brush.Border2}" BorderThickness="0,0,0,1">
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                          <TextBlock Grid.Row="0" Grid.Column="0"
+                                     FontFamily="{DynamicResource Fonts.Monospace}"
+                                     Text="{Binding SHA, Converter={x:Static c:StringConverters.ToShortSHA}}"
+                                     Cursor="Hand"
+                                     Foreground="DarkOrange"
+                                     TextDecorations="Underline"
+                                     PointerPressed="OnPressedSHA"/>
+                          <TextBlock Grid.Row="0" Grid.Column="1"
+                                     Margin="8,0,0,0"
+                                     Text="{Binding Author.Name}"
+                                     TextTrimming="CharacterEllipsis"/>
+                          <v:DateTimePresenter Grid.Row="0" Grid.Column="2"
+                                               Margin="8,0,0,0"
+                                               Timestamp="{Binding AuthorTime}"
+                                               Foreground="{DynamicResource Brush.FG2}"
+                                               HorizontalAlignment="Right"/>
+                          <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                     Margin="0,4,0,0"
+                                     Text="{Binding Subject}"
+                                     TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+
+                <TextBlock Text="{DynamicResource Text.Running}"
+                           Foreground="{DynamicResource Brush.FG2}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding IsLoadingHistories}"/>
+                <TextBlock Text="No matching commits"
+                           Foreground="{DynamicResource Brush.FG2}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding IsMineHistoryEmpty}"/>
+              </Grid>
+            </Grid>
+          </Border>
+
+          <Border Grid.Column="1"
+                  Margin="4,0,0,0"
+                  BorderThickness="1"
+                  BorderBrush="{DynamicResource Brush.Border2}"
+                  Background="{DynamicResource Brush.Contents}">
+            <Grid RowDefinitions="30,*">
+              <Border Grid.Row="0" Padding="8,0" Background="{DynamicResource Brush.Popup}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border2}">
+                <TextBlock Text="{Binding TheirsHistoryTitle}" FontWeight="Bold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+              </Border>
+
+              <Grid Grid.Row="1">
+                <ListBox ItemsSource="{Binding TheirsHistories}"
+                         Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="MinHeight" Value="52"/>
+                      <Setter Property="Margin" Value="0"/>
+                      <Setter Property="Padding" Value="0"/>
+                    </Style>
+                  </ListBox.Styles>
+
+                  <ListBox.ItemTemplate>
+                    <DataTemplate DataType="m:FileVersion">
+                      <Border Padding="8,6" BorderBrush="{DynamicResource Brush.Border2}" BorderThickness="0,0,0,1">
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                          <TextBlock Grid.Row="0" Grid.Column="0"
+                                     FontFamily="{DynamicResource Fonts.Monospace}"
+                                     Text="{Binding SHA, Converter={x:Static c:StringConverters.ToShortSHA}}"
+                                     Cursor="Hand"
+                                     Foreground="DarkOrange"
+                                     TextDecorations="Underline"
+                                     PointerPressed="OnPressedSHA"/>
+                          <TextBlock Grid.Row="0" Grid.Column="1"
+                                     Margin="8,0,0,0"
+                                     Text="{Binding Author.Name}"
+                                     TextTrimming="CharacterEllipsis"/>
+                          <v:DateTimePresenter Grid.Row="0" Grid.Column="2"
+                                               Margin="8,0,0,0"
+                                               Timestamp="{Binding AuthorTime}"
+                                               Foreground="{DynamicResource Brush.FG2}"
+                                               HorizontalAlignment="Right"/>
+                          <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                     Margin="0,4,0,0"
+                                     Text="{Binding Subject}"
+                                     TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+
+                <TextBlock Text="{DynamicResource Text.Running}"
+                           Foreground="{DynamicResource Brush.FG2}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding IsLoadingHistories}"/>
+                <TextBlock Text="No matching commits"
+                           Foreground="{DynamicResource Brush.FG2}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding IsTheirsHistoryEmpty}"/>
+              </Grid>
+            </Grid>
+          </Border>
+        </Grid>
+
+        <Border Grid.Row="2"
+                Margin="0,0,0,8"
+                Padding="8"
+                CornerRadius="4"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource Brush.Border2}"
+                IsVisible="{Binding !UseHistoryPanel}">
+          <Border.DataTemplates>
+            <DataTemplate DataType="m:Commit">
+              <StackPanel Orientation="Horizontal">
+                <v:CommitRefsPresenter Foreground="{DynamicResource Brush.FG1}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       UseGraphColor="False"/>
+                <TextBlock Margin="4,0,0,0"
+                           Text="{Binding SHA, Converter={x:Static c:StringConverters.ToShortSHA}}"
+                           Foreground="DarkOrange"
+                           TextDecorations="Underline"
+                           Cursor="Hand"
+                           PointerPressed="OnPressedSHA"/>
+                <TextBlock Margin="4,0,0,0" Text="{Binding Subject}"/>
+              </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate DataType="x:String">
+              <StackPanel Orientation="Horizontal">
+                <Path Width="12" Height="12" Data="{StaticResource Icons.Changes}"/>
+                <TextBlock Margin="4,0,0,0" Text="{Binding}"/>
+              </StackPanel>
+            </DataTemplate>
+          </Border.DataTemplates>
+
+          <Grid Margin="8,0,0,0" RowDefinitions="32,32" ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Grid.Column="0" Classes="info_label" Text="MINE"/>
+            <ContentControl Grid.Row="0" Grid.Column="1" Margin="16,0,0,0" Content="{Binding Mine}"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Classes="info_label" Text="THEIRS"/>
+            <ContentControl Grid.Row="1" Grid.Column="1" Margin="16,0,0,0" Content="{Binding Theirs}"/>
+          </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+          <Button Classes="flat" Click="OnUseMine">
+            <StackPanel Orientation="Horizontal">
+              <Path Width="12" Height="12" Data="{StaticResource Icons.Local}"/>
+              <TextBlock Margin="6,0,0,0" Text="{DynamicResource Text.WorkingCopy.Conflicts.UseMine}" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="flat" Margin="8,0,0,0" Click="OnUseTheirs">
+            <StackPanel Orientation="Horizontal">
+              <Path Width="12" Height="12" Data="{StaticResource Icons.Incoming}"/>
+              <TextBlock Margin="6,0,0,0" Text="{DynamicResource Text.WorkingCopy.Conflicts.UseTheirs}" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="flat primary"
+                  Margin="8,0,0,0"
+                  Click="OnMergeExternal"
+                  IsVisible="{Binding CanMerge, Mode=OneWay}">
+            <StackPanel Orientation="Horizontal">
+              <Path Width="12" Height="12" Data="{StaticResource Icons.OpenWith}" Fill="White"/>
+              <TextBlock Margin="6,0,0,0" Text="{DynamicResource Text.WorkingCopy.Conflicts.MergeExternal}" Foreground="White" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      <StackPanel Orientation="Vertical" IsVisible="{Binding IsResolved}" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Path Width="64" Height="64" Data="{StaticResource Icons.Check}" Fill="Green"/>
+        <TextBlock Margin="0,16,0,8" FontSize="20" FontWeight="Bold" Text="{DynamicResource Text.WorkingCopy.Conflicts.Resolved}" Foreground="{DynamicResource Brush.FG2}" HorizontalAlignment="Center"/>
+        <TextBlock Text="{DynamicResource Text.WorkingCopy.CanStageTip}" Foreground="{DynamicResource Brush.FG2}" HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Grid>
+  </Border>
+</UserControl>

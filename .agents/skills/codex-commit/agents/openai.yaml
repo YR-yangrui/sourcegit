@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Commit"
+  short_description: "Review and compose atomic commits"
+  default_prompt: "Use $codex-commit when preparing repository changes for commit."

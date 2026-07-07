@@ -1,0 +1,184 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:SourceGit.Models"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:c="using:SourceGit.Converters"
+             xmlns:v="using:SourceGit.Views"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.LauncherTabBar"
+             x:DataType="vm:Launcher"
+             x:Name="ThisControl">
+  <Grid ColumnDefinitions="Auto,*,Auto">
+    <RepeatButton Grid.Column="0"
+                  Classes="icon_button"
+                  Width="18" Height="28"
+                  Margin="0,2,0,0"
+                  Click="ScrollTabsLeft"
+                  IsVisible="{Binding #ThisControl.IsScrollerVisible}">
+      <Path Width="8" Height="14" Stretch="Fill" Data="{StaticResource Icons.TriangleLeft}"/>
+    </RepeatButton>
+
+    <ScrollViewer Grid.Column="1"
+                  Margin="6,0"
+                  x:Name="LauncherTabsScroller"
+                  HorizontalAlignment="Left"
+                  HorizontalScrollBarVisibility="Hidden"
+                  VerticalScrollBarVisibility="Disabled"
+                  PointerWheelChanged="ScrollTabs">
+      <StackPanel Orientation="Horizontal">
+        <ListBox x:Name="LauncherTabsList"
+                 Classes="launcher_page_tabbar"
+                 ItemsSource="{Binding Pages}"
+                 SelectionMode="AlwaysSelected"
+                 SelectedItem="{Binding ActivePage, Mode=TwoWay}"
+                 SelectionChanged="OnTabsSelectionChanged"
+                 LayoutUpdated="OnTabsLayoutUpdated">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" Height="30"/>
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+
+          <ListBox.ItemTemplate>
+            <DataTemplate DataType="vm:LauncherPage">
+              <v:LauncherTabSizeBox UseFixedWidth="{Binding Source={x:Static vm:Preferences.Instance}, Path=UseFixedTabWidth}" Height="30"
+                                    Padding="0,2,0,0"
+                                    Background="Transparent"
+                                    PointerPressed="OnPointerPressedTab"
+                                    PointerMoved="OnPointerMovedOverTab"
+                                    PointerReleased="OnPointerReleasedTab"
+                                    ContextRequested="OnTabContextRequested"
+                                    DragDrop.AllowDrop="True"
+                                    DragDrop.Drop="DropTab">
+                <ToolTip.Tip>
+                  <Grid>
+                    <TextBlock Text="{DynamicResource Text.Welcome}" IsVisible="{Binding !Node.IsRepository}"/>
+                    <StackPanel Orientation="Horizontal" IsVisible="{Binding Node.IsRepository}">
+                      <TextBlock Text="{Binding Node.Id}"/>
+                      <TextBlock Text="{Binding DirtyState, Converter={x:Static c:DirtyStateConverters.ToDesc}}"
+                                 Foreground="{DynamicResource Brush.FG2}"/>
+                    </StackPanel>
+                  </Grid>
+                </ToolTip.Tip>
+
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                  <Path Grid.Column="0"
+                        Width="12" Height="12" Margin="12,0"
+                        Fill="{Binding Node.Bookmark, Converter={x:Static c:IntConverters.ToBookmarkBrush}}"
+                        Data="{StaticResource Icons.Bookmark}"
+                        IsVisible="{Binding Node.IsRepository}"
+                        IsHitTestVisible="False"/>
+                  <Path Grid.Column="0"
+                        Width="12" Height="12" Margin="12,0"
+                        Fill="{DynamicResource Brush.FG1}"
+                        Data="{StaticResource Icons.Repositories}"
+                        IsVisible="{Binding !Node.IsRepository}"
+                        IsHitTestVisible="False"/>
+
+                  <Grid Grid.Column="1"
+                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                        ColumnDefinitions="Auto,Auto,Auto,*"
+                        IsHitTestVisible="False"
+                        IsVisible="{Binding Node.IsRepository}">
+                    <Ellipse Grid.Column="0"
+                             Width="8" Height="8"
+                             Margin="0,0,6,0"
+                             VerticalAlignment="Center"
+                             IsVisible="{Binding IsDirtyStateVisible}"
+                             Fill="{Binding DirtyState, Converter={x:Static c:DirtyStateConverters.ToBrush}}"/>
+
+                    <v:LoadingIcon Grid.Column="0"
+                                   Width="8" Height="8"
+                                   Margin="0,0,6,0"
+                                   IsVisible="{Binding IsRefreshing}"/>
+
+                    <Path Grid.Column="2"
+                          Classes="moving_down"
+                          Width="8" Height="8"
+                          Margin="0,0,6,0"
+                          Data="{StaticResource Icons.Down}"
+                          IsVisible="{Binding IsRemoteSyncing}"/>
+
+                    <TextBlock Grid.Column="3"
+                               VerticalAlignment="Center"
+                               FontSize="{Binding Source={x:Static vm:Preferences.Instance}, Path=DefaultFontSize, Converter={x:Static c:DoubleConverters.Decrease}}"
+                               TextAlignment="Center"
+                               Text="{Binding Node.Name}"
+                               IsHitTestVisible="False"/>
+                  </Grid>
+
+                  <TextBlock Grid.Column="1"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                             FontSize="{Binding Source={x:Static vm:Preferences.Instance}, Path=DefaultFontSize, Converter={x:Static c:DoubleConverters.Decrease}}"
+                             TextAlignment="Center"
+                             Text="{DynamicResource Text.PageTabBar.Welcome.Title}"
+                             IsVisible="{Binding !Node.IsRepository}"
+                             IsHitTestVisible="False"/>
+
+                  <Button Grid.Column="2"
+                          Classes="icon_button"
+                          Width="14" Height="12" Margin="12,0"
+                          Click="OnCloseTab">
+                    <ToolTip.Tip>
+                      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource Text.PageTabBar.Tab.Close}" VerticalAlignment="Center"/>
+                        <TextBlock Margin="16,0,0,0"
+                                   Text="{OnPlatform Ctrl+W, macOS=⌘+W}"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"/>
+                      </StackPanel>
+                    </ToolTip.Tip>
+                    <Path Width="9" Height="9" Data="{StaticResource Icons.Close}"/>
+                  </Button>
+                </Grid>
+              </v:LauncherTabSizeBox>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Button Classes="icon_button"
+                Width="16" Height="16"
+                Margin="8,2,8,0"
+                Command="{Binding AddNewTab}"
+                IsVisible="{Binding !#ThisControl.IsScrollerVisible}">
+          <ToolTip.Tip>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+              <TextBlock Text="{DynamicResource Text.PageTabBar.New}" VerticalAlignment="Center"/>
+              <TextBlock Margin="16,0,0,0"
+                         Text="{OnPlatform Ctrl+T, macOS=⌘+T}"
+                         FontSize="11"
+                         VerticalAlignment="Center"
+                         Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"/>
+            </StackPanel>
+          </ToolTip.Tip>
+
+          <Path Width="12" Height="12" Data="{StaticResource Icons.Plus}"/>
+        </Button>
+      </StackPanel>
+    </ScrollViewer>
+
+    <StackPanel Grid.Column="2" Orientation="Horizontal" IsVisible="{Binding #ThisControl.IsScrollerVisible}">
+      <RepeatButton Classes="icon_button" Width="18" Height="28" Margin="0,2,0,0" Click="ScrollTabsRight">
+        <Path Width="8" Height="14" Stretch="Fill" Data="{StaticResource Icons.TriangleRight}"/>
+      </RepeatButton>
+
+      <Button Classes="icon_button" Width="16" Height="28" Margin="4,2,0,0" Command="{Binding AddNewTab}">
+        <ToolTip.Tip>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="{DynamicResource Text.PageTabBar.New}" VerticalAlignment="Center"/>
+            <TextBlock Margin="16,0,0,0"
+                       Text="{OnPlatform Ctrl+T, macOS=⌘+T}"
+                       FontSize="11"
+                       VerticalAlignment="Center"
+                       Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}"/>
+          </StackPanel>
+        </ToolTip.Tip>
+
+        <Path Width="12" Height="12" Data="{StaticResource Icons.Plus}"/>
+      </Button>
+    </StackPanel>
+  </Grid>
+</UserControl>

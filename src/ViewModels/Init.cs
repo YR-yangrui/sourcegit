@@ -1,0 +1,62 @@
+﻿using System.Threading.Tasks;
+
+namespace SourceGit.ViewModels
+{
+    public class Init : Popup
+    {
+        public string TargetPath
+        {
+            get => _targetPath;
+            set => SetProperty(ref _targetPath, value);
+        }
+
+        public string Reason
+        {
+            get;
+            private set;
+        }
+
+        public Init(string pageId, string path, RepositoryNode parent, int bookmark, string reason)
+        {
+            _pageId = pageId;
+            _targetPath = path;
+            _parentNode = parent;
+            _bookmark = bookmark;
+
+            Reason = string.IsNullOrEmpty(reason) ? "unknown error" : reason;
+            Reason = Reason.Trim();
+        }
+
+        public override async Task<bool> Sure()
+        {
+            ProgressDescription = $"Initialize git repository at: '{_targetPath}'";
+
+            var log = new CommandLog("Initialize");
+            Use(log);
+
+            var succ = await new Commands.Init(_pageId, _targetPath)
+                .Use(log)
+                .ExecAsync();
+
+            if (succ)
+                succ = await Commands.RepositoryInitializationConfig.EnsureAsync(_targetPath, log);
+
+            log.Complete();
+
+            if (succ)
+            {
+                var node = Preferences.Instance.FindOrAddNodeByRepositoryPath(_targetPath, _parentNode, true);
+                node.Bookmark = _bookmark;
+                await node.UpdateStatusAsync(false, null);
+
+                Welcome.Instance.Refresh();
+            }
+            return succ;
+        }
+
+        private readonly string _pageId = null;
+        private string _targetPath = null;
+        private readonly RepositoryNode _parentNode = null;
+        private readonly int _bookmark = 0;
+    }
+}

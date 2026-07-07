@@ -1,0 +1,241 @@
+<v:ChromelessWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:m="using:SourceGit.Models"
+                    xmlns:vm="using:SourceGit.ViewModels"
+                    xmlns:v="using:SourceGit.Views"
+                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                    x:Class="SourceGit.Views.Statistics"
+                    x:DataType="vm:Statistics"
+                    x:Name="ThisControl"
+                    Title="{DynamicResource Text.Statistics}"
+                    Width="800" Height="500"
+                    WindowStartupLocation="CenterOwner"
+                    CanResize="False">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <!-- Title bar -->
+    <Grid Grid.Row="0" Height="28" IsVisible="{Binding !#ThisControl.UseSystemWindowFrame}">
+      <Border Background="{DynamicResource Brush.TitleBar}"
+              BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
+              PointerPressed="BeginMoveWindow"/>
+
+      <Path Width="14" Height="14"
+            Margin="10,0,0,0"
+            HorizontalAlignment="Left"
+            Data="{StaticResource Icons.Statistics}"
+            IsVisible="{OnPlatform True, macOS=False}"/>
+
+      <TextBlock Classes="bold"
+                 Text="{DynamicResource Text.Statistics}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsHitTestVisible="False"/>
+
+      <v:CaptionButtons HorizontalAlignment="Right"
+                        IsCloseButtonOnly="True"
+                        IsVisible="{OnPlatform True, macOS=False}"/>
+    </Grid>
+
+    <!-- View mode switcher -->
+    <ListBox Grid.Row="1"
+             Margin="0,8"
+             SelectedIndex="{Binding ViewMode, Mode=TwoWay}"
+             HorizontalAlignment="Center"
+             VerticalAlignment="Center"
+             Background="Transparent"
+             BorderThickness="1"
+             BorderBrush="{DynamicResource Brush.Border2}"
+             CornerRadius="14"
+             Padding="3,0">
+      <ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+          <StackPanel Orientation="Horizontal"/>
+        </ItemsPanelTemplate>
+      </ListBox.ItemsPanel>
+
+      <ListBox.Styles>
+        <Style Selector="ListBoxItem">
+          <Setter Property="Width" Value="100"/>
+          <Setter Property="Height" Value="28"/>
+          <Setter Property="Padding" Value="0"/>
+          <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+          <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+          <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <Style Selector="ListBoxItem Border.switcher_bg">
+          <Setter Property="Height" Value="22"/>
+          <Setter Property="CornerRadius" Value="11"/>
+          <Setter Property="Background" Value="Transparent"/>
+          <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="ListBoxItem:selected Border.switcher_bg">
+          <Setter Property="Background" Value="{DynamicResource Brush.Accent}"/>
+        </Style>
+
+        <Style Selector="TextBlock.view_mode_switcher">
+          <Setter Property="FontWeight" Value="Bold"/>
+          <Setter Property="Foreground" Value="{DynamicResource Brush.FG2}"/>
+          <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="ListBoxItem:pointerover TextBlock.view_mode_switcher">
+          <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}"/>
+        </Style>
+
+        <Style Selector="ListBoxItem:selected TextBlock.view_mode_switcher">
+          <Setter Property="Foreground" Value="White"/>
+        </Style>
+      </ListBox.Styles>
+
+      <ListBoxItem>
+        <Border Classes="switcher_bg">
+          <TextBlock Classes="view_mode_switcher" Text="{DynamicResource Text.Statistics.Overview}"/>
+        </Border>
+      </ListBoxItem>
+
+      <ListBoxItem>
+        <Border Classes="switcher_bg">
+          <TextBlock Classes="view_mode_switcher" Text="{DynamicResource Text.Statistics.ThisMonth}"/>
+        </Border>
+      </ListBoxItem>
+
+      <ListBoxItem>
+        <Border Classes="switcher_bg">
+          <TextBlock Classes="view_mode_switcher" Text="{DynamicResource Text.Statistics.ThisWeek}"/>
+        </Border>
+      </ListBoxItem>
+    </ListBox>
+
+    <!-- Contents -->
+    <Grid Grid.Row="2" Margin="8" ColumnDefinitions="256,*">
+      <!-- Left -->
+      <ContentControl Grid.Column="0" Content="{Binding SelectedReport, Mode=OneWay}">
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="m:StatisticsReport">
+            <Grid RowDefinitions="*,16">
+              <!-- Table of author -->
+              <ListBox Grid.Column="0"
+                       ItemsSource="{Binding Authors}"
+                       SelectionMode="Single"
+                       BorderThickness="1"
+                       BorderBrush="{DynamicResource Brush.Border2}"
+                       Background="{DynamicResource Brush.Contents}"
+                       SelectionChanged="OnAuthorSelectionChanged"
+                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                       ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.Styles>
+                  <Style Selector="ListBoxItem">
+                    <Setter Property="Margin" Value="0"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Height" Value="26"/>
+                  </Style>
+                </ListBox.Styles>
+
+                <ListBox.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <VirtualizingStackPanel Orientation="Vertical"/>
+                  </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+
+                <ListBox.ItemTemplate>
+                  <DataTemplate DataType="m:StatisticsAuthor">
+                    <Border BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border2}"
+                            Background="Transparent"
+                            ToolTip.Tip="{Binding User}">
+                      <Grid ColumnDefinitions="26,*,72">
+                        <v:Avatar Grid.Column="0"
+                                  Width="16" Height="16"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  User="{Binding User}"/>
+                        <Border Grid.Column="1" Padding="4,0,8,0" ClipToBounds="True">
+                          <TextBlock Text="{Binding User.Name}" HorizontalAlignment="Left"/>
+                        </Border>
+                        <Border Grid.Column="2" Padding="8,0" ClipToBounds="True">
+                          <TextBlock Text="{Binding Count}" HorizontalAlignment="Right"/>
+                        </Border>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+
+              <!-- Summary -->
+              <Grid Grid.Row="1" ColumnDefinitions="*,*">
+                <!-- Total Authors -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Bottom">
+                  <TextBlock Text="{DynamicResource Text.Statistics.TotalAuthors}" FontSize="11" Foreground="{DynamicResource Brush.FG2}"/>
+                  <TextBlock Text="{Binding Authors.Count}" FontSize="11" Margin="4,0,0,0"/>
+                </StackPanel>
+
+                <!-- Total Commits -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                  <TextBlock Text="{DynamicResource Text.Statistics.TotalCommits}" FontSize="11" Foreground="{DynamicResource Brush.FG2}"/>
+                  <TextBlock Text="{Binding Total}" FontSize="11" Margin="4,0,0,0"/>
+                </StackPanel>
+              </Grid>
+            </Grid>
+          </DataTemplate>
+        </ContentControl.DataTemplates>
+      </ContentControl>
+
+      <!-- Right -->
+      <v:Chart Grid.Column="1"
+               Margin="8,0"
+               Samples="{Binding Samples, Mode=OneWay}"
+               SampleBrush="{DynamicResource Brush.Accent}"
+               LabelFontFamily="{DynamicResource Fonts.Default}">
+        <v:Chart.DataTemplates>
+          <DataTemplate DataType="v:ChartToolTip">
+            <Border>
+              <StackPanel Orientation="Vertical">
+                <TextBlock Text="{Binding Title, Mode=OneWay}" FontWeight="Bold"/>
+
+                <Grid Margin="0,8,0,0"
+                      RowDefinitions="Auto,4,Auto" ColumnDefinitions="Auto,Auto"
+                      IsVisible="{Binding HasUser, Mode=OneWay}">
+                  <Ellipse Grid.Row="0" Grid.Column="0"
+                           Width="12" Height="12"
+                           Fill="{DynamicResource Brush.Accent}"
+                           Opacity="0.2"/>
+                  
+                  <TextBlock Grid.Row="0" Grid.Column="1"
+                             Margin="12,0,0,0"
+                             Text="{Binding All, Mode=OneWay}"/>
+
+                  <Ellipse Grid.Row="2" Grid.Column="0"
+                           Width="12" Height="12"
+                           Fill="{DynamicResource Brush.Accent}"/>
+
+                  <TextBlock Grid.Row="2" Grid.Column="1"
+                             Margin="12,0,0,0"
+                             Text="{Binding User, Mode=OneWay}"/>
+                </Grid>
+
+                <StackPanel Margin="0,8,0,0"
+                            Orientation="Horizontal"
+                            IsVisible="{Binding !HasUser, Mode=OneWay}">
+                  <Ellipse Width="12" Height="12" Fill="{DynamicResource Brush.Accent}"/>
+                  <TextBlock Margin="12,0,0,0" Text="{Binding All, Mode=OneWay}"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </v:Chart.DataTemplates>
+      </v:Chart>
+    </Grid>
+
+    <!-- Loading Mask -->
+    <v:LoadingIcon Grid.Row="2"
+                   Width="48" Height="48"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   IsVisible="{Binding IsLoading}"/>
+  </Grid>
+</v:ChromelessWindow>

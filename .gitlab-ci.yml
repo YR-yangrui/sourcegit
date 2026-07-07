@@ -1,0 +1,319 @@
+variables:
+  GIT_DEPTH: "0"
+  GIT_SUBMODULE_STRATEGY: recursive
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  NIGHTLY_BRANCH: "huayu"
+  RELEASE_CHANNEL: ""
+  DELETE_RELEASE: ""
+  SKIP_MACOS_PACKAGES: "true"
+  SKIP_LINUX_PACKAGES: "true"
+
+workflow:
+  rules:
+    - if: '$DELETE_RELEASE != "" && $CI_PIPELINE_SOURCE != "web"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DELETE_RELEASE != ""'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $RELEASE_CHANNEL == "stable"'
+      variables:
+        UPDATE_CHANNEL: "stable"
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $NIGHTLY_BRANCH'
+      variables:
+        UPDATE_CHANNEL: "nightly"
+    - if: '$CI_PIPELINE_SOURCE == "web" && $RELEASE_CHANNEL == "nightly"'
+      variables:
+        UPDATE_CHANNEL: "nightly"
+    - if: '$CI_PIPELINE_SOURCE == "web" && ($RELEASE_CHANNEL == "" || $RELEASE_CHANNEL == "stable")'
+      variables:
+        UPDATE_CHANNEL: "stable"
+    - when: never
+
+stages:
+  - delete
+  - prepare
+  - build
+  - manifest
+  - release
+
+delete-release:
+  stage: delete
+  image: alpine:3.20
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $DELETE_RELEASE != ""'
+      when: on_success
+    - when: never
+  script:
+    - apk add --no-cache bash curl python3
+    - bash build/scripts/gitlab/delete-release.sh
+
+prepare-release:
+  stage: prepare
+  image: python:3.12-alpine
+  rules:
+    - if: '$DELETE_RELEASE != ""'
+      when: never
+    - when: on_success
+  script:
+    - python3 build/scripts/gitlab/prepare-release.py
+  artifacts:
+    reports:
+      dotenv: build/release.env
+    paths:
+      - build/release.env
+    expire_in: 14 days
+
+build-unix-packages:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  rules:
+    - if: '$DELETE_RELEASE != ""'
+      when: never
+    - when: on_success
+  needs:
+    - job: prepare-release
+      artifacts: true
+  script:
+    - |
+      if [ "${SKIP_NIGHTLY_BUILD:-false}" = "true" ]; then
+        echo "Skipping build because scheduled nightly commit was already published."
+        exit 0
+      fi
+    - |
+      if [ "$SKIP_MACOS_PACKAGES" = "true" ] && [ "$SKIP_LINUX_PACKAGES" = "true" ]; then
+        echo "Skipping macOS and Linux packages."
+        exit 0
+      fi
+    - apt-get update
+    - apt-get install -y --no-install-recommends ca-certificates curl gnupg apt-transport-https zip unzip file
+    - |
+      if [ "$SKIP_LINUX_PACKAGES" = "false" ]; then
+        apt-get install -y --no-install-recommends desktop-file-utils dpkg-dev rpm
+        apt-get install -y --no-install-recommends fuse libfuse2 || apt-get install -y --no-install-recommends fuse3 libfuse2t64 || true
+      fi
+    - dotnet restore src/SourceGit.csproj -p:Version="$BASE_VERSION"
+    - |
+      publish_sourcegit() {
+        runtime="$1"
+        output="build/publish/sourcegit/$runtime"
+        rm -rf "$output"
+        dotnet publish src/SourceGit.csproj \
+          -c Release \
+          -r "$runtime" \
+          --self-contained true \
+          -o "$output" \
+          -p:DisableAOT=true \
+          -p:Version="$BASE_VERSION" \
+          -p:SourceGitUpdateChannel="$UPDATE_CHANNEL" \
+          -p:SourceGitUpdateVersion="$RELEASE_VERSION" \
+          -p:SourceGitBaseVersion="$BASE_VERSION" \
+          -p:SourceGitPipelineIid="$CI_PIPELINE_IID" \
+          -p:SourceGitCommit="$CI_COMMIT_SHA" \
+          -p:SourceGitBuildDate="$BUILD_DATE"
+      }
+      sourcegit_runtimes=""
+      if [ "$SKIP_MACOS_PACKAGES" = "false" ]; then
+        sourcegit_runtimes="$sourcegit_runtimes osx-x64 osx-arm64"
+      else
+        echo "Skipping SourceGit publish for macOS runtimes."
+      fi
+      if [ "$SKIP_LINUX_PACKAGES" = "false" ]; then
+        sourcegit_runtimes="$sourcegit_runtimes linux-x64 linux-arm64"
+      else
+        echo "Skipping SourceGit publish for Linux runtimes."
+      fi
+
+      for runtime in $sourcegit_runtimes; do
+        publish_sourcegit "$runtime"
+        if [ "${runtime#linux-}" != "$runtime" ]; then
+          mv "build/publish/sourcegit/$runtime/SourceGit" "build/publish/sourcegit/$runtime/sourcegit"
+        fi
+      done
+    - |
+      if [ "$SKIP_MACOS_PACKAGES" = "true" ]; then
+        echo "Skipping macOS packages."
+      else
+        for runtime in osx-x64 osx-arm64; do
+          rm -rf build/SourceGit build/SourceGit.app
+          cp -a "build/publish/sourcegit/$runtime" build/SourceGit
+          RUNTIME="$runtime" VERSION="$PACKAGE_VERSION" bash build/scripts/package.osx-app.sh
+        done
+      fi
+    - |
+      if [ "$SKIP_LINUX_PACKAGES" = "true" ]; then
+        echo "Skipping Linux packages."
+      else
+        export APPIMAGE_EXTRACT_AND_RUN=1
+        for runtime in linux-x64 linux-arm64; do
+          rm -rf build/SourceGit build/SourceGit.AppDir build/resources/deb/opt/sourcegit build/resources/deb/usr/bin/sourcegit
+          mkdir -p build/resources/deb/opt
+          cp -a "build/publish/sourcegit/$runtime" build/SourceGit
+          RUNTIME="$runtime" VERSION="$PACKAGE_VERSION" bash build/scripts/package.linux.sh
+        done
+      fi
+  artifacts:
+    reports:
+      dotenv: build/release.env
+    paths:
+      - build/release.env
+      - build/sourcegit*
+      - build/*.AppImage
+      - build/*.deb
+      - build/*.rpm
+      - build/sourcegit-update.json
+    expire_in: 14 days
+
+build-windows-packages:
+  stage: build
+  tags:
+    - sourcegit-windows
+  rules:
+    - if: '$DELETE_RELEASE != ""'
+      when: never
+    - when: on_success
+  needs:
+    - job: prepare-release
+      artifacts: true
+  script:
+    - |
+      $ErrorActionPreference = 'Stop'
+      $PSNativeCommandUseErrorActionPreference = $true
+      if ($PSVersionTable.PSVersion -lt [Version]'7.3') {
+          throw 'GitLab Windows runner must use PowerShell 7.3 or newer (pwsh).'
+      }
+
+      if ($env:SKIP_NIGHTLY_BUILD -eq 'true') {
+          Write-Host 'Skipping build because scheduled nightly commit was already published.'
+          exit 0
+      }
+
+      $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+      if (-not (Test-Path -LiteralPath $vswhere -PathType Leaf)) {
+          throw 'Visual Studio Installer vswhere.exe was not found. Install Visual Studio Build Tools with C++ workload.'
+      }
+
+      $vcX64 = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+      if ([string]::IsNullOrWhiteSpace($vcX64)) {
+          throw 'Missing Visual Studio C++ x64/x86 tools. Install Microsoft.VisualStudio.Component.VC.Tools.x86.x64.'
+      }
+
+      $vcArm64 = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.ARM64 -property installationPath
+      if ([string]::IsNullOrWhiteSpace($vcArm64)) {
+          throw 'Missing Visual Studio C++ ARM64 tools. Install Microsoft.VisualStudio.Component.VC.Tools.ARM64.'
+      }
+
+      dotnet restore src/SourceGit.csproj -p:Version="$env:BASE_VERSION"
+      dotnet restore src/SourceGit.Updater/SourceGit.Updater.csproj
+
+      function Publish-SourceGit {
+          param([Parameter(Mandatory = $true)][string]$Runtime)
+
+          $output = Join-Path 'build/publish/sourcegit' $Runtime
+          Remove-Item -LiteralPath $output -Recurse -Force -ErrorAction SilentlyContinue
+
+          dotnet publish src/SourceGit.csproj `
+            -c Release `
+            -r $Runtime `
+            --self-contained true `
+            -o $output `
+            -p:Version="$env:BASE_VERSION" `
+            -p:SourceGitUpdateChannel="$env:UPDATE_CHANNEL" `
+            -p:SourceGitUpdateVersion="$env:RELEASE_VERSION" `
+            -p:SourceGitBaseVersion="$env:BASE_VERSION" `
+            -p:SourceGitPipelineIid="$env:CI_PIPELINE_IID" `
+            -p:SourceGitCommit="$env:CI_COMMIT_SHA" `
+            -p:SourceGitBuildDate="$env:BUILD_DATE"
+      }
+
+      function Publish-Updater {
+          param([Parameter(Mandatory = $true)][string]$Runtime)
+
+          $output = Join-Path 'build/Updater' $Runtime
+          Remove-Item -LiteralPath $output -Recurse -Force -ErrorAction SilentlyContinue
+
+          dotnet publish src/SourceGit.Updater/SourceGit.Updater.csproj `
+            -c Release `
+            -r $Runtime `
+            --self-contained true `
+            -o $output `
+            -p:PublishSingleFile=true `
+            -p:EnableCompressionInSingleFile=true
+      }
+
+      foreach ($runtime in @('win-x64', 'win-arm64')) {
+          Publish-SourceGit $runtime
+          Publish-Updater $runtime
+
+          $env:SOURCEGIT_BUILD = Join-Path 'build/publish/sourcegit' $runtime
+          $env:UPDATER_BUILD = Join-Path 'build/Updater' $runtime
+          $env:RUNTIME = $runtime
+          pwsh -NoProfile -ExecutionPolicy Bypass -File build/scripts/package.gitlab.win.ps1
+      }
+  artifacts:
+    reports:
+      dotenv: build/release.env
+    paths:
+      - build/release.env
+      - build/sourcegit*.zip
+    expire_in: 14 days
+
+package-manifest:
+  stage: manifest
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  rules:
+    - if: '$DELETE_RELEASE != ""'
+      when: never
+    - when: on_success
+  needs:
+    - job: prepare-release
+      artifacts: true
+    - job: build-unix-packages
+      artifacts: true
+    - job: build-windows-packages
+      artifacts: true
+  script:
+    - |
+      if [ "${SKIP_NIGHTLY_BUILD:-false}" = "true" ]; then
+        echo "Skipping manifest because scheduled nightly commit was already published."
+        exit 0
+      fi
+    - apt-get update
+    - apt-get install -y --no-install-recommends ca-certificates curl gnupg apt-transport-https
+    - |
+      os_id="$(. /etc/os-release && printf '%s' "$ID")"
+      os_version_id="$(. /etc/os-release && printf '%s' "$VERSION_ID")"
+      curl -fsSL "https://packages.microsoft.com/config/${os_id}/${os_version_id}/packages-microsoft-prod.deb" -o packages-microsoft-prod.deb
+    - dpkg -i packages-microsoft-prod.deb
+    - apt-get update
+    - apt-get install -y --no-install-recommends powershell
+    - pwsh -NoProfile -ExecutionPolicy Bypass -File build/scripts/gitlab/package-manifest.ps1
+  artifacts:
+    reports:
+      dotenv: build/release.env
+    paths:
+      - build/release.env
+      - build/sourcegit*
+      - build/*.AppImage
+      - build/*.deb
+      - build/*.rpm
+      - build/sourcegit-update.json
+    expire_in: 14 days
+
+release-packages:
+  stage: release
+  image: alpine:3.20
+  rules:
+    - if: '$DELETE_RELEASE != ""'
+      when: never
+    - when: on_success
+  needs:
+    - job: package-manifest
+      artifacts: true
+  script:
+    - |
+      if [ "${SKIP_NIGHTLY_BUILD:-false}" = "true" ]; then
+        echo "Skipping release because scheduled nightly commit was already published."
+        exit 0
+      fi
+    - apk add --no-cache bash curl python3
+    - bash build/scripts/gitlab/release-assets.sh
+    - bash build/scripts/gitlab/cleanup-nightly.sh

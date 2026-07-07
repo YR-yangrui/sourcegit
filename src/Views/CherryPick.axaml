@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:SourceGit.Models"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:c="using:SourceGit.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.CherryPick"
+             x:DataType="vm:CherryPick">
+  <StackPanel Orientation="Vertical" Margin="8,0">
+    <StackPanel Orientation="Horizontal">
+      <Path Width="16" Height="16"
+            Data="{StaticResource Icons.CherryPick}"/>
+
+      <TextBlock FontSize="18"
+                 Margin="8,0,0,0"
+                 Classes="bold"
+                 Text="{DynamicResource Text.CherryPick}"/>
+    </StackPanel>
+    
+    <Grid Margin="0,16,0,0" RowDefinitions="Auto,Auto,32,32" ColumnDefinitions="100,*">
+      <TextBlock Grid.Row="0" Grid.Column="0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Margin="0,0,8,0"
+                 Text="{DynamicResource Text.CherryPick.Commit}"/>
+      <ListBox Grid.Row="0" Grid.Column="1"
+               MinHeight="32" MaxHeight="100"
+               ItemsSource="{Binding Targets}"
+               Background="{DynamicResource Brush.Contents}"
+               BorderThickness="1"
+               BorderBrush="{DynamicResource Brush.Border2}"
+               Padding="4"
+               CornerRadius="4"
+               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+               ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="4,0"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="CornerRadius" Value="4"/>
+          </Style>
+        </ListBox.Styles>
+
+        <ListBox.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Vertical"/>
+          </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="m:Commit">
+            <Grid ColumnDefinitions="14,Auto,*">
+              <Path Grid.Column="0" Width="14" Height="14" Data="{StaticResource Icons.Commit}"/>
+              <TextBlock Grid.Column="1" FontFamily="{DynamicResource Fonts.Monospace}" VerticalAlignment="Center" Text="{Binding SHA, Converter={x:Static c:StringConverters.ToShortSHA}}" Foreground="DarkOrange" Margin="6,0,4,0"/>
+              <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Subject}" TextTrimming="CharacterEllipsis"/>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <TextBlock Grid.Row="1" Grid.Column="0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Margin="0,0,8,0"
+                 Text="{DynamicResource Text.CherryPick.Mainline}"
+                 IsVisible="{Binding IsMergeCommit}"/>
+      <Grid Grid.Row="1" Grid.Column="1" Height="32" ColumnDefinitions="*,24" IsVisible="{Binding IsMergeCommit}">
+        <ComboBox Grid.Column="0"
+                  Height="28" Padding="4,0"
+                  VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                  ItemsSource="{Binding ParentsForMergeCommit}"
+                  SelectedIndex="{Binding MainlineForMergeCommit, Mode=TwoWay}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="{x:Type m:Commit}">
+              <Grid ColumnDefinitions="Auto,*">
+                <TextBlock Grid.Column="0" FontFamily="{DynamicResource Fonts.Monospace}" VerticalAlignment="Center" Text="{Binding SHA, Converter={x:Static c:StringConverters.ToShortSHA}}" Foreground="DarkOrange" Margin="6,0,4,0"/>
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Subject}" TextTrimming="CharacterEllipsis"/>
+              </Grid>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <Border Grid.Column="1"
+                Background="Transparent"
+                ToolTip.Tip="{DynamicResource Text.CherryPick.Mainline.Tips}">
+          <Path Width="14" Height="14"
+                Data="{StaticResource Icons.Info}"/>
+        </Border>
+      </Grid>
+
+      <CheckBox Grid.Row="2" Grid.Column="1"
+                Content="{DynamicResource Text.CherryPick.CommitChanges}"
+                IsChecked="{Binding AutoCommit, Mode=TwoWay}"/>
+
+      <CheckBox Grid.Row="3" Grid.Column="1"
+                Content="{DynamicResource Text.CherryPick.AppendSourceToMessage}"
+                IsChecked="{Binding AppendSourceToMessage, Mode=TwoWay}"
+                IsEnabled="{Binding AutoCommit}"
+                ToolTip.Tip="-x"/>
+    </Grid>
+  </StackPanel>
+</UserControl>

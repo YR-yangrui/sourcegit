@@ -1,0 +1,4 @@
+interface:
+  display_name: "SourceGit Design Docs"
+  short_description: "Write SourceGit design docs in Chinese"
+  default_prompt: "Use $sourcegit-design-docs when writing or updating SourceGit design docs."

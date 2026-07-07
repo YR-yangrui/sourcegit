@@ -1,0 +1,175 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace SourceGit.ViewModels
+{
+    public class AIAssistant : ObservableObject
+    {
+        public List<string> AvailableModels
+        {
+            get => _service.AvailableModels;
+        }
+
+        public string CurrentModel
+        {
+            get => _service.Model;
+            set => _service.Model = value;
+        }
+
+        public bool IsGenerating
+        {
+            get => _isGenerating;
+            private set => SetProperty(ref _isGenerating, value);
+        }
+
+        public bool CanUseResponse
+        {
+            get => _mode == Mode.CommitMessage;
+        }
+
+        public string Text
+        {
+            get => _text;
+            private set => SetProperty(ref _text, value);
+        }
+
+        public string Response
+        {
+            get => _response;
+            private set => SetProperty(ref _response, value);
+        }
+
+        public AIAssistant(Repository repo, AI.Service service, List<Models.Change> changes)
+            : this(repo, service, changes, Mode.CommitMessage)
+        {
+        }
+
+        public AIAssistant(Repository repo, AI.Service service, List<Models.Change> changes, Mode mode)
+        {
+            _repo = repo;
+            _service = service;
+            _mode = mode;
+            _cancel = new CancellationTokenSource();
+
+            var builder = new StringBuilder();
+            foreach (var c in changes)
+                SerializeChange(c, builder);
+            _changeList = builder.ToString();
+        }
+
+        public async Task GenAsync()
+        {
+            if (_cancel is { IsCancellationRequested: false })
+                _cancel.Cancel();
+            _cancel = new CancellationTokenSource();
+
+            var agent = new AI.Agent(_service);
+            var builder = new StringBuilder();
+            builder.AppendLine(_mode == Mode.CommitMessage ? "Asking AI to generate commit message..." : "Asking AI to review staged changes...").AppendLine();
+
+            var responseBuilder = new StringBuilder();
+            var foundResponse = false;
+
+            Text = builder.ToString();
+            Response = string.Empty;
+            IsGenerating = true;
+
+            try
+            {
+                Action<string> onUpdate = message =>
+                {
+                    builder.AppendLine(message);
+
+                    if (foundResponse)
+                    {
+                        if (message.Equals("# Token Usage", StringComparison.Ordinal))
+                            foundResponse = false;
+                        else
+                            responseBuilder.AppendLine(message);
+                    }
+                    else if (message.Equals("# Assistant", StringComparison.Ordinal))
+                    {
+                        foundResponse = true;
+                    }
+
+                    Dispatcher.UIThread.Post(() => Text = builder.ToString());
+                };
+
+                if (_mode == Mode.CommitMessage)
+                    await agent.GenerateCommitMessageAsync(_repo.FullPath, _changeList, onUpdate, _cancel.Token);
+                else
+                    await agent.GenerateReviewAsync(_repo.FullPath, _changeList, onUpdate, _cancel.Token);
+
+                Response = responseBuilder.ToString().Trim();
+            }
+            catch (OperationCanceledException)
+            {
+                // Do nothing and leave `IsGenerating` to current (may already changed), so that the UI can update accordingly.
+                return;
+            }
+            catch (Exception e)
+            {
+                builder
+                    .AppendLine()
+                    .AppendLine("[ERROR]")
+                    .Append(e.Message);
+
+                Text = builder.ToString();
+                Response = string.Empty;
+            }
+
+            IsGenerating = false;
+        }
+
+        public void Use(string text)
+        {
+            _repo.SetCommitMessage(text);
+        }
+
+        public void Cancel()
+        {
+            _cancel?.Cancel();
+        }
+
+        private void SerializeChange(Models.Change c, StringBuilder builder)
+        {
+            var status = c.Index switch
+            {
+                Models.ChangeState.Added => "A",
+                Models.ChangeState.Modified => "M",
+                Models.ChangeState.Deleted => "D",
+                Models.ChangeState.TypeChanged => "T",
+                Models.ChangeState.Renamed => "R",
+                Models.ChangeState.Copied => "C",
+                _ => " ",
+            };
+
+            builder.Append(status).Append('\t');
+
+            if (c.Index == Models.ChangeState.Renamed || c.Index == Models.ChangeState.Copied)
+                builder.Append(c.OriginalPath).Append(" -> ").Append(c.Path).AppendLine();
+            else
+                builder.Append(c.Path).AppendLine();
+        }
+
+        public enum Mode
+        {
+            CommitMessage,
+            Review,
+        }
+
+        private readonly Repository _repo = null;
+        private readonly AI.Service _service = null;
+        private readonly Mode _mode = Mode.CommitMessage;
+        private readonly string _changeList = null;
+        private CancellationTokenSource _cancel = null;
+        private bool _isGenerating = false;
+        private string _text = string.Empty;
+        private string _response = string.Empty;
+    }
+}

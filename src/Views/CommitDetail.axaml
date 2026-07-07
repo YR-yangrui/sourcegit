@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:SourceGit.Models"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:v="using:SourceGit.Views"
+             xmlns:c="using:SourceGit.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.CommitDetail"
+             x:DataType="vm:CommitDetail"
+             x:Name="ThisControl">
+  <Grid>
+    <TabControl SelectedIndex="{Binding ActiveTabIndex, Mode=TwoWay}"
+                Padding="0,4"
+                PointerPressed="OnDetailsTabStripPointerPressed"
+                PointerMoved="OnDetailsTabStripPointerMoved"
+                PointerReleased="OnDetailsTabStripPointerReleased">
+      <!-- Information Page -->
+      <TabItem>
+        <TabItem.Header>
+          <Border Background="Transparent" PointerPressed="OnTabHeaderPointerPressed">
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.CommitDetail.Info}"/>
+          </Border>
+        </TabItem.Header>
+
+        <ScrollViewer Margin="4,0,0,0"
+                      Offset="{Binding ScrollOffset, Mode=TwoWay}"
+                      HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                      IsVisible="{Binding #ThisControl.IsDetailsPanelExpanded, Mode=OneWay}">
+          <StackPanel Orientation="Vertical">
+            <!-- Base Information -->
+            <v:CommitBaseInfo Content="{Binding Commit}"
+                              FullMessage="{Binding FullMessage}"
+                              SignInfo="{Binding SignInfo}"
+                              SupportsContainsIn="True"
+                              WebLinks="{Binding WebLinks}"
+                              Children="{Binding Children}"
+                              Margin="0,0,12,0"/>
+
+            <!-- Line -->
+            <Rectangle Height=".65" Margin="8,8,12,8" Fill="{DynamicResource Brush.Border2}"/>
+
+            <!-- Change List -->
+            <ListBox Background="Transparent"
+                     Margin="64,0,12,4"
+                     SelectionMode="Single"
+                     ItemsSource="{Binding Changes, Converter={x:Static c:ListConverters.Top100Changes}}"
+                     KeyDown="OnCommitListKeyDown">
+              <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                  <Setter Property="Padding" Value="0"/>
+                  <Setter Property="MinHeight" Value="24"/>
+                  <Setter Property="CornerRadius" Value="4"/>
+                </Style>
+              </ListBox.Styles>
+
+              <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+              </ListBox.ItemsPanel>
+
+              <ListBox.ItemTemplate>
+                <DataTemplate DataType="m:Change">
+                  <Grid Background="Transparent" Height="24" ColumnDefinitions="36,*" ContextRequested="OnChangeContextRequested" DoubleTapped="OnChangeDoubleTapped">
+                    <ToolTip.Tip>
+                      <TextBlock TextWrapping="Wrap">
+                        <Run Text="{Binding Path, Mode=OneWay}"/>
+                        <Run Text=" • " Foreground="Gray"/>
+                        <Run Text="{Binding IndexDesc, Mode=OneWay}" Foreground="Gray"/>
+                      </TextBlock>
+                    </ToolTip.Tip>
+
+                    <v:ChangeStatusIcon Grid.Column="0"
+                                        Width="14" Height="14"
+                                        HorizontalAlignment="Left"
+                                        Margin="16,0,0,0"
+                                        Change="{Binding}"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Path}" Margin="8,0" HorizontalAlignment="Stretch" TextTrimming="CharacterEllipsis"/>
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Only Top100 Tip -->
+            <TextBlock Margin="108,0,12,16"
+                       Text="{DynamicResource Text.CommitDetail.Info.GotoChangesPage}"
+                       Foreground="{DynamicResource Brush.FG2}"
+                       IsVisible="{Binding Changes, Converter={x:Static c:ListConverters.IsOnlyTop100Shows}}"/>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem>
+        <TabItem.Header>
+          <Border Background="Transparent" PointerPressed="OnTabHeaderPointerPressed">
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.CommitDetail.Changes}"/>
+          </Border>
+        </TabItem.Header>
+        <v:CommitChanges Margin="4,0"
+                         IsVisible="{Binding #ThisControl.IsDetailsPanelExpanded, Mode=OneWay}"/>
+      </TabItem>
+
+      <TabItem>
+        <TabItem.Header>
+          <Border Background="Transparent" PointerPressed="OnTabHeaderPointerPressed">
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.CommitDetail.Files}"/>
+          </Border>
+        </TabItem.Header>
+        <v:RevisionFiles Margin="4,0"
+                         IsVisible="{Binding #ThisControl.IsDetailsPanelExpanded, Mode=OneWay}"/>
+      </TabItem>
+    </TabControl>
+
+  </Grid>
+</UserControl>

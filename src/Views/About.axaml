@@ -1,0 +1,84 @@
+<v:ChromelessWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:v="using:SourceGit.Views"
+                    mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="230"
+                    x:Class="SourceGit.Views.About"
+                    x:Name="ThisControl"
+                    Icon="/App.ico"
+                    Title="{DynamicResource Text.About}"
+                    SizeToContent="WidthAndHeight"
+                    CanResize="False"
+                    WindowStartupLocation="CenterOwner">
+  <StackPanel Orientation="Vertical">
+    <!-- TitleBar -->
+    <Grid Height="28" IsVisible="{Binding !#ThisControl.UseSystemWindowFrame}">
+      <Border Background="{DynamicResource Brush.TitleBar}"
+              BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
+              PointerPressed="BeginMoveWindow"/>
+
+      <Path Width="14" Height="14"
+            Margin="10,0,0,0"
+            HorizontalAlignment="Left"
+            Data="{StaticResource Icons.Info}"
+            IsVisible="{OnPlatform True, macOS=False}"/>
+
+      <TextBlock Classes="bold"
+                 Text="{DynamicResource Text.About}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsHitTestVisible="False"/>
+
+      <v:CaptionButtons HorizontalAlignment="Right"
+                        IsCloseButtonOnly="True"
+                        IsVisible="{OnPlatform True, macOS=False}"/>
+    </Grid>
+
+    <!-- Content -->
+    <StackPanel Orientation="Horizontal">
+      <Image Width="200" Height="200"
+             Margin="8,0"
+             Source="/App.ico"
+             HorizontalAlignment="Center"
+             VerticalAlignment="Center"/>
+
+      <StackPanel Orientation="Vertical" Margin="4,18,24,18">
+        <StackPanel Height="40" Orientation="Horizontal">
+          <TextBlock Classes="bold" Text="SourceGit" FontSize="32" />
+          <Border Margin="12,0,0,0" Height="20"
+                  CornerRadius="10"
+                  Background="{DynamicResource Brush.Accent}"
+                  Effect="drop-shadow(0 0 6 #40000000)"
+                  Cursor="Hand"
+                  PointerPressed="OnVisitReleaseNotes"
+                  ToolTip.Tip="{DynamicResource Text.About.ReleaseNotes}">
+            <TextBlock x:Name="TxtVersion" Margin="8,0" FontSize="12" Foreground="White"/>
+          </Border>
+        </StackPanel>
+
+        <Border Margin="0,4,0,0">
+          <TextBlock Text="{DynamicResource Text.About.SubTitle}" FontSize="16" TextWrapping="Wrap"/>
+        </Border>
+
+        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+          <Button Width="18" Height="18" Classes="icon_button" Click="OnVisitWebsite" ToolTip.Tip="https://sourcegit-scm.github.io/">
+            <Path Width="16" Height="16" Data="{StaticResource Icons.Remotes}"/>
+          </Button>
+
+          <Button Width="18" Height="18" Margin="8,0,0,0" Classes="icon_button" Click="OnVisitSourceCode" ToolTip.Tip="https://github.com/sourcegit-scm/sourcegit">
+            <Path Width="16" Height="16" Data="{StaticResource Icons.GitHub}"/>
+          </Button>
+        </StackPanel>
+
+        <TextBlock x:Name="TxtReleaseDate" Margin="0,28,0,0" Foreground="{DynamicResource Brush.FG2}"/>
+
+        <StackPanel x:Name="PnlGitSourceRevision" Orientation="Horizontal" Margin="0,2,0,0" IsVisible="False">
+          <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource Brush.FG2}" Text="{DynamicResource Text.About.GitSourceRevision}"/>
+          <SelectableTextBlock x:Name="TxtGitSourceRevision" Margin="4,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource Brush.FG2}"/>
+        </StackPanel>
+
+        <TextBlock x:Name="TxtCopyright" Margin="0,2,0,0" Foreground="{DynamicResource Brush.FG2}"/>
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
+</v:ChromelessWindow>

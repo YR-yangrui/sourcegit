@@ -1,0 +1,175 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:SourceGit.Models"
+             xmlns:v="using:SourceGit.Views"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:c="using:SourceGit.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.LauncherPage"
+             x:DataType="vm:LauncherPage">
+  <Grid RowDefinitions="56,*">
+    <!-- ToolBar -->
+    <Border Grid.Row="0"
+            BorderBrush="{DynamicResource Brush.Border0}"
+            BorderThickness="0,0,0,1"
+            Background="{DynamicResource Brush.ToolBar}"
+            PointerPressed="OnToolBarPointerPressed">
+      <ContentControl Content="{Binding Data}">
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="vm:Welcome">
+            <v:WelcomeToolbar/>
+          </DataTemplate>
+
+          <DataTemplate DataType="vm:Repository">
+            <v:RepositoryToolbar/>
+          </DataTemplate>
+        </ContentControl.DataTemplates>
+      </ContentControl>
+    </Border>
+
+    <!-- Body -->
+    <Border Grid.Row="1">
+      <ContentControl Content="{Binding Data}">        
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="vm:Welcome">
+            <v:Welcome/>
+          </DataTemplate>
+
+          <DataTemplate DataType="vm:Repository">
+            <v:Repository/>
+          </DataTemplate>
+        </ContentControl.DataTemplates>
+      </ContentControl>
+    </Border>
+
+    <!-- Floating -->
+    <Grid Grid.Row="1" ClipToBounds="True">
+      <Grid.IsVisible>
+        <MultiBinding Converter="{x:Static BoolConverters.Or}">
+          <Binding Path="Popup" Converter="{x:Static ObjectConverters.IsNotNull}"/>
+          <Binding Path="Notifications.Count" Converter="{x:Static c:IntConverters.IsGreaterThanZero}"/>
+        </MultiBinding>
+      </Grid.IsVisible>
+
+      <Border Background="Transparent"
+              PointerPressed="OnMaskClicked"
+              IsVisible="{Binding Popup, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+
+      <Grid RowDefinitions="Auto,Auto,*" Width="560" HorizontalAlignment="Center">
+        <!-- Popup -->
+        <Border Grid.Row="0"
+                Padding="6,0,6,6"
+                Background="Transparent"
+                Effect="drop-shadow(0 0 8 #8F000000)"
+                IsVisible="{Binding Popup, Converter={x:Static ObjectConverters.IsNotNull}}">
+          <Border CornerRadius="0,0,8,8" ClipToBounds="True">
+            <ContentControl x:Name="PopupPanel" Content="{Binding Popup}" Background="{DynamicResource Brush.Popup}">
+              <ContentControl.DataTemplates>
+                <DataTemplate DataType="vm:Popup">
+                  <StackPanel Orientation="Vertical" Background="{DynamicResource Brush.Popup}">
+                    <!-- Popup Widget -->
+                    <ContentControl Margin="8,16,8,8"
+                                    Content="{Binding}"
+                                    IsHitTestVisible="{Binding InProgress, Converter={x:Static BoolConverters.Not}}">
+                      <ContentControl.DataTemplates>
+                        <v:PopupDataTemplates/>
+                      </ContentControl.DataTemplates>
+                    </ContentControl>
+
+                    <!-- Options -->
+                    <StackPanel Margin="8,4,8,8"
+                                Height="32"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                IsVisible="{Binding InProgress, Converter={x:Static BoolConverters.Not}}">
+                      <Button Width="0" Height="0"
+                              Click="OnPopupSureByHotKey"
+                              HotKey="Enter"
+                              Focusable="False"/>
+                      <Button Classes="flat primary"
+                              Width="100" Height="28"
+                              Padding="0"
+                              HorizontalContentAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Content="{DynamicResource Text.Sure}"
+                              Click="OnPopupSure"
+                              ToolTip.Tip="Enter"/>
+                      <Button Classes="flat"
+                              Width="100" Height="28"
+                              Margin="8,0,0,0"
+                              Padding="0"
+                              HorizontalContentAlignment="Center"
+                              VerticalContentAlignment="Center"
+                              Content="{DynamicResource Text.Cancel}"
+                              Click="OnPopupCancel"
+                              ToolTip.Tip="ESC"/>
+                    </StackPanel>
+
+                    <!-- Running -->
+                    <v:PopupRunningStatus Margin="12,8"
+                                          Description="{Binding ProgressDescription}"
+                                          IsVisible="{Binding InProgress}"/>
+                  </StackPanel>
+                </DataTemplate>
+              </ContentControl.DataTemplates>
+            </ContentControl>
+          </Border>
+        </Border>
+
+        <!-- Notifications Clear Button -->
+        <Button Grid.Row="1"
+                Classes="flat primary"
+                Margin="0,8,0,0"
+                Padding="16,0"
+                Height="24"
+                CornerRadius="12"
+                HorizontalAlignment="Center"
+                Command="{Binding ClearNotifications}"
+                IsVisible="{Binding Notifications.Count, Converter={x:Static c:IntConverters.IsGreaterThanZero}}">
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Path Width="14" Height="14" Data="{StaticResource Icons.ClearNotifications}" Fill="White"/>
+            <TextBlock Margin="4,0,0,0" Text="{DynamicResource Text.Repository.Notifications.Clear}" Foreground="White"/>
+          </StackPanel>
+        </Button>
+
+        <!-- Notifications -->
+        <ScrollViewer Grid.Row="2" VerticalAlignment="Top" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Notifications}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="m:Notification">
+                <Border Margin="6" HorizontalAlignment="Stretch" VerticalAlignment="Top" Effect="drop-shadow(0 0 8 #8F000000)">
+                  <Border Padding="8" CornerRadius="6" Background="{DynamicResource Brush.Popup}">
+                    <Grid RowDefinitions="26,Auto">
+                      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto" Margin="8,0">
+                        <Path Grid.Column="0" Width="14" Height="14" Data="{StaticResource Icons.Error}" Fill="Red" IsVisible="{Binding IsError}"/>
+                        <Path Grid.Column="0" Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="Green" IsVisible="{Binding !IsError}"/>
+                        <TextBlock Grid.Column="1" Margin="8,0,0,0" FontWeight="Bold" FontSize="14" Text="{DynamicResource Text.Launcher.Error}" IsVisible="{Binding IsError}"/>
+                        <TextBlock Grid.Column="1" Margin="8,0,0,0" FontWeight="Bold" FontSize="14" Text="{DynamicResource Text.Launcher.Info}" IsVisible="{Binding !IsError}"/>
+                        <Button Grid.Column="2" Classes="icon_button" Width="16" Height="16" Click="OnCopyNotification">
+                          <Path Width="12" Height="12" Data="{StaticResource Icons.Copy}"/>
+                        </Button>
+                        <Button Grid.Column="3" Classes="icon_button" Width="16" Height="16" Margin="8,0,0,0" Click="OnDismissNotification">
+                          <Path Width="10" Height="10" Data="{StaticResource Icons.Close}"/>
+                        </Button>
+                      </Grid>
+
+                      <v:CommandLogContentPresenter Grid.Row="1"
+                                                    Margin="8" Padding="2"
+                                                    MaxHeight="200"
+                                                    PureText="{Binding Message}"
+                                                    WordWrap="True"
+                                                    HorizontalScrollBarVisibility="Disabled"
+                                                    VerticalScrollBarVisibility="Auto"/>
+                    </Grid>
+                  </Border>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

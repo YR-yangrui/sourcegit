@@ -1,0 +1,189 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:SourceGit.Models"
+             xmlns:vm="using:SourceGit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.RepositoryToolbar"
+             x:DataType="vm:Repository">
+  <UserControl.Styles>
+    <Style Selector="Button.repo_toolbar_button">
+      <Setter Property="MinWidth" Value="64"/>
+      <Setter Property="MaxWidth" Value="128"/>
+      <Setter Property="Height" Value="52"/>
+      <Setter Property="Padding" Value="6,0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    </Style>
+
+    <Style Selector="TextBlock.repo_toolbar_label">
+      <Setter Property="MaxWidth" Value="116"/>
+      <Setter Property="Margin" Value="0,3,0,0"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid ColumnDefinitions="Auto,*,Auto">
+    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="4,0,8,0">
+      <Button Classes="icon_button repo_toolbar_button" Click="OpenWithExternalTools" ToolTip.Tip="{DynamicResource Text.Repository.OpenWithExternalTools}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.OpenWith}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.OpenIn}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Click="OpenGitLogs" ToolTip.Tip="{DynamicResource Text.Repository.ViewLogs}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Logs}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.Logs}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Click="OpenStatistics" ToolTip.Tip="{DynamicResource Text.Repository.Statistics}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Statistics}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.Stats}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Click="OpenConfigure" ToolTip.Tip="{DynamicResource Text.Repository.Configure}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Settings}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.Settings}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Click="OpenTerminal" ToolTip.Tip="{DynamicResource Text.Repository.Terminal}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Terminal}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.Terminal}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Click="OpenFileBrowser" ToolTip.Tip="{DynamicResource Text.Repository.Explore}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Explore}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.Files}"/>
+        </StackPanel>
+      </Button>
+    </StackPanel>
+
+    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+      <Button Classes="icon_button repo_toolbar_button" Tapped="Fetch" IsEnabled="{Binding !IsFetching}">
+        <ToolTip.Tip>
+          <StackPanel Orientation="Vertical">
+            <TextBlock Text="{DynamicResource Text.Fetch}"/>
+            <TextBlock Classes="small italic" Margin="0,4,0,0" Text="{DynamicResource Text.CtrlClickTip}" Foreground="{DynamicResource Brush.FG2}"/>
+          </StackPanel>
+        </ToolTip.Tip>
+
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Fetch}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Fetch}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Tapped="Pull" IsVisible="{Binding !IsBare}" IsEnabled="{Binding !IsBare}">
+        <ToolTip.Tip>
+          <StackPanel Orientation="Vertical">
+            <TextBlock Text="{DynamicResource Text.Pull}"/>
+            <TextBlock Classes="small italic" Margin="0,4,0,0" Text="{DynamicResource Text.CtrlClickTip}" Foreground="{DynamicResource Brush.FG2}"/>
+          </StackPanel>
+        </ToolTip.Tip>
+
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Pull}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Pull}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Tapped="Push">
+        <ToolTip.Tip>
+          <StackPanel Orientation="Vertical">
+            <TextBlock Text="{DynamicResource Text.Push}"/>
+            <TextBlock Classes="small italic" Margin="0,4,0,0" Text="{DynamicResource Text.CtrlClickTip}" Foreground="{DynamicResource Brush.FG2}"/>
+          </StackPanel>
+        </ToolTip.Tip>
+
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Push}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Push}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Tapped="StashAll" IsVisible="{Binding !IsBare}">
+        <ToolTip.Tip>
+          <StackPanel Orientation="Vertical">
+            <TextBlock Text="{DynamicResource Text.Stash}"/>
+            <TextBlock Classes="small italic" Margin="0,4,0,0" Text="{DynamicResource Text.CtrlClickTip}" Foreground="{DynamicResource Brush.FG2}"/>
+          </StackPanel>
+        </ToolTip.Tip>
+
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Stashes.Add}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Stash}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Command="{Binding ApplyPatch}" IsVisible="{Binding !IsBare}" ToolTip.Tip="{DynamicResource Text.Apply.Title}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.ApplyPatch}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.Patch}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Click="OpenCustomActionMenu" ToolTip.Tip="{DynamicResource Text.Repository.CustomActions}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Action}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.Actions}"/>
+        </StackPanel>
+      </Button>
+
+      <Button Classes="icon_button repo_toolbar_button" Click="OpenMoreToolsMenu" ToolTip.Tip="{DynamicResource Text.Repository.Toolbar.MoreTools}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.More}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.More}"/>
+        </StackPanel>
+      </Button>
+    </StackPanel>
+
+    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="8,0,4,0">
+      <Path Width="13" Height="13" Fill="{DynamicResource Brush.FG1}" Data="{StaticResource Icons.Branch}"/>
+
+      <ContentControl Margin="6,0,4,0">
+        <ContentControl.Content>
+          <Binding Path="CurrentBranch">
+            <Binding.TargetNullValue>
+              <TextBlock Text="--"/>
+            </Binding.TargetNullValue>
+          </Binding>
+        </ContentControl.Content>
+
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="m:Branch">
+            <Border Background="Transparent" ToolTip.Tip="{Binding FriendlyName}">
+              <TextBlock Text="{Binding FriendlyName}" MaxWidth="220" TextTrimming="CharacterEllipsis"/>
+            </Border>
+          </DataTemplate>
+        </ContentControl.DataTemplates>
+      </ContentControl>
+
+      <Button Classes="icon_button repo_toolbar_button" Click="NavigateToHead" ToolTip.Tip="{DynamicResource Text.Repository.NavigateToCurrentHead}">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Width="18" Height="18" Data="{StaticResource Icons.Target}" Fill="{DynamicResource Brush.FG1}"/>
+          <TextBlock Classes="repo_toolbar_label" Text="{DynamicResource Text.Repository.Toolbar.Locate}"/>
+        </StackPanel>
+      </Button>
+    </StackPanel>
+
+    <StackPanel Grid.ColumnSpan="3" Orientation="Horizontal" Width="0" Height="0" IsHitTestVisible="False">
+      <Button Width="0" Height="0" Click="PushDirectlyByHotKey" IsVisible="False" HotKey="{OnPlatform Ctrl+Shift+Up, macOS=⌘+Shift+Up}"/>
+      <Button Width="0" Height="0" Click="PullDirectlyByHotKey" IsVisible="False" IsEnabled="{Binding !IsBare}" HotKey="{OnPlatform Ctrl+Shift+Down, macOS=⌘+Shift+Down}"/>
+      <Button Width="0" Height="0" Click="FetchDirectlyByHotKey" IsVisible="False" IsEnabled="{Binding !IsFetching}" HotKey="{OnPlatform Ctrl+Down, macOS=⌘+Down}"/>
+    </StackPanel>
+  </Grid>
+</UserControl>

@@ -1,0 +1,232 @@
+<v:ChromelessWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:m="using:SourceGit.Models"
+                    xmlns:vm="using:SourceGit.ViewModels"
+                    xmlns:v="using:SourceGit.Views"
+                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                    x:Class="SourceGit.Views.SelfUpdate"
+                    x:DataType="vm:SelfUpdate"
+                    x:Name="ThisControl"
+                    Title="{DynamicResource Text.SelfUpdate.Title}"
+                    Icon="/App.ico"
+                    SizeToContent="WidthAndHeight"
+                    CanResize="False"
+                    WindowStartupLocation="CenterOwner">
+  <Grid RowDefinitions="Auto,*">
+    <!-- TitleBar -->
+    <Grid Grid.Row="0" Height="28" IsVisible="{Binding !#ThisControl.UseSystemWindowFrame}">
+      <Border Background="{DynamicResource Brush.TitleBar}"
+              BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
+              PointerPressed="BeginMoveWindow"/>
+
+      <Path Width="14" Height="14"
+            Margin="10,0,0,0"
+            HorizontalAlignment="Left"
+            Data="{StaticResource Icons.SoftwareUpdate}"
+            IsVisible="{OnPlatform True, macOS=False}"/>
+
+      <TextBlock Classes="bold"
+                 Text="{DynamicResource Text.SelfUpdate.Title}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsHitTestVisible="False"/>
+
+      <Grid HorizontalAlignment="Right" IsVisible="{OnPlatform True, macOS=False}">
+        <v:CaptionButtons IsCloseButtonOnly="True"
+                          IsVisible="{Binding #ThisControl.DataContext.IsInstallingUpdate, Converter={x:Static BoolConverters.Not}}"/>
+      </Grid>
+    </Grid>
+
+    <!-- Body -->
+    <Grid Grid.Row="1">
+      <ContentControl Content="{Binding Data}">
+        <ContentControl.DataTemplates>
+          <DataTemplate DataType="m:UpdateAvailable">
+            <StackPanel Orientation="Vertical" Margin="16,8">
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
+                <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="Green"/>
+                <TextBlock Margin="8,0,0,0" FontWeight="Bold" FontSize="14" Text="{DynamicResource Text.SelfUpdate.Available}"/>
+                <Border Margin="4,0,0,0" Height="20" CornerRadius="10" Background="{DynamicResource Brush.Accent}" Effect="drop-shadow(0 0 6 #40000000)">
+                  <TextBlock Margin="8,0" Text="{Binding #ThisControl.DataContext.ChangelogPageTagName}" FontSize="12" Foreground="White"/>
+                </Border>
+              </StackPanel>
+
+              <TextBlock Margin="0,8,0,0">
+                <Run Text="{DynamicResource Text.SelfUpdate.CurrentVersion}" FontWeight="Bold" Foreground="{DynamicResource Brush.FG2}"/>
+                <Run Text="{Binding CurrentVersionStr, Mode=OneWay}"/>
+              </TextBlock>
+
+              <TextBlock Margin="0,2,0,0">
+                <Run Text="{DynamicResource Text.SelfUpdate.Channel}" FontWeight="Bold" Foreground="{DynamicResource Brush.FG2}"/>
+                <Run Text="{Binding ChannelName, Mode=OneWay}"/>
+              </TextBlock>
+
+              <TextBlock Margin="0,2,0,0">
+                <Run Text="{DynamicResource Text.SelfUpdate.ReleaseDate}" FontWeight="Bold" Foreground="{DynamicResource Brush.FG2}"/>
+                <Run Text="{Binding #ThisControl.DataContext.ChangelogPageReleaseDateStr, Mode=OneWay}"/>
+              </TextBlock>
+
+              <Grid Width="560" ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                <TextBlock Grid.Column="0"
+                           Text="{DynamicResource Text.SelfUpdate.Changelog}"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource Brush.FG2}"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                  <Button Classes="icon_button"
+                          Width="28"
+                          Height="28"
+                          IsEnabled="{Binding #ThisControl.DataContext.CanGoPreviousChangelogPage}"
+                          ToolTip.Tip="{DynamicResource Text.SelfUpdate.Changelog.Previous}"
+                          Click="GoPreviousChangelogPage">
+                    <Path Width="10" Height="10" Stretch="Uniform" Data="{StaticResource Icons.TriangleLeft}"/>
+                  </Button>
+
+                  <TextBox Width="42"
+                           Height="24"
+                           Margin="6,0,0,0"
+                           Padding="0"
+                           CornerRadius="3"
+                           Text="{Binding #ThisControl.DataContext.ChangelogPageNumberText, Mode=OneWay}"
+                           HorizontalContentAlignment="Center"
+                           VerticalContentAlignment="Center"
+                           LostFocus="OnChangelogPageNumberLostFocus"
+                           KeyDown="OnChangelogPageNumberKeyDown"/>
+                  <TextBlock Text="/"
+                             VerticalAlignment="Center"
+                             Foreground="{DynamicResource Brush.FG2}"/>
+                  <TextBlock Text="{Binding #ThisControl.DataContext.ChangelogPageCount}"
+                             VerticalAlignment="Center"
+                             Foreground="{DynamicResource Brush.FG2}"/>
+
+                  <Button Classes="icon_button"
+                          Width="28"
+                          Height="28"
+                          Margin="6,0,0,0"
+                          IsEnabled="{Binding #ThisControl.DataContext.CanGoNextChangelogPage}"
+                          ToolTip.Tip="{DynamicResource Text.SelfUpdate.Changelog.Next}"
+                          Click="GoNextChangelogPage">
+                    <Path Width="10" Height="10" Stretch="Uniform" Data="{StaticResource Icons.TriangleRight}"/>
+                  </Button>
+                </StackPanel>
+              </Grid>
+
+              <Border Width="560" Height="360"
+                      Margin="0,4,0,0"
+                      Background="{DynamicResource Brush.Contents}"
+                      BorderThickness="1"
+                      BorderBrush="{DynamicResource Brush.Border2}">
+                <v:UpdateInfoView DataContext="{Binding #ThisControl.DataContext}"/>
+              </Border>
+
+              <StackPanel Margin="0,8,0,0"
+                          Orientation="Horizontal"
+                          HorizontalAlignment="Center"
+                          IsVisible="{Binding #ThisControl.DataContext.IsInstallingUpdate, Converter={x:Static BoolConverters.Not}}">
+                <Button Classes="flat primary"
+                        Height="30"
+                        Margin="0,0,8,0"
+                        IsVisible="{Binding CanInstall}"
+                        Click="InstallUpdate"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center">
+                  <StackPanel Orientation="Horizontal">
+                    <Path Width="12" Height="12" Data="{StaticResource Icons.Pull}" Fill="{DynamicResource AccentButtonForeground}"/>
+                    <TextBlock Text="{DynamicResource Text.SelfUpdate.InstallUpdate}" Margin="8,0,0,0" Foreground="{DynamicResource AccentButtonForeground}"/>
+                  </StackPanel>
+                </Button>
+
+                <Button Classes="flat"
+                        Height="30"
+                        Click="GotoDownload"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center">
+                  <StackPanel Orientation="Horizontal">
+                    <Path Width="12" Height="12" Data="{StaticResource Icons.Pull}" Fill="{DynamicResource Brush.FG1}"/>
+                    <TextBlock Text="{DynamicResource Text.SelfUpdate.GotoDownload}" Margin="8,0,0,0"/>
+                  </StackPanel>
+                </Button>
+
+                <Button Classes="flat"
+                        Height="30"
+                        Margin="8,0,0,0"
+                        Click="IgnoreThisVersion"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center">
+                  <StackPanel Orientation="Horizontal">
+                    <Path Width="12" Height="12" Data="{StaticResource Icons.File.Ignore}"/>
+                    <TextBlock Text="{DynamicResource Text.SelfUpdate.IgnoreThisVersion}" Margin="8,0,0,0"/>
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+
+              <StackPanel Width="560"
+                          Margin="0,10,0,0"
+                          Orientation="Vertical"
+                          IsVisible="{Binding #ThisControl.DataContext.IsInstallingUpdate}">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Grid.Column="0"
+                             Text="{Binding #ThisControl.DataContext.InstallProgressDescription}"
+                             TextWrapping="Wrap"/>
+                  <TextBlock Grid.Column="1"
+                             Margin="12,0,0,0"
+                             Text="{Binding #ThisControl.DataContext.InstallProgressText}"
+                             IsVisible="{Binding #ThisControl.DataContext.HasInstallProgressValue}"/>
+                </Grid>
+                <ProgressBar Margin="0,8,0,0"
+                             Height="6"
+                             Minimum="0"
+                             Maximum="100"
+                             Background="{DynamicResource Brush.FG2}"
+                             Foreground="{DynamicResource Brush.Accent}"
+                             IsIndeterminate="{Binding #ThisControl.DataContext.IsInstallProgressIndeterminate}"
+                             Value="{Binding #ThisControl.DataContext.InstallProgressValue}"/>
+              </StackPanel>
+            </StackPanel>
+          </DataTemplate>
+
+          <DataTemplate DataType="m:AlreadyUpToDate">
+            <StackPanel Orientation="Vertical" Margin="16,8">
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8">
+                <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="Green"/>
+                <TextBlock Margin="8,0,0,0" Text="{DynamicResource Text.SelfUpdate.UpToDate}"/>
+              </StackPanel>
+
+              <Button Classes="flat primary"
+                      Height="30"
+                      Margin="4,0"
+                      Click="CloseWindow"
+                      Content="{DynamicResource Text.Close}"
+                      HorizontalAlignment="Center"
+                      HorizontalContentAlignment="Center"
+                      VerticalContentAlignment="Center"/>
+            </StackPanel>
+          </DataTemplate>
+
+          <DataTemplate DataType="m:SelfUpdateFailed">
+            <StackPanel Orientation="Vertical" Margin="16,8">
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Path Width="14" Height="14" Data="{StaticResource Icons.Error}" Fill="Red"/>
+                <TextBlock Margin="8,0,0,0" FontWeight="Bold" FontSize="14" Text="{DynamicResource Text.SelfUpdate.Error}"/>
+              </StackPanel>
+
+              <TextBlock Text="{Binding Reason}" MaxWidth="500" TextWrapping="Wrap" Margin="0,8"/>
+
+              <Button Classes="flat primary"
+                      Height="30"
+                      Margin="4,0"
+                      Click="CloseWindow"
+                      Content="{DynamicResource Text.Close}"
+                      HorizontalAlignment="Center"
+                      HorizontalContentAlignment="Center"
+                      VerticalContentAlignment="Center"/>
+            </StackPanel>
+          </DataTemplate>
+        </ContentControl.DataTemplates>
+      </ContentControl>
+    </Grid>
+  </Grid>
+</v:ChromelessWindow>

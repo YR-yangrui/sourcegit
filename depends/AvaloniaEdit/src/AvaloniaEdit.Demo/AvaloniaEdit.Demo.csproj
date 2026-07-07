@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\SampleFiles\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Resources\SampleFiles\**\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Tmds.DBus.Protocol" />
+    <ProjectReference Include="..\AvaloniaEdit\AvaloniaEdit.csproj" />
+    <ProjectReference Include="..\AvaloniaEdit.TextMate\AvaloniaEdit.TextMate.csproj" />
+  </ItemGroup>
+
+</Project>

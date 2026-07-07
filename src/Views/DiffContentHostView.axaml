@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:v="using:SourceGit.Views"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.DiffContentHostView"
+             x:DataType="vm:DiffContentHost">
+  <Grid>
+    <Border BorderThickness="1"
+            BorderBrush="{DynamicResource Brush.Border2}"
+            IsVisible="{Binding IsWelcomeVisible}">
+      <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+        <Path Width="64" Height="64" Data="{StaticResource Icons.Diff}" Fill="{DynamicResource Brush.FG2}"/>
+        <TextBlock Margin="0,16,0,0"
+                   Text="{DynamicResource Text.Diff.Welcome}"
+                   FontSize="18" FontWeight="Bold"
+                   Foreground="{DynamicResource Brush.FG2}"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Border>
+
+    <ContentControl Content="{Binding ActiveContent}"
+                    IsEnabled="{Binding !IsLoading}">
+      <ContentControl.DataTemplates>
+        <DataTemplate DataType="vm:Conflict">
+          <v:Conflict/>
+        </DataTemplate>
+
+        <DataTemplate DataType="vm:DiffContext">
+          <v:DiffView/>
+        </DataTemplate>
+      </ContentControl.DataTemplates>
+    </ContentControl>
+
+    <Grid Background="Transparent"
+          IsVisible="{Binding IsLoading}">
+      <v:LoadingIcon Width="48"
+                     Height="48"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     IsHitTestVisible="False"/>
+    </Grid>
+  </Grid>
+</UserControl>

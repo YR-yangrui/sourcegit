@@ -1,0 +1,990 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using Avalonia.Collections;
+using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace SourceGit.ViewModels
+{
+    public class Preferences : ObservableObject
+    {
+        [JsonIgnore]
+        public static Preferences Instance
+        {
+            get
+            {
+                if (_instance != null)
+                    return _instance;
+
+                _instance = Load();
+                _instance._isLoading = false;
+
+                _instance.PrepareGit();
+                _instance.PrepareShellOrTerminal();
+                _instance.PrepareExternalDiffMergeTool();
+                _instance.PrepareWorkspaces();
+
+                return _instance;
+            }
+        }
+
+        public string Locale
+        {
+            get => _locale;
+            set
+            {
+                if (SetProperty(ref _locale, value) && !_isLoading)
+                    App.SetLocale(value);
+            }
+        }
+
+        public string Theme
+        {
+            get => _theme;
+            set
+            {
+                if (SetProperty(ref _theme, value) && !_isLoading)
+                    App.SetTheme(_theme, _themeOverrides);
+            }
+        }
+
+        public string ThemeOverrides
+        {
+            get => _themeOverrides;
+            set
+            {
+                if (SetProperty(ref _themeOverrides, value) && !_isLoading)
+                    App.SetTheme(_theme, value);
+            }
+        }
+
+        [JsonIgnore]
+        public IReadOnlyList<string> InstalledFontFamilies
+        {
+            get => _installedFontFamilies ??= GetInstalledFontFamilies(_defaultFontFamily, _monospaceFontFamily);
+        }
+
+        public string DefaultFontFamily
+        {
+            get => _defaultFontFamily;
+            set
+            {
+                if (SetProperty(ref _defaultFontFamily, value) && !_isLoading)
+                    App.SetFonts(value, _monospaceFontFamily);
+            }
+        }
+
+        public string MonospaceFontFamily
+        {
+            get => _monospaceFontFamily;
+            set
+            {
+                if (SetProperty(ref _monospaceFontFamily, value) && !_isLoading)
+                    App.SetFonts(_defaultFontFamily, value);
+            }
+        }
+
+        public bool UseSystemWindowFrame
+        {
+            get => Native.OS.UseSystemWindowFrame;
+            set => Native.OS.UseSystemWindowFrame = value;
+        }
+
+        public double DefaultFontSize
+        {
+            get => _defaultFontSize;
+            set => SetProperty(ref _defaultFontSize, value);
+        }
+
+        public double EditorFontSize
+        {
+            get => _editorFontSize;
+            set => SetProperty(ref _editorFontSize, value);
+        }
+
+        public int EditorTabWidth
+        {
+            get => _editorTabWidth;
+            set => SetProperty(ref _editorTabWidth, value);
+        }
+
+        public double Zoom
+        {
+            get => _zoom;
+            set => SetProperty(ref _zoom, value);
+        }
+
+        public LayoutInfo Layout
+        {
+            get => _layout;
+            set => SetProperty(ref _layout, value);
+        }
+
+        public bool ShowLocalChangesByDefault
+        {
+            get;
+            set;
+        } = true;
+
+        public bool ShowChangesInCommitDetailByDefault
+        {
+            get;
+            set;
+        } = true;
+
+        public int MaxHistoryCommits
+        {
+            get => _maxHistoryCommits;
+            set => SetProperty(ref _maxHistoryCommits, value);
+        }
+
+        public int SubjectGuideLength
+        {
+            get => _subjectGuideLength;
+            set => SetProperty(ref _subjectGuideLength, value);
+        }
+
+        public int DateTimeFormat
+        {
+            get => Models.DateTimeFormat.ActiveIndex;
+            set
+            {
+                if (value != Models.DateTimeFormat.ActiveIndex &&
+                    value >= 0 &&
+                    value < Models.DateTimeFormat.Supported.Count)
+                {
+                    Models.DateTimeFormat.ActiveIndex = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool Use24Hours
+        {
+            get => Models.DateTimeFormat.Use24Hours;
+            set
+            {
+                if (value != Models.DateTimeFormat.Use24Hours)
+                {
+                    Models.DateTimeFormat.Use24Hours = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool UseFixedTabWidth
+        {
+            get => _useFixedTabWidth;
+            set => SetProperty(ref _useFixedTabWidth, value);
+        }
+
+        public bool UseAutoHideScrollBars
+        {
+            get => _useAutoHideScrollBars;
+            set => SetProperty(ref _useAutoHideScrollBars, value);
+        }
+
+        public bool EnableMyAuthorNameBorder
+        {
+            get => _enableMyAuthorNameBorder;
+            set => SetProperty(ref _enableMyAuthorNameBorder, value);
+        }
+
+        public uint MyAuthorNameBorderColor
+        {
+            get => _myAuthorNameBorderColor;
+            set
+            {
+                if (SetProperty(ref _myAuthorNameBorderColor, value))
+                    OnPropertyChanged(nameof(MyAuthorNameBorderBrush));
+            }
+        }
+
+        [JsonIgnore]
+        public IBrush MyAuthorNameBorderBrush
+        {
+            get => new SolidColorBrush(Color.FromUInt32(_myAuthorNameBorderColor));
+        }
+
+        public bool UseGitHubStyleAvatar
+        {
+            get => _useGitHubStyleAvatar;
+            set => SetProperty(ref _useGitHubStyleAvatar, value);
+        }
+
+        public bool Check4UpdatesOnStartup
+        {
+            get => _check4UpdatesOnStartup;
+            set => SetProperty(ref _check4UpdatesOnStartup, value);
+        }
+
+        public int UpdateChannel
+        {
+            get => _updateChannel;
+            set
+            {
+                var normalized = (int)Models.UpdateChannels.Normalize((Models.UpdateChannel)value);
+                SetProperty(ref _updateChannel, normalized);
+            }
+        }
+
+        public bool ExportPerfettoTraceOnExit
+        {
+            get => _exportPerfettoTraceOnExit;
+            set => SetProperty(ref _exportPerfettoTraceOnExit, value);
+        }
+
+        public bool ShowChildren
+        {
+            get => _showChildren;
+            set => SetProperty(ref _showChildren, value);
+        }
+
+        public string IgnoreUpdateTag
+        {
+            get => _ignoreUpdateTag;
+            set => SetProperty(ref _ignoreUpdateTag, value);
+        }
+
+        public string IgnoreStableUpdateTag
+        {
+            get => _ignoreStableUpdateTag;
+            set => SetProperty(ref _ignoreStableUpdateTag, value);
+        }
+
+        public string IgnoreNightlyUpdateTag
+        {
+            get => _ignoreNightlyUpdateTag;
+            set => SetProperty(ref _ignoreNightlyUpdateTag, value);
+        }
+
+        public bool ShowTagsInGraph
+        {
+            get => _showTagsInGraph;
+            set => SetProperty(ref _showTagsInGraph, value);
+        }
+
+        public bool UseCompactBranchNamesInGraph
+        {
+            get => _useCompactBranchNamesInGraph;
+            set => SetProperty(ref _useCompactBranchNamesInGraph, value);
+        }
+
+        public bool UseTwoColumnsLayoutInHistories
+        {
+            get => _useTwoColumnsLayoutInHistories;
+            set => SetProperty(ref _useTwoColumnsLayoutInHistories, value);
+        }
+
+        public bool DisplayTimeAsPeriodInHistories
+        {
+            get => _displayTimeAsPeriodInHistories;
+            set => SetProperty(ref _displayTimeAsPeriodInHistories, value);
+        }
+
+        public bool UseSideBySideDiff
+        {
+            get => _useSideBySideDiff;
+            set => SetProperty(ref _useSideBySideDiff, value);
+        }
+
+        public bool EnableCustomDiffRenderers
+        {
+            get => _enableCustomDiffRenderers;
+            set => SetProperty(ref _enableCustomDiffRenderers, value);
+        }
+
+        public bool UseSyntaxHighlighting
+        {
+            get => _useSyntaxHighlighting;
+            set => SetProperty(ref _useSyntaxHighlighting, value);
+        }
+
+        public bool IgnoreCRAtEOLInDiff
+        {
+            get => _ignoreCRAtEOLInDiff;
+            set => SetProperty(ref _ignoreCRAtEOLInDiff, value);
+        }
+
+        public bool UseStashAndReapplyByDefault
+        {
+            get;
+            set;
+        } = true;
+
+        public bool EnableAutoFetch
+        {
+            get;
+            set;
+        } = true;
+
+        public int AutoFetchInterval
+        {
+            get;
+            set;
+        } = 10;
+
+        public bool IgnoreWhitespaceChangesInDiff
+        {
+            get => _ignoreWhitespaceChangesInDiff;
+            set => SetProperty(ref _ignoreWhitespaceChangesInDiff, value);
+        }
+
+        public bool EnableDiffViewWordWrap
+        {
+            get => _enableDiffViewWordWrap;
+            set => SetProperty(ref _enableDiffViewWordWrap, value);
+        }
+
+        public bool ShowHiddenSymbolsInDiffView
+        {
+            get => _showHiddenSymbolsInDiffView;
+            set => SetProperty(ref _showHiddenSymbolsInDiffView, value);
+        }
+
+        public bool UseFullTextDiff
+        {
+            get => _useFullTextDiff;
+            set => SetProperty(ref _useFullTextDiff, value);
+        }
+
+        public int LFSImageActiveIdx
+        {
+            get => _lfsImageActiveIdx;
+            set => SetProperty(ref _lfsImageActiveIdx, value);
+        }
+
+        public int ImageDiffActiveIdx
+        {
+            get => _imageDiffActiveIdx;
+            set => SetProperty(ref _imageDiffActiveIdx, value);
+        }
+
+        public bool EnableCompactFoldersInChangesTree
+        {
+            get => _enableCompactFoldersInChangesTree;
+            set => SetProperty(ref _enableCompactFoldersInChangesTree, value);
+        }
+
+        public Models.ChangeViewMode UnstagedChangeViewMode
+        {
+            get => _unstagedChangeViewMode;
+            set => SetProperty(ref _unstagedChangeViewMode, value);
+        }
+
+        public Models.ChangeViewMode StagedChangeViewMode
+        {
+            get => _stagedChangeViewMode;
+            set => SetProperty(ref _stagedChangeViewMode, value);
+        }
+
+        public Models.ChangeViewMode CommitChangeViewMode
+        {
+            get => _commitChangeViewMode;
+            set => SetProperty(ref _commitChangeViewMode, value);
+        }
+
+        public Models.ChangeViewMode StashChangeViewMode
+        {
+            get => _stashChangeViewMode;
+            set => SetProperty(ref _stashChangeViewMode, value);
+        }
+
+        public string GitInstallPath
+        {
+            get => Native.OS.GitExecutable;
+            set
+            {
+                if (Native.OS.GitExecutable != value)
+                {
+                    Native.OS.GitExecutable = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string GitDefaultCloneDir
+        {
+            get => _gitDefaultCloneDir;
+            set => SetProperty(ref _gitDefaultCloneDir, value);
+        }
+
+        public bool UseLibsecretInsteadOfGCM
+        {
+            get => Native.OS.CredentialHelper.Equals("libsecret", StringComparison.Ordinal);
+            set
+            {
+                var helper = value ? "libsecret" : "manager";
+                if (OperatingSystem.IsLinux() && !Native.OS.CredentialHelper.Equals(helper, StringComparison.Ordinal))
+                {
+                    Native.OS.CredentialHelper = helper;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int ShellOrTerminalType
+        {
+            get => _shellOrTerminalType;
+            set
+            {
+                if (SetProperty(ref _shellOrTerminalType, value) && !_isLoading)
+                {
+                    if (value >= 0 && value < Models.ShellOrTerminal.Supported.Count)
+                        Native.OS.SetShellOrTerminal(Models.ShellOrTerminal.Supported[value]);
+                    else
+                        Native.OS.SetShellOrTerminal(null);
+
+                    OnPropertyChanged(nameof(ShellOrTerminalPath));
+                    OnPropertyChanged(nameof(ShellOrTerminalArgs));
+                }
+            }
+        }
+
+        public string ShellOrTerminalPath
+        {
+            get => Native.OS.ShellOrTerminal;
+            set
+            {
+                if (value != Native.OS.ShellOrTerminal)
+                {
+                    Native.OS.ShellOrTerminal = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string ShellOrTerminalArgs
+        {
+            get => Native.OS.ShellOrTerminalArgs;
+            set
+            {
+                if (value != Native.OS.ShellOrTerminalArgs)
+                {
+                    Native.OS.ShellOrTerminalArgs = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int ExternalMergeToolType
+        {
+            get => Native.OS.ExternalMergerType;
+            set
+            {
+                if (Native.OS.ExternalMergerType != value)
+                {
+                    Native.OS.ExternalMergerType = value;
+                    OnPropertyChanged();
+
+                    if (!_isLoading)
+                    {
+                        Native.OS.AutoSelectExternalMergeToolExecFile();
+                        OnPropertyChanged(nameof(ExternalMergeToolPath));
+                        OnPropertyChanged(nameof(ExternalMergeToolDiffArgs));
+                        OnPropertyChanged(nameof(ExternalMergeToolMergeArgs));
+                    }
+                }
+            }
+        }
+
+        public string ExternalMergeToolPath
+        {
+            get => Native.OS.ExternalMergerExecFile;
+            set
+            {
+                if (!Native.OS.ExternalMergerExecFile.Equals(value, StringComparison.Ordinal))
+                {
+                    Native.OS.ExternalMergerExecFile = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string ExternalMergeToolDiffArgs
+        {
+            get => Native.OS.ExternalDiffArgs;
+            set
+            {
+                if (!Native.OS.ExternalDiffArgs.Equals(value, StringComparison.Ordinal))
+                {
+                    Native.OS.ExternalDiffArgs = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string ExternalMergeToolMergeArgs
+        {
+            get => Native.OS.ExternalMergeArgs;
+            set
+            {
+                if (!Native.OS.ExternalMergeArgs.Equals(value, StringComparison.Ordinal))
+                {
+                    Native.OS.ExternalMergeArgs = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public List<RepositoryNode> RepositoryNodes
+        {
+            get;
+            set;
+        } = [];
+
+        public List<Workspace> Workspaces
+        {
+            get;
+            set;
+        } = [];
+
+        public AvaloniaList<Models.CustomAction> CustomActions
+        {
+            get;
+            set;
+        } = [];
+
+        public AvaloniaList<Models.CustomDiffRenderer> CustomDiffRenderers
+        {
+            get;
+            set;
+        } = [];
+
+        public AvaloniaList<AI.Service> OpenAIServices
+        {
+            get;
+            set;
+        } = [];
+
+        public double LastCheckUpdateTime
+        {
+            get => _lastCheckUpdateTime;
+            set => SetProperty(ref _lastCheckUpdateTime, value);
+        }
+
+        public void SetCanModify()
+        {
+            _isReadonly = false;
+        }
+
+        public bool IsGitConfigured()
+        {
+            var path = GitInstallPath;
+            return !string.IsNullOrEmpty(path) && File.Exists(path);
+        }
+
+        public bool ShouldCheck4UpdateOnStartup()
+        {
+            if (!_check4UpdatesOnStartup)
+                return false;
+
+            var lastCheck = DateTime.UnixEpoch.AddSeconds(LastCheckUpdateTime).ToLocalTime();
+            var now = DateTime.Now;
+
+            if (lastCheck.Year == now.Year && lastCheck.Month == now.Month && lastCheck.Day == now.Day)
+                return false;
+
+            LastCheckUpdateTime = now.Subtract(DateTime.UnixEpoch.ToLocalTime()).TotalSeconds;
+            return true;
+        }
+
+        public bool IsUpdateIgnored(Models.UpdateChannel channel, string version)
+        {
+            if (string.IsNullOrEmpty(version))
+                return false;
+
+            channel = Models.UpdateChannels.Normalize(channel);
+            if (channel == Models.UpdateChannel.Nightly)
+                return version.Equals(_ignoreNightlyUpdateTag, StringComparison.Ordinal);
+
+            if (!string.IsNullOrEmpty(_ignoreStableUpdateTag))
+                return version.Equals(_ignoreStableUpdateTag, StringComparison.Ordinal);
+
+            return version.Equals(_ignoreUpdateTag, StringComparison.Ordinal);
+        }
+
+        public void IgnoreUpdate(Models.UpdateChannel channel, string version)
+        {
+            channel = Models.UpdateChannels.Normalize(channel);
+            if (channel == Models.UpdateChannel.Nightly)
+                IgnoreNightlyUpdateTag = version;
+            else
+                IgnoreStableUpdateTag = version;
+        }
+
+        public Workspace GetActiveWorkspace()
+        {
+            foreach (var w in Workspaces)
+            {
+                if (w.IsActive)
+                    return w;
+            }
+
+            var first = Workspaces[0];
+            first.IsActive = true;
+            return first;
+        }
+
+        public void AddNode(RepositoryNode node, RepositoryNode to, bool save)
+        {
+            var collection = to == null ? RepositoryNodes : to.SubNodes;
+            collection.Add(node);
+            SortNodes(collection);
+
+            if (save)
+                Save();
+        }
+
+        public void SortNodes(List<RepositoryNode> collection)
+        {
+            collection?.Sort((l, r) =>
+            {
+                if (l.IsRepository != r.IsRepository)
+                    return l.IsRepository ? 1 : -1;
+
+                return Models.NumericSort.Compare(l.Name, r.Name);
+            });
+        }
+
+        public RepositoryNode FindNode(string id)
+        {
+            return FindNodeRecursive(id, RepositoryNodes);
+        }
+
+        public RepositoryNode FindOrAddNodeByRepositoryPath(string repo, RepositoryNode parent, bool shouldMoveNode, bool save = true)
+        {
+            var normalized = repo.Replace('\\', '/').TrimEnd('/');
+
+            var node = FindNodeRecursive(normalized, RepositoryNodes);
+            if (node == null)
+            {
+                node = new RepositoryNode()
+                {
+                    Id = normalized,
+                    Name = Path.GetFileName(normalized),
+                    Bookmark = 0,
+                    IsRepository = true,
+                };
+
+                AddNode(node, parent, save);
+            }
+            else if (shouldMoveNode)
+            {
+                MoveNode(node, parent, save);
+            }
+
+            return node;
+        }
+
+        public void MoveNode(RepositoryNode node, RepositoryNode to, bool save)
+        {
+            if (to == null && RepositoryNodes.Contains(node))
+                return;
+            if (to != null && to.SubNodes.Contains(node))
+                return;
+
+            RemoveNode(node, false);
+            AddNode(node, to, false);
+
+            if (save)
+                Save();
+        }
+
+        public void RemoveNode(RepositoryNode node, bool save)
+        {
+            RemoveNodeRecursive(node, RepositoryNodes);
+
+            if (save)
+                Save();
+        }
+
+        public void SortByRenamedNode(RepositoryNode node)
+        {
+            var container = FindNodeContainer(node, RepositoryNodes);
+            SortNodes(container);
+            Save();
+        }
+
+        public void AutoRemoveInvalidNode()
+        {
+            RemoveInvalidRepositoriesRecursive(RepositoryNodes);
+        }
+
+        public void UpdateAvailableAIModels()
+        {
+            Task.Run(() =>
+            {
+                foreach (var service in OpenAIServices)
+                {
+                    try
+                    {
+                        service.FetchAvailableModels();
+                    }
+                    catch
+                    {
+                        // Ignore errors.
+                    }
+                }
+            });
+        }
+
+        public Models.CustomDiffRenderer FindCustomDiffRenderer(string path)
+        {
+            return CustomDiffRenderers.FirstOrDefault(renderer => renderer.Matches(path));
+        }
+
+        public void Save()
+        {
+            if (_isLoading || _isReadonly)
+                return;
+
+            var tmpfile = Path.Combine(Native.OS.DataDir, "preference_tmp.json");
+            var content = JsonSerializer.Serialize(this, JsonCodeGen.Default.Preferences);
+            File.WriteAllText(tmpfile, content);
+
+            var finalFile = Path.Combine(Native.OS.DataDir, "preference.json");
+            File.Move(tmpfile, finalFile, true);
+        }
+
+        private static Preferences Load()
+        {
+            var path = Path.Combine(Native.OS.DataDir, "preference.json");
+            if (!File.Exists(path))
+                return new Preferences();
+
+            try
+            {
+                using var stream = File.OpenRead(path);
+                return JsonSerializer.Deserialize(stream, JsonCodeGen.Default.Preferences);
+            }
+            catch
+            {
+                return new Preferences();
+            }
+        }
+
+        private void PrepareGit()
+        {
+            var path = Native.OS.GitExecutable;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                GitInstallPath = Native.OS.FindGitExecutable();
+        }
+
+        private void PrepareShellOrTerminal()
+        {
+            if (_shellOrTerminalType >= 0)
+                return;
+
+            for (int i = 0; i < Models.ShellOrTerminal.Supported.Count; i++)
+            {
+                var shell = Models.ShellOrTerminal.Supported[i];
+                if (Native.OS.TestShellOrTerminal(shell))
+                {
+                    ShellOrTerminalType = i;
+                    break;
+                }
+            }
+        }
+
+        private void PrepareExternalDiffMergeTool()
+        {
+            var mergerType = Native.OS.ExternalMergerType;
+            if (mergerType > 0 && mergerType < Models.ExternalMerger.Supported.Count)
+            {
+                var merger = Models.ExternalMerger.Supported[mergerType];
+                if (string.IsNullOrEmpty(Native.OS.ExternalDiffArgs))
+                    Native.OS.ExternalDiffArgs = merger.DiffCmd;
+                if (string.IsNullOrEmpty(Native.OS.ExternalMergeArgs))
+                    Native.OS.ExternalMergeArgs = merger.MergeCmd;
+            }
+        }
+
+        private void PrepareWorkspaces()
+        {
+            if (Workspaces.Count == 0)
+            {
+                Workspaces.Add(new Workspace() { Name = "Default" });
+                return;
+            }
+
+            foreach (var workspace in Workspaces)
+            {
+                if (!workspace.RestoreOnStartup)
+                {
+                    workspace.Repositories.Clear();
+                    workspace.ActiveIdx = 0;
+                }
+            }
+        }
+
+        private RepositoryNode FindNodeRecursive(string id, List<RepositoryNode> collection)
+        {
+            foreach (var node in collection)
+            {
+                if (node.Id == id)
+                    return node;
+
+                var sub = FindNodeRecursive(id, node.SubNodes);
+                if (sub != null)
+                    return sub;
+            }
+
+            return null;
+        }
+
+        private List<RepositoryNode> FindNodeContainer(RepositoryNode node, List<RepositoryNode> collection)
+        {
+            foreach (var sub in collection)
+            {
+                if (node == sub)
+                    return collection;
+
+                var subCollection = FindNodeContainer(node, sub.SubNodes);
+                if (subCollection != null)
+                    return subCollection;
+            }
+
+            return null;
+        }
+
+        private static IReadOnlyList<string> GetInstalledFontFamilies(params string[] currentFontFamilies)
+        {
+            try
+            {
+                var exists = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var fonts = new List<string>();
+
+                AddFontFamily(fonts, exists, string.Empty);
+
+                foreach (var family in currentFontFamilies)
+                    AddFontFamily(fonts, exists, family);
+
+                var systemFonts = FontManager.Current.SystemFonts
+                    .Select(x => x.Name)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x, StringComparer.CurrentCultureIgnoreCase);
+
+                foreach (var family in systemFonts)
+                    AddFontFamily(fonts, exists, family);
+
+                return fonts;
+            }
+            catch
+            {
+                return [string.Empty];
+            }
+        }
+
+        private static void AddFontFamily(List<string> fonts, HashSet<string> exists, string family)
+        {
+            if (family == null)
+                return;
+
+            var trimmed = family.Trim();
+            if (exists.Add(trimmed))
+                fonts.Add(trimmed);
+        }
+
+        private bool RemoveNodeRecursive(RepositoryNode node, List<RepositoryNode> collection)
+        {
+            if (collection.Contains(node))
+            {
+                collection.Remove(node);
+                return true;
+            }
+
+            foreach (var one in collection)
+            {
+                if (RemoveNodeRecursive(node, one.SubNodes))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool RemoveInvalidRepositoriesRecursive(List<RepositoryNode> collection)
+        {
+            bool changed = false;
+
+            for (int i = collection.Count - 1; i >= 0; i--)
+            {
+                var node = collection[i];
+                if (node.IsInvalid)
+                {
+                    collection.RemoveAt(i);
+                    changed = true;
+                }
+                else if (!node.IsRepository)
+                {
+                    changed |= RemoveInvalidRepositoriesRecursive(node.SubNodes);
+                }
+            }
+
+            return changed;
+        }
+
+        private static Preferences _instance = null;
+
+        private bool _isLoading = true;
+        private bool _isReadonly = true;
+        private string _locale = "en_US";
+        private string _theme = "Default";
+        private string _themeOverrides = string.Empty;
+        private string _defaultFontFamily = "\u5FAE\u8F6F\u96C5\u9ED1";
+        private string _monospaceFontFamily = "Courier New";
+        private IReadOnlyList<string> _installedFontFamilies = null;
+        private double _defaultFontSize = 14;
+        private double _editorFontSize = 15;
+        private int _editorTabWidth = 4;
+        private double _zoom = 1.0;
+        private LayoutInfo _layout = new();
+
+        private int _maxHistoryCommits = 20000;
+        private int _subjectGuideLength = 50;
+        private bool _useFixedTabWidth = true;
+        private bool _useAutoHideScrollBars = true;
+        private bool _enableMyAuthorNameBorder = false;
+        private uint _myAuthorNameBorderColor = 0xFF0078D7;
+        private bool _useGitHubStyleAvatar = false;
+        private bool _showChildren = false;
+        private bool _useCompactBranchNamesInGraph = true;
+
+        private bool _check4UpdatesOnStartup = true;
+        private int _updateChannel = 0;
+        private bool _exportPerfettoTraceOnExit = false;
+        private double _lastCheckUpdateTime = 0;
+        private string _ignoreUpdateTag = string.Empty;
+        private string _ignoreStableUpdateTag = string.Empty;
+        private string _ignoreNightlyUpdateTag = string.Empty;
+
+        private bool _showTagsInGraph = true;
+        private bool _useTwoColumnsLayoutInHistories = false;
+        private bool _displayTimeAsPeriodInHistories = false;
+        private bool _useSideBySideDiff = false;
+        private bool _enableCustomDiffRenderers = false;
+        private bool _ignoreWhitespaceChangesInDiff = false;
+        private bool _ignoreCRAtEOLInDiff = true;
+        private bool _useSyntaxHighlighting = false;
+        private bool _enableDiffViewWordWrap = false;
+        private bool _showHiddenSymbolsInDiffView = false;
+        private bool _useFullTextDiff = false;
+        private int _lfsImageActiveIdx = 0;
+        private int _imageDiffActiveIdx = 0;
+        private bool _enableCompactFoldersInChangesTree = true;
+
+        private Models.ChangeViewMode _unstagedChangeViewMode = Models.ChangeViewMode.List;
+        private Models.ChangeViewMode _stagedChangeViewMode = Models.ChangeViewMode.List;
+        private Models.ChangeViewMode _commitChangeViewMode = Models.ChangeViewMode.List;
+        private Models.ChangeViewMode _stashChangeViewMode = Models.ChangeViewMode.List;
+
+        private string _gitDefaultCloneDir = string.Empty;
+        private int _shellOrTerminalType = -1;
+    }
+}

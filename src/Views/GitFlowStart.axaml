@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:SourceGit.Models"
+             xmlns:vm="using:SourceGit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
+             x:Class="SourceGit.Views.GitFlowStart"
+             x:DataType="vm:GitFlowStart">
+  <StackPanel Orientation="Vertical" Margin="8,0">
+    <StackPanel Orientation="Horizontal">
+      <Path Width="16" Height="16"
+            Margin="0,0,8,0"
+            Data="{StaticResource Icons.GitFlow}"/>
+
+      <TextBlock FontSize="18"
+                 Classes="bold"
+                 Text="{DynamicResource Text.GitFlow.StartFeatureTitle}"
+                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static m:GitFlowBranchType.Feature}}"/>
+      <TextBlock FontSize="18"
+                 Classes="bold"
+                 Text="{DynamicResource Text.GitFlow.StartReleaseTitle}"
+                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static m:GitFlowBranchType.Release}}"/>
+      <TextBlock FontSize="18"
+                 Classes="bold"
+                 Text="{DynamicResource Text.GitFlow.StartHotfixTitle}"
+                 IsVisible="{Binding Type, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static m:GitFlowBranchType.Hotfix}}"/>
+    </StackPanel>
+    
+    <Grid Margin="0,16,0,0" ColumnDefinitions="120,*">
+      <TextBlock Grid.Column="0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Margin="0,0,8,0"
+                 Text="{Binding Prefix}"/>
+      <TextBox Grid.Column="1"
+               Height="26"
+               VerticalAlignment="Center"
+               CornerRadius="3"
+               PlaceholderText="{DynamicResource Text.GitFlow.StartPlaceholder}"
+               Text="{Binding Name, Mode=TwoWay}"/>
+    </Grid>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,335 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
+using System.Threading.Tasks;
+
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace SourceGit.ViewModels
+{
+    public interface ICustomActionControlParameter
+    {
+        string GetValue();
+    }
+
+    public class CustomActionControlTextBox : ICustomActionControlParameter
+    {
+        public string Label { get; set; }
+        public string Placeholder { get; set; }
+        public string Text { get; set; }
+        public string Formatter { get; set; }
+
+        public CustomActionControlTextBox(string label, string placeholder, string defaultValue, string formatter)
+        {
+            Label = label + ":";
+            Placeholder = placeholder;
+            Text = defaultValue;
+            Formatter = formatter;
+        }
+
+        public string GetValue()
+        {
+            if (string.IsNullOrEmpty(Text))
+                return string.Empty;
+            return string.IsNullOrEmpty(Formatter) ? Text : Formatter.Replace("${VALUE}", Text);
+        }
+    }
+
+    public class CustomActionControlPathSelector : ObservableObject, ICustomActionControlParameter
+    {
+        public string Label { get; set; }
+        public string Placeholder { get; set; }
+        public bool IsFolder { get; set; }
+
+        public string Path
+        {
+            get => _path;
+            set => SetProperty(ref _path, value);
+        }
+
+        public CustomActionControlPathSelector(string label, string placeholder, bool isFolder, string defaultValue)
+        {
+            Label = label + ":";
+            Placeholder = placeholder;
+            IsFolder = isFolder;
+            _path = defaultValue;
+        }
+
+        public string GetValue() => _path;
+
+        private string _path;
+    }
+
+    public class CustomActionControlCheckBox : ICustomActionControlParameter
+    {
+        public string Label { get; set; }
+        public string ToolTip { get; set; }
+        public string CheckedValue { get; set; }
+        public bool IsChecked { get; set; }
+
+        public CustomActionControlCheckBox(string label, string tooltip, string checkedValue, bool isChecked)
+        {
+            Label = label;
+            ToolTip = string.IsNullOrEmpty(tooltip) ? null : tooltip;
+            CheckedValue = checkedValue;
+            IsChecked = isChecked;
+        }
+
+        public string GetValue() => IsChecked ? CheckedValue : string.Empty;
+    }
+
+    public class CustomActionControlComboBox : ObservableObject, ICustomActionControlParameter
+    {
+        public string Label { get; set; }
+        public string Description { get; set; }
+        public List<string> Options { get; set; } = [];
+        public string Value { get; set; }
+
+        public CustomActionControlComboBox(string label, string description, string options)
+        {
+            Label = label;
+            Description = description;
+
+            var parts = options.Split('|', StringSplitOptions.TrimEntries);
+            if (parts.Length > 0)
+            {
+                Options.AddRange(parts);
+                Value = parts[0];
+            }
+        }
+
+        public string GetValue() => Value;
+    }
+
+    public class CustomActionControlBranchSelector : ObservableObject, ICustomActionControlParameter
+    {
+        public string Label { get; set; }
+        public string Description { get; set; }
+        public List<Models.Branch> Branches { get; set; } = [];
+        public Models.Branch SelectedBranch { get; set; }
+
+        public CustomActionControlBranchSelector(string label, string description, Repository repo, bool isLocal, bool useFriendlyName, object target)
+        {
+            Label = label;
+            Description = description;
+            _useFriendlyName = useFriendlyName;
+
+            foreach (var b in repo.Branches)
+            {
+                if (b.IsLocal == isLocal && !b.IsDetachedHead)
+                    Branches.Add(b);
+            }
+
+            if (Branches.Count == 0)
+                return;
+
+            if (target is Models.Branch branch)
+            {
+                if (isLocal)
+                {
+                    var prefer = Branches.Find(b => b.FullName.Equals(branch.FullName, StringComparison.Ordinal));
+                    if (prefer != null)
+                    {
+                        SelectedBranch = prefer;
+                        return;
+                    }
+                }
+                else if (!string.IsNullOrEmpty(branch.Upstream))
+                {
+                    var upstream = Branches.Find(b => b.FullName.Equals(branch.Upstream, StringComparison.Ordinal));
+                    if (upstream != null)
+                    {
+                        SelectedBranch = upstream;
+                        return;
+                    }
+                }
+            }
+
+            SelectedBranch = Branches[0];
+        }
+
+        public string GetValue()
+        {
+            if (SelectedBranch == null)
+                return string.Empty;
+
+            return _useFriendlyName ? SelectedBranch.FriendlyName : SelectedBranch.Name;
+        }
+
+        private bool _useFriendlyName = false;
+    }
+
+    public class ExecuteCustomAction : Popup
+    {
+        public Models.CustomAction CustomAction
+        {
+            get;
+        }
+
+        public object Target
+        {
+            get;
+        }
+
+        public List<ICustomActionControlParameter> ControlParameters
+        {
+            get;
+        } = [];
+
+        public ExecuteCustomAction(Repository repo, Models.CustomAction action, object scopeTarget)
+        {
+            _repo = repo;
+            CustomAction = action;
+            Target = scopeTarget ?? new Models.Null();
+
+            foreach (var ctl in CustomAction.Controls)
+            {
+                switch (ctl.Type)
+                {
+                    case Models.CustomActionControlType.TextBox:
+                        ControlParameters.Add(new CustomActionControlTextBox(ctl.Label, ctl.Description, PrepareStringByTarget(ctl.StringValue), ctl.StringFormatter));
+                        break;
+                    case Models.CustomActionControlType.PathSelector:
+                        ControlParameters.Add(new CustomActionControlPathSelector(ctl.Label, ctl.Description, ctl.BoolValue, PrepareStringByTarget(ctl.StringValue)));
+                        break;
+                    case Models.CustomActionControlType.CheckBox:
+                        ControlParameters.Add(new CustomActionControlCheckBox(ctl.Label, ctl.Description, ctl.StringValue, ctl.BoolValue));
+                        break;
+                    case Models.CustomActionControlType.ComboBox:
+                        ControlParameters.Add(new CustomActionControlComboBox(ctl.Label, ctl.Description, PrepareStringByTarget(ctl.StringValue)));
+                        break;
+                    case Models.CustomActionControlType.LocalBranchSelector:
+                        ControlParameters.Add(new CustomActionControlBranchSelector(ctl.Label, ctl.Description, _repo, true, false, scopeTarget ?? _repo.CurrentBranch));
+                        break;
+                    case Models.CustomActionControlType.RemoteBranchSelector:
+                        ControlParameters.Add(new CustomActionControlBranchSelector(ctl.Label, ctl.Description, _repo, false, ctl.BoolValue, scopeTarget ?? _repo.CurrentBranch));
+                        break;
+                }
+            }
+        }
+
+        public override async Task<bool> Sure()
+        {
+            using var lockWatcher = _repo.LockWatcher();
+            ProgressDescription = "Run custom action ...";
+
+            var cmdline = PrepareStringByTarget(CustomAction.Arguments);
+            for (var i = ControlParameters.Count - 1; i >= 0; i--)
+            {
+                var param = ControlParameters[i];
+                cmdline = cmdline.Replace($"${i + 1}", param.GetValue());
+            }
+
+            var log = _repo.CreateLog(CustomAction.Name);
+            Use(log);
+
+            log.AppendLine($"$ {CustomAction.Executable} {cmdline}\n");
+
+            if (CustomAction.WaitForExit)
+                await RunAsync(cmdline, log);
+            else
+                _ = Task.Run(() => Run(cmdline));
+
+            log.Complete();
+            return true;
+        }
+
+        private string PrepareStringByTarget(string org)
+        {
+            var repoPath = OperatingSystem.IsWindows() ? _repo.FullPath.Replace("/", "\\") : _repo.FullPath;
+            org = org.Replace("${REPO}", repoPath);
+
+            if (Target is Models.Branch { IsDetachedHead: false } targetBranch)
+                org = org.Replace("${BRANCH}", targetBranch.Name).Replace("${BRANCH_FRIENDLY_NAME}", targetBranch.FriendlyName).Replace("${REMOTE}", targetBranch.Remote);
+            else if (_repo.CurrentBranch is { IsDetachedHead: false } currentBranch)
+                org = org.Replace("${BRANCH}", currentBranch.Name).Replace("${BRANCH_FRIENDLY_NAME}", currentBranch.FriendlyName);
+            else
+                org = org.Replace("${BRANCH}", "HEAD").Replace("${BRANCH_FRIENDLY_NAME}", "HEAD");
+
+            return Target switch
+            {
+                Models.Branch b => org.Replace("${SHA}", b.Head),
+                Models.Commit c => org.Replace("${SHA}", c.SHA),
+                Models.Tag t => org.Replace("${SHA}", t.SHA).Replace("${TAG}", t.Name),
+                Models.Remote r => org.Replace("${REMOTE}", r.Name),
+                Models.CustomActionTargetFile f => org.Replace("${SHA}", f.Revision?.SHA ?? "HEAD").Replace("${FILE}", f.File),
+                _ => org
+            };
+        }
+
+        private void Run(string args)
+        {
+            var start = new ProcessStartInfo();
+            start.FileName = CustomAction.Executable;
+            start.Arguments = args;
+            start.UseShellExecute = false;
+            start.CreateNoWindow = true;
+            start.WorkingDirectory = _repo.FullPath;
+
+            try
+            {
+                Process.Start(start);
+            }
+            catch (Exception e)
+            {
+                _repo.SendNotification(e.Message, true);
+            }
+        }
+
+        private async Task RunAsync(string args, Models.ICommandLog log)
+        {
+            var start = new ProcessStartInfo();
+            start.FileName = CustomAction.Executable;
+            start.Arguments = args;
+            start.UseShellExecute = false;
+            start.CreateNoWindow = true;
+            start.RedirectStandardOutput = true;
+            start.RedirectStandardError = true;
+            start.StandardOutputEncoding = Encoding.UTF8;
+            start.StandardErrorEncoding = Encoding.UTF8;
+            start.WorkingDirectory = _repo.FullPath;
+
+            using var proc = new Process();
+            proc.StartInfo = start;
+
+            proc.OutputDataReceived += (_, e) =>
+            {
+                if (e.Data != null)
+                    log?.AppendLine(e.Data);
+            };
+
+            var builder = new StringBuilder();
+            proc.ErrorDataReceived += (_, e) =>
+            {
+                if (e.Data != null)
+                {
+                    log?.AppendLine(e.Data);
+                    builder.AppendLine(e.Data);
+                }
+            };
+
+            try
+            {
+                proc.Start();
+                proc.BeginOutputReadLine();
+                proc.BeginErrorReadLine();
+                await proc.WaitForExitAsync().ConfigureAwait(false);
+
+                var exitCode = proc.ExitCode;
+                if (exitCode != 0)
+                {
+                    var errMsg = builder.ToString().Trim();
+                    if (!string.IsNullOrEmpty(errMsg))
+                        _repo.SendNotification(errMsg, true);
+                }
+            }
+            catch (Exception e)
+            {
+                _repo.SendNotification(e.Message, true);
+            }
+        }
+
+        private readonly Repository _repo = null;
+    }
+}

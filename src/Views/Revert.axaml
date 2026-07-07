@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:c="using:SourceGit.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SourceGit.Views.Revert"
+             x:DataType="vm:Revert">
+  <StackPanel Orientation="Vertical" Margin="8,0">
+    <StackPanel Orientation="Horizontal">
+      <Path Width="16" Height="16"
+            Data="{StaticResource Icons.Undo}"/>
+
+      <TextBlock FontSize="18"
+                 Margin="8,0,0,0"
+                 Classes="bold"
+                 Text="{DynamicResource Text.Revert}"/>
+    </StackPanel>
+    
+    <Grid Margin="0,16,0,0" RowDefinitions="32,32" ColumnDefinitions="130,*">
+      <TextBlock Grid.Row="0" Grid.Column="0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Margin="0,0,8,0"
+                 Text="{DynamicResource Text.Revert.Commit}"/>
+
+      <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="Auto,Auto,*">
+        <Path Grid.Column="0" Width="14" Height="14" Data="{StaticResource Icons.Commit}"/>
+        <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Target.SHA, Converter={x:Static c:StringConverters.ToShortSHA}}" Foreground="DarkOrange" Margin="8,0,0,0"/>
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Target.Subject}" Margin="4,0,0,0" TextTrimming="CharacterEllipsis"/>
+      </Grid>
+
+      <CheckBox Grid.Row="1" Grid.Column="1"
+                Content="{DynamicResource Text.Revert.CommitChanges}"
+                IsChecked="{Binding AutoCommit, Mode=TwoWay}"/>
+    </Grid>
+  </StackPanel>
+</UserControl>

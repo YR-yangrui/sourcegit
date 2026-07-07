@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:m="using:SourceGit.Models"
+             xmlns:vm="using:SourceGit.ViewModels"
+             xmlns:v="using:SourceGit.Views"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
+             x:Class="SourceGit.Views.Pull"
+             x:DataType="vm:Pull">
+  <StackPanel Orientation="Vertical" Margin="8,0">
+    <StackPanel Orientation="Horizontal">
+      <Path Width="16" Height="16"
+            Data="{StaticResource Icons.Pull}"/>
+
+      <TextBlock FontSize="18"
+                 Margin="8,0,0,0"
+                 Classes="bold"
+                 Text="{DynamicResource Text.Pull.Title}"/>
+    </StackPanel>
+    
+    <Grid Margin="0,16,0,0" RowDefinitions="32,32,32,Auto,32" ColumnDefinitions="140,*">
+      <TextBlock Grid.Row="0" Grid.Column="0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Margin="0,0,8,0"
+                 Text="{DynamicResource Text.Pull.Remote}"/>
+      <ComboBox Grid.Row="0" Grid.Column="1"
+                Height="28" Padding="8,0"
+                VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                ItemsSource="{Binding Remotes}"
+                SelectedItem="{Binding SelectedRemote, Mode=TwoWay}"
+                IsEnabled="{Binding !HasSpecifiedRemoteBranch}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="{x:Type m:Remote}">
+            <StackPanel Orientation="Horizontal" Height="20" VerticalAlignment="Center">
+              <Path Margin="0,2,8,0" Width="14" Height="14" Fill="{DynamicResource Brush.FG1}" Data="{StaticResource Icons.Remote}"/>
+              <TextBlock Text="{Binding Name}"/>
+            </StackPanel>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <TextBlock Grid.Row="1" Grid.Column="0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Margin="0,0,8,0"
+                 Text="{DynamicResource Text.Pull.Branch}"/>
+      <v:BranchSelector Grid.Row="1" Grid.Column="1"
+                        Height="28"
+                        VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                        Branches="{Binding RemoteBranches, Mode=OneWay}"
+                        SelectedBranch="{Binding SelectedBranch, Mode=TwoWay}"
+                        UsePureName="True"
+                        IsEnabled="{Binding !HasSpecifiedRemoteBranch}"/>
+
+      <TextBlock Grid.Row="2" Grid.Column="0"
+                 HorizontalAlignment="Right" VerticalAlignment="Center"
+                 Margin="0,0,8,0"
+                 Text="{DynamicResource Text.Pull.Into}"/>
+      <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Height="20" VerticalAlignment="Center">
+        <Path Margin="2,0,8,0" Width="14" Height="14" Fill="{DynamicResource Brush.FG1}" Data="{StaticResource Icons.Branch}"/>
+        <TextBlock Text="{Binding Current.Name}"/>
+      </StackPanel>
+
+      <Border Grid.Row="3" Grid.Column="0"
+              Height="32"
+              VerticalAlignment="Top"
+              IsVisible="{Binding HasLocalChanges, Mode=OneWay}">
+        <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center"
+                   Margin="0,0,8,0"
+                   Text="{DynamicResource Text.Pull.LocalChanges}"/>
+      </Border>
+      <v:DealWithLocalChangesMethod Grid.Row="3" Grid.Column="1"
+                                    Method="{Binding DealWithLocalChanges, Mode=TwoWay}"
+                                    IsVisible="{Binding HasLocalChanges, Mode=OneWay}"/>
+
+      <CheckBox Grid.Row="4" Grid.Column="1"
+                Content="{DynamicResource Text.Pull.UseRebase}"
+                IsChecked="{Binding UseRebase, Mode=TwoWay}"
+                ToolTip.Tip="--rebase"/>
+    </Grid>
+  </StackPanel>
+</UserControl>

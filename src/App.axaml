@@ -1,0 +1,56 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="using:SourceGit"
+             x:Class="SourceGit.App"
+             Name="SourceGit"
+             RequestedThemeVariant="Dark">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/Resources/Icons.axaml"/>
+        <ResourceInclude Source="/Resources/Themes.axaml"/>
+      </ResourceDictionary.MergedDictionaries>
+
+      <ResourceInclude x:Key="de_DE" Source="/Resources/Locales/de_DE.axaml"/>
+      <ResourceInclude x:Key="el_GR" Source="/Resources/Locales/el_GR.axaml"/>
+      <ResourceInclude x:Key="en_US" Source="/Resources/Locales/en_US.axaml"/>
+      <ResourceInclude x:Key="fr_FR" Source="/Resources/Locales/fr_FR.axaml"/>
+      <ResourceInclude x:Key="he_IL" Source="/Resources/Locales/he_IL.axaml"/>
+      <ResourceInclude x:Key="id_ID" Source="/Resources/Locales/id_ID.axaml"/>
+      <ResourceInclude x:Key="it_IT" Source="/Resources/Locales/it_IT.axaml"/>
+      <ResourceInclude x:Key="pt_BR" Source="/Resources/Locales/pt_BR.axaml"/>
+      <ResourceInclude x:Key="uk_UA" Source="/Resources/Locales/uk_UA.axaml"/>
+      <ResourceInclude x:Key="ru_RU" Source="/Resources/Locales/ru_RU.axaml"/>
+      <ResourceInclude x:Key="zh_CN" Source="/Resources/Locales/zh_CN.axaml"/>
+      <ResourceInclude x:Key="zh_TW" Source="/Resources/Locales/zh_TW.axaml"/>
+      <ResourceInclude x:Key="es_ES" Source="/Resources/Locales/es_ES.axaml"/>
+      <ResourceInclude x:Key="ja_JP" Source="/Resources/Locales/ja_JP.axaml"/>
+      <ResourceInclude x:Key="ta_IN" Source="/Resources/Locales/ta_IN.axaml"/>
+      <ResourceInclude x:Key="ko_KR" Source="/Resources/Locales/ko_KR.axaml"/>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+    <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+    <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+    <StyleInclude Source="/Resources/Styles.axaml"/>
+  </Application.Styles>
+
+  <NativeMenu.Menu>
+    <NativeMenu>
+      <NativeMenuItem Header="{DynamicResource Text.About.Menu}" Command="{x:Static s:App.OpenAboutCommand}"/>
+      <NativeMenuItem Header="{DynamicResource Text.Hotkeys}" Command="{x:Static s:App.OpenHotkeysCommand}" Gesture="F1"/>
+      <NativeMenuItem Header="{DynamicResource Text.SelfUpdate}" Command="{x:Static s:App.CheckForUpdateCommand}" IsVisible="{x:Static s:App.IsCheckForUpdateCommandVisible}"/>
+      <NativeMenuItemSeparator/>
+      <NativeMenuItem Header="{DynamicResource Text.Preferences}" Command="{x:Static s:App.OpenPreferencesCommand}" Gesture="⌘+,"/>
+      <NativeMenuItem Header="{DynamicResource Text.OpenAppDataDir}" Command="{x:Static s:App.OpenAppDataDirCommand}"/>
+      <NativeMenuItemSeparator/>
+      <NativeMenuItem Header="{DynamicResource Text.App.Hide}" Command="{x:Static s:App.HideAppCommand}" Gesture="⌘+H"/>
+      <NativeMenuItem Header="{DynamicResource Text.App.HideOthers}" Command="{x:Static s:App.HideOtherApplicationsCommand}" Gesture="⌘+Alt+H"/>
+      <NativeMenuItem Header="{DynamicResource Text.App.ShowAll}" Command="{x:Static s:App.ShowAllApplicationsCommand}"/>
+      <NativeMenuItemSeparator/>
+      <NativeMenuItem Header="{DynamicResource Text.Quit}" Command="{x:Static s:App.QuitCommand}" Gesture="⌘+Q"/>
+    </NativeMenu>
+  </NativeMenu.Menu>
+</Application>

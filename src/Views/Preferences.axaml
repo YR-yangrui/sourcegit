@@ -1,0 +1,1144 @@
+<v:ChromelessWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:s="using:SourceGit"
+                    xmlns:ai="using:SourceGit.AI"
+                    xmlns:m="using:SourceGit.Models"
+                    xmlns:c="using:SourceGit.Converters"
+                    xmlns:vm="using:SourceGit.ViewModels"
+                    xmlns:v="using:SourceGit.Views"
+                    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                    x:Class="SourceGit.Views.Preferences"
+                    x:DataType="vm:Preferences"
+                    x:Name="ThisControl"
+                    Icon="/App.ico"
+                    Title="{DynamicResource Text.Preferences}"
+                    SizeToContent="WidthAndHeight"
+                    CanResize="False"
+                    WindowStartupLocation="CenterScreen">
+  <Grid RowDefinitions="Auto,Auto" MinWidth="600">
+    <!-- TitleBar -->
+    <Grid Grid.Row="0" Height="28" IsVisible="{Binding !#ThisControl.UseSystemWindowFrame}">
+      <Border Background="{DynamicResource Brush.TitleBar}"
+              BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border0}"
+              PointerPressed="BeginMoveWindow"/>
+
+      <Path Width="14" Height="14"
+            Margin="10,0,0,0"
+            HorizontalAlignment="Left"
+            Data="{StaticResource Icons.Settings}"
+            IsVisible="{OnPlatform True, macOS=False}"/>
+
+      <TextBlock Classes="bold"
+                 Text="{DynamicResource Text.Preferences}"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 IsHitTestVisible="False"/>
+
+      <v:CaptionButtons HorizontalAlignment="Right"
+                        IsCloseButtonOnly="True"
+                        IsVisible="{OnPlatform True, macOS=False}"/>
+    </Grid>
+
+    <!-- Body -->
+    <Border Grid.Row="1">
+      <TabControl x:Name="Tabs">
+        <TabItem>
+          <TabItem.Header>
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.Preferences.General}"/>
+          </TabItem.Header>
+          <Grid Margin="8" RowDefinitions="32,32,32,32,32,32,32,32,32,32,32,32,32,32,Auto" ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.General.Locale}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <ComboBox Grid.Row="0" Grid.Column="1"
+                      MinHeight="28"
+                      Padding="8,0"
+                      HorizontalAlignment="Stretch"
+                      ItemsSource="{Binding Source={x:Static m:Locale.Supported}}"
+                      DisplayMemberBinding="{Binding Name, x:DataType=m:Locale}"
+                      SelectedItem="{Binding Locale, Mode=TwoWay, Converter={x:Static c:StringConverters.ToLocale}}"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.General.DateFormat}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto">
+              <ComboBox Grid.Column="0"
+                        MinHeight="28"
+                        Padding="8,0"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding Source={x:Static m:DateTimeFormat.Supported}}"
+                        SelectedIndex="{Binding DateTimeFormat, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="{x:Type m:DateTimeFormat}">
+                    <Grid ColumnDefinitions="*,8,*">
+                      <TextBlock Grid.Column="0" FontFamily="{DynamicResource Fonts.Monospace}" Text="{Binding Example}"/>
+                      <TextBlock Grid.Column="2" FontFamily="{DynamicResource Fonts.Monospace}" Text="{Binding DateFormat}" Foreground="{DynamicResource Brush.FG2}"/>
+                    </Grid>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+
+              <CheckBox Grid.Column="1"
+                        Height="32"
+                        Margin="8,0,0,0"
+                        Content="{DynamicResource Text.Preferences.General.Use24Hours}"
+                        IsChecked="{Binding Use24Hours, Mode=TwoWay}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="2" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Git.DefaultCloneDir}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <TextBox Grid.Row="2" Grid.Column="1"
+                     Height="28"
+                     CornerRadius="3"
+                     Text="{Binding GitDefaultCloneDir, Mode=TwoWay}">
+              <TextBox.InnerRightContent>
+                <Button Classes="icon_button" Width="30" Height="30" Click="SelectDefaultCloneDir">
+                  <Path Data="{StaticResource Icons.Folder.Open}" Fill="{DynamicResource Brush.FG1}"/>
+                </Button>
+              </TextBox.InnerRightContent>
+            </TextBox>
+
+            <TextBlock Grid.Row="3" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.General.SubjectGuideLength}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,64">
+              <Slider Grid.Column="0"
+                      Minimum="50" Maximum="200"
+                      TickPlacement="BottomRight" TickFrequency="10"
+                      IsSnapToTickEnabled="False"
+                      VerticalAlignment="Center"
+                      Foreground="{DynamicResource Brush.Border1}"
+                      Value="{Binding SubjectGuideLength, Mode=TwoWay}"/>
+
+              <TextBlock Grid.Column="1"
+                         HorizontalAlignment="Right" VerticalAlignment="Center"
+                         Foreground="{DynamicResource Brush.FG1}"
+                         Text="{Binding SubjectGuideLength, Mode=OneWay}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="4" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.General.MaxHistoryCommits}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <Grid Grid.Row="4" Grid.Column="1" ColumnDefinitions="*,64">
+              <Slider Grid.Column="0"
+                      Minimum="5000" Maximum="100000"
+                      TickPlacement="BottomRight" TickFrequency="5000"
+                      IsSnapToTickEnabled="True"
+                      VerticalAlignment="Center"
+                      Foreground="{DynamicResource Brush.Border1}"
+                      Value="{Binding MaxHistoryCommits, Mode=TwoWay}"/>
+
+              <TextBlock Grid.Column="1"
+                         HorizontalAlignment="Right" VerticalAlignment="Center"
+                         Foreground="{DynamicResource Brush.FG1}"
+                         Text="{Binding MaxHistoryCommits}"/>
+            </Grid>
+
+            <CheckBox Grid.Row="5" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.ShowChangesPageByDefault}"
+                      IsChecked="{Binding ShowLocalChangesByDefault, Mode=TwoWay}"/>
+            
+            <CheckBox Grid.Row="6" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.ShowChangesTabInCommitDetailByDefault}"
+                      IsChecked="{Binding ShowChangesInCommitDetailByDefault, Mode=TwoWay}"/>
+
+            <CheckBox Grid.Row="7" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.ShowTagsInGraph}"
+                      IsChecked="{Binding ShowTagsInGraph, Mode=TwoWay}"/>
+
+            <CheckBox Grid.Row="8" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.ShowRelativeTimeInGraph}"
+                      IsChecked="{Binding DisplayTimeAsPeriodInHistories, Mode=TwoWay}"/>
+
+            <CheckBox Grid.Row="9" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.ShowChildren}"
+                      IsChecked="{Binding ShowChildren, Mode=TwoWay}"/>
+
+            <CheckBox Grid.Row="10" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.UseCompactBranchNames}"
+                      IsChecked="{Binding UseCompactBranchNamesInGraph, Mode=TwoWay}"/>
+
+            <CheckBox Grid.Row="11" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.EnableCompactFolders}"
+                      IsChecked="{Binding EnableCompactFoldersInChangesTree, Mode=TwoWay}"/>
+
+            <CheckBox Grid.Row="12" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.UseGitHubStyleAvatar}"
+                      IsChecked="{Binding UseGitHubStyleAvatar, Mode=TwoWay}"/>
+
+            <Grid Grid.Row="13" Grid.Column="1"
+                  ColumnDefinitions="Auto,8,128"
+                  IsVisible="{x:Static s:App.IsCheckForUpdateCommandVisible}">
+              <CheckBox Grid.Column="0"
+                        Height="32"
+                        Content="{DynamicResource Text.Preferences.General.Check4UpdatesOnStartup}"
+                        IsChecked="{Binding Check4UpdatesOnStartup, Mode=TwoWay}"/>
+
+              <ComboBox Grid.Column="2"
+                        MinHeight="28"
+                        Padding="8,0"
+                        HorizontalAlignment="Stretch"
+                        SelectedIndex="{Binding UpdateChannel, Mode=TwoWay}">
+                <ComboBoxItem Content="{DynamicResource Text.UpdateChannel.Stable}"/>
+                <ComboBoxItem Content="{DynamicResource Text.UpdateChannel.Nightly}"/>
+              </ComboBox>
+            </Grid>
+
+            <CheckBox Grid.Row="14" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.General.ExportPerfettoTraceOnExit}"
+                      IsChecked="{Binding ExportPerfettoTraceOnExit, Mode=TwoWay}"/>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <TabItem.Header>
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.Preferences.Appearance}"/>
+          </TabItem.Header>
+          <Grid Margin="8" RowDefinitions="32,32,32,32,32,32,32,32,32,Auto" ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Appearance.Theme}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <ComboBox Grid.Row="0" Grid.Column="1"
+                      MinHeight="28"
+                      Padding="8,0"
+                      HorizontalAlignment="Stretch"
+                      DisplayMemberBinding="{Binding Key, x:DataType=ThemeVariant}"
+                      SelectedItem="{Binding Theme, Mode=TwoWay, Converter={x:Static c:StringConverters.ToTheme}}">
+              <ComboBox.Items>
+                <ThemeVariant>Default</ThemeVariant>
+                <ThemeVariant>Dark</ThemeVariant>
+                <ThemeVariant>Light</ThemeVariant>
+              </ComboBox.Items>
+            </ComboBox>
+
+            <TextBlock Grid.Row="1" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Appearance.DefaultFont}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <ComboBox Grid.Row="1" Grid.Column="1"
+                      MinHeight="28"
+                      Padding="8,0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      MaxDropDownHeight="360"
+                      ItemsSource="{Binding InstalledFontFamilies}"
+                      SelectedItem="{Binding DefaultFontFamily, Mode=TwoWay}"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Appearance.MonospaceFont}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <ComboBox Grid.Row="2" Grid.Column="1"
+                      MinHeight="28"
+                      Padding="8,0"
+                      HorizontalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"
+                      MaxDropDownHeight="360"
+                      ItemsSource="{Binding InstalledFontFamilies}"
+                      SelectedItem="{Binding MonospaceFontFamily, Mode=TwoWay}"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Appearance.FontSize}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,8,*">
+              <NumericUpDown Grid.Column="0"
+                             Minimum="10" Maximum="18" Increment="0.5"
+                             Height="28"
+                             Padding="4"
+                             BorderThickness="1" BorderBrush="{DynamicResource Brush.Border1}"
+                             CornerRadius="3"
+                             Value="{Binding DefaultFontSize, Mode=TwoWay}">
+                <NumericUpDown.InnerLeftContent>
+                  <Border BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Brush.Border1}">
+                    <TextBlock Margin="4,0" Text="{DynamicResource Text.Preferences.Appearance.FontSize.Default}"/>
+                  </Border>
+                </NumericUpDown.InnerLeftContent>
+              </NumericUpDown>
+              <NumericUpDown Grid.Column="2"
+                             Minimum="10" Maximum="18" Increment="0.5"
+                             Height="28"
+                             Padding="4"
+                             BorderThickness="1" BorderBrush="{DynamicResource Brush.Border1}"
+                             CornerRadius="3"
+                             Value="{Binding EditorFontSize, Mode=TwoWay}">
+                <NumericUpDown.InnerLeftContent>
+                  <Border BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Brush.Border1}">
+                    <TextBlock Margin="4,0" Text="{DynamicResource Text.Preferences.Appearance.FontSize.Editor}"/>
+                  </Border>
+                </NumericUpDown.InnerLeftContent>
+              </NumericUpDown>
+            </Grid>
+
+            <TextBlock Grid.Row="4" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Appearance.EditorTabWidth}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <Grid Grid.Row="4" Grid.Column="1">
+              <NumericUpDown Minimum="1" Maximum="16" Increment="1"
+                             Height="28"
+                             Padding="4"
+                             BorderThickness="1" BorderBrush="{DynamicResource Brush.Border1}"
+                             CornerRadius="3"
+                             Value="{Binding EditorTabWidth, Mode=TwoWay}"/>
+            </Grid>
+
+            <TextBlock Grid.Row="5" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Appearance.ThemeOverrides}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <TextBox Grid.Row="5" Grid.Column="1"
+                     Height="28"
+                     CornerRadius="3"
+                     Text="{Binding ThemeOverrides, Mode=TwoWay}">
+              <TextBox.InnerRightContent>
+                <StackPanel Orientation="Horizontal">
+                  <Button Classes="icon_button" Width="28" Height="28" Click="SelectThemeOverrideFile">
+                    <Path Width="16" Height="16" Data="{StaticResource Icons.Folder.Open}" Margin="0,2,0,0" Fill="{DynamicResource Brush.FG1}"/>
+                  </Button>
+                  
+                  <Button Classes="icon_button" Width="28" Height="28" Click="OpenThemeRepository">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Remotes}" Fill="{DynamicResource Brush.FG1}"/>
+                  </Button>
+                </StackPanel>
+              </TextBox.InnerRightContent>
+            </TextBox>
+
+            <CheckBox Grid.Row="6" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.Appearance.UseFixedTabWidth}"
+                      IsChecked="{Binding UseFixedTabWidth, Mode=TwoWay}"/>
+
+            <CheckBox Grid.Row="7" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.Appearance.UseAutoHideScrollBars}"
+                      IsChecked="{Binding UseAutoHideScrollBars, Mode=TwoWay}"/>
+
+            <Grid Grid.Row="8" Grid.Column="1" ColumnDefinitions="Auto,8,Auto">
+              <CheckBox Grid.Column="0"
+                        Height="32"
+                        Content="{DynamicResource Text.Preferences.Appearance.MyAuthorNameBorder}"
+                        IsChecked="{Binding EnableMyAuthorNameBorder, Mode=TwoWay}"/>
+
+              <Button Grid.Column="2"
+                      Classes="icon_button"
+                      Width="28" Height="28"
+                      IsEnabled="{Binding EnableMyAuthorNameBorder}">
+                <Button.Flyout>
+                  <Flyout Placement="BottomEdgeAlignedLeft">
+                    <v:ColorPicker Value="{Binding MyAuthorNameBorderColor, Mode=TwoWay}"/>
+                  </Flyout>
+                </Button.Flyout>
+
+                <Border Width="16" Height="16"
+                        CornerRadius="3"
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource Brush.Border1}"
+                        Background="{Binding MyAuthorNameBorderBrush}"/>
+              </Button>
+            </Grid>
+
+            <CheckBox Grid.Row="9" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.Appearance.UseNativeWindowFrame}"
+                      IsChecked="{Binding UseSystemWindowFrame, Mode=OneTime}"
+                      IsVisible="{OnPlatform False, Linux=True}"
+                      IsCheckedChanged="OnUseNativeWindowFrameChanged"/>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <TabItem.Header>
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.Preferences.Git}"/>
+          </TabItem.Header>
+
+          <Grid Margin="8" RowDefinitions="32,32,32,32,32,32,32,32,Auto,32,32" ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Git.Path}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <TextBox Grid.Row="0" Grid.Column="1"
+                     Height="28"
+                     CornerRadius="3"
+                     Text="{Binding GitInstallPath, Mode=TwoWay}"
+                     TextChanged="OnGitInstallPathChanged">
+              <TextBox.InnerRightContent>
+                <Button Classes="icon_button" Width="30" Height="30" Click="SelectGitExecutable">
+                  <Path Data="{StaticResource Icons.Folder.Open}" Fill="{DynamicResource Brush.FG1}"/>
+                </Button>
+              </TextBox.InnerRightContent>
+            </TextBox>
+
+            <TextBlock Grid.Row="1" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Git.Version}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+              <TextBlock Margin="0,0,8,0"
+                         Text="{Binding #ThisControl.GitVersion}"
+                         IsVisible="{Binding #ThisControl.GitVersion, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+              <Border Background="Transparent"
+                      ToolTip.Tip="{DynamicResource Text.Preferences.Git.Invalid}"
+                      IsVisible="{Binding #ThisControl.ShowGitVersionWarning}">
+                <Path Width="14" Height="14" Data="{StaticResource Icons.Error}" Fill="Red"/>
+              </Border>
+            </StackPanel>
+
+            <TextBlock Grid.Row="2" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Git.User}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <TextBox Grid.Row="2" Grid.Column="1"
+                     Height="28"
+                     CornerRadius="3"
+                     Text="{Binding #ThisControl.DefaultUser, Mode=TwoWay}"
+                     PlaceholderText="{DynamicResource Text.Preferences.Git.User.Placeholder}"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Git.Email}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <TextBox Grid.Row="3" Grid.Column="1"
+                     Height="28"
+                     CornerRadius="3"
+                     Text="{Binding #ThisControl.DefaultEmail, Mode=TwoWay}"
+                     PlaceholderText="{DynamicResource Text.Preferences.Git.Email.Placeholder}"/>
+
+            <TextBlock Grid.Row="4" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.Git.CRLF}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <ComboBox Grid.Row="4" Grid.Column="1"
+                      MinHeight="28"
+                      Padding="8,0"
+                      HorizontalAlignment="Stretch"
+                      ItemsSource="{Binding Source={x:Static m:CRLFMode.Supported}}"
+                      SelectedItem="{Binding #ThisControl.CRLFMode, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type m:CRLFMode}">
+                  <Grid ColumnDefinitions="64,*">
+                    <TextBlock Grid.Column="0" Text="{Binding Name}"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Desc}" Foreground="{DynamicResource Brush.FG2}" HorizontalAlignment="Right"/>
+                  </Grid>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <CheckBox Grid.Row="5" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.Git.EnablePruneOnFetch}"
+                      IsChecked="{Binding #ThisControl.EnablePruneOnFetch, Mode=TwoWay}"
+                      ToolTip.Tip="fetch.prune=true"/>
+
+            <CheckBox Grid.Row="6" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.Git.IgnoreCRAtEOLInDiff}"
+                      IsChecked="{Binding IgnoreCRAtEOLInDiff, Mode=TwoWay}"
+                      ToolTip.Tip="--ignore-cr-at-eol"/>
+
+            <CheckBox Grid.Row="7" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.Git.SSLVerify}"
+                      IsChecked="{Binding #ThisControl.EnableHTTPSSLVerify, Mode=TwoWay}"
+                      ToolTip.Tip="http.sslverify=true"/>
+
+            <CheckBox Grid.Row="8" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.Git.UseLibsecret}"
+                      IsChecked="{Binding UseLibsecretInsteadOfGCM, Mode=TwoWay}"
+                      IsVisible="{OnPlatform False, Linux=True}"/>
+
+            <CheckBox Grid.Row="9" Grid.Column="1"
+                      Height="32"
+                      Content="{DynamicResource Text.Preferences.Git.UseStashAndReapplyByDefault}"
+                      IsChecked="{Binding UseStashAndReapplyByDefault, Mode=TwoWay}"/>
+
+            <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
+              <CheckBox x:Name="AutoFetchCheckBox"
+                        Content="{DynamicResource Text.Configure.Git.AutoFetch}"
+                        IsChecked="{Binding EnableAutoFetch, Mode=TwoWay}"/>
+
+              <NumericUpDown Minimum="1" Maximum="60" Increment="1"
+                             Height="26" Width="110"
+                             Margin="8,0,0,0" Padding="4"
+                             BorderThickness="1" BorderBrush="{DynamicResource Brush.Border1}"
+                             CornerRadius="3"
+                             ParsingNumberStyle="Integer"
+                             FormatString="0"
+                             Value="{Binding AutoFetchInterval, Mode=TwoWay, FallbackValue=10}"
+                             IsEnabled="{Binding #AutoFetchCheckBox.IsChecked}"/>
+
+              <TextBlock VerticalAlignment="Center"
+                         Margin="5,0,0,0"
+                         Text="{DynamicResource Text.Configure.Git.AutoFetchIntervalSuffix}" />
+            </StackPanel>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <TabItem.Header>
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.Preferences.GPG}"/>
+          </TabItem.Header>
+
+          <Grid Margin="8" RowDefinitions="32,Auto,32,32,32" ColumnDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.GPG.Format}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <ComboBox Grid.Row="0" Grid.Column="1"
+                      MinHeight="28"
+                      Padding="8,0"
+                      HorizontalAlignment="Stretch"
+                      ItemsSource="{Binding Source={x:Static m:GPGFormat.Supported}}"
+                      SelectedItem="{Binding #ThisControl.GPGFormat, Mode=TwoWay}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type m:GPGFormat}">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <TextBlock Grid.Column="0" Text="{Binding Name}"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Desc}" Foreground="{DynamicResource Brush.FG2}" HorizontalAlignment="Right"/>
+                  </Grid>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <TextBlock Grid.Row="1" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.GPG.Path}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"
+                       IsVisible="{Binding #ThisControl.GPGFormat.NeedFindProgram}"/>
+            <TextBox Grid.Row="1" Grid.Column="1"
+                     Height="28"
+                     CornerRadius="3"
+                     Text="{Binding #ThisControl.GPGExecutableFile, Mode=TwoWay}"
+                     PlaceholderText="{DynamicResource Text.Preferences.GPG.Path.Placeholder}"
+                     IsVisible="{Binding #ThisControl.GPGFormat.NeedFindProgram}">
+              <TextBox.InnerRightContent>
+                <Button Classes="icon_button" Width="30" Height="30" Click="SelectGPGExecutable">
+                  <Path Data="{StaticResource Icons.Folder.Open}" Fill="{DynamicResource Brush.FG1}"/>
+                </Button>
+              </TextBox.InnerRightContent>
+            </TextBox>
+
+            <TextBlock Grid.Row="2" Grid.Column="0"
+                       Text="{DynamicResource Text.Preferences.GPG.UserKey}"
+                       HorizontalAlignment="Right"
+                       Margin="0,0,16,0"/>
+            <TextBox Grid.Row="2" Grid.Column="1"
+                     Height="28"
+                     CornerRadius="3"
+                     Text="{Binding #ThisControl.GPGUserKey, Mode=TwoWay}"
+                     PlaceholderText="{DynamicResource Text.Preferences.GPG.UserKey.Placeholder}"/>
+
+            <CheckBox Grid.Row="3" Grid.Column="1"
+                      Content="{DynamicResource Text.Preferences.GPG.CommitEnabled}"
+                      IsChecked="{Binding #ThisControl.EnableGPGCommitSigning, Mode=TwoWay}"
+                      ToolTip.Tip="commit.gpgsign=true"/>
+
+            <CheckBox Grid.Row="4" Grid.Column="1"
+                      Content="{DynamicResource Text.Preferences.GPG.TagEnabled}"
+                      IsChecked="{Binding #ThisControl.EnableGPGTagSigning, Mode=TwoWay}"
+                      ToolTip.Tip="tag.gpgsign=true"/>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <TabItem.Header>
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.Preferences.Integration}"/>
+          </TabItem.Header>
+
+          <StackPanel Margin="8" Orientation="Vertical" Grid.IsSharedSizeScope="True">
+            <StackPanel Orientation="Horizontal">
+              <Path Width="12" Height="12" Data="{StaticResource Icons.Terminal}"/>
+              <TextBlock Classes="bold" Margin="4,0,0,0" Text="{DynamicResource Text.Preferences.Shell}"/>
+            </StackPanel>
+            <Rectangle Margin="0,8" Fill="{DynamicResource Brush.Border2}" Height=".6" HorizontalAlignment="Stretch"/>
+            <Grid Margin="8,0,0,0" RowDefinitions="32,Auto,Auto">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="IntegrationLabel"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+
+              <TextBlock Grid.Row="0" Grid.Column="0"
+                         Text="{DynamicResource Text.Preferences.Shell.Type}"
+                         HorizontalAlignment="Right" VerticalAlignment="Center"
+                         Margin="0,0,16,0"/>
+              <ComboBox Grid.Row="0" Grid.Column="1"
+                        MinHeight="28"
+                        Padding="8,0"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding Source={x:Static m:ShellOrTerminal.Supported}}"
+                        SelectedIndex="{Binding ShellOrTerminalType, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="{x:Type m:ShellOrTerminal}">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <Image Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                      <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="6,0,0,0"/>
+                    </Grid>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+
+              <Border Grid.Row="1" Grid.Column="0"
+                      Height="32"
+                      Margin="0,0,16,0"
+                      IsVisible="{OnPlatform True, macOS=False}">
+                <TextBlock Text="{DynamicResource Text.Preferences.Shell.Path}"
+                           HorizontalAlignment="Right" />
+              </Border>
+              <TextBox Grid.Row="1" Grid.Column="1"
+                       Height="28"
+                       CornerRadius="3"
+                       Text="{Binding ShellOrTerminalPath, Mode=TwoWay}"
+                       IsVisible="{OnPlatform True, macOS=False}">
+                <TextBox.InnerRightContent>
+                  <Button Classes="icon_button" Width="30" Height="30" Click="SelectShellOrTerminal">
+                    <Path Data="{StaticResource Icons.Folder.Open}" Fill="{DynamicResource Brush.FG1}"/>
+                  </Button>
+                </TextBox.InnerRightContent>
+              </TextBox>
+
+              <Border Grid.Row="2" Grid.Column="0"
+                      Height="32"
+                      Margin="0,0,16,0"
+                      IsVisible="{OnPlatform True, macOS=False}">
+                <TextBlock Text="{DynamicResource Text.Preferences.Shell.Args}"
+                           HorizontalAlignment="Right" />
+              </Border>
+              <TextBox Grid.Row="2" Grid.Column="1"
+                       Height="28"
+                       CornerRadius="3"
+                       Text="{Binding ShellOrTerminalArgs, Mode=TwoWay}"
+                       IsVisible="{OnPlatform True, macOS=False}">
+                <TextBox.InnerRightContent>
+                  <Border Width="28" Height="28" Background="Transparent" ToolTip.Tip="{DynamicResource Text.Preferences.Shell.Args.Tip}">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="{DynamicResource Brush.FG1}" Opacity="0.8"/>
+                  </Border>
+                </TextBox.InnerRightContent>
+              </TextBox>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+              <Path Width="12" Height="12" Data="{StaticResource Icons.Diff}"/>
+              <TextBlock Classes="bold" Margin="4,0,0,0" Text="{DynamicResource Text.Preferences.DiffMerge}"/>
+            </StackPanel>
+            <Rectangle Margin="0,8" Fill="{DynamicResource Brush.Border2}" Height=".6" HorizontalAlignment="Stretch"/>
+            <Grid Margin="8,0,0,8" RowDefinitions="32,Auto,Auto,Auto,32">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="IntegrationLabel"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+
+              <TextBlock Grid.Row="0" Grid.Column="0"
+                         Text="{DynamicResource Text.Preferences.DiffMerge.Type}"
+                         HorizontalAlignment="Right"
+                         Margin="0,0,16,0"/>
+              <ComboBox Grid.Row="0" Grid.Column="1"
+                        MinHeight="28"
+                        Padding="8,0"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        RenderOptions.BitmapInterpolationMode="HighQuality"
+                        FontSize="{Binding DefaultFontSize}"
+                        ItemsSource="{Binding Source={x:Static m:ExternalMerger.Supported}}"
+                        SelectedIndex="{Binding ExternalMergeToolType, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="{x:Type m:ExternalMerger}">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <Image Grid.Column="0" Width="16" Height="16" Source="{Binding IconImage}" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                      <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="6,0,0,0"/>
+                    </Grid>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+
+              <Border Grid.Row="1" Grid.Column="0"
+                      Height="32"
+                      Margin="0,0,16,0"
+                      IsVisible="{Binding ExternalMergeToolType, Converter={x:Static c:IntConverters.IsGreaterThanZero}}">
+                <TextBlock Text="{DynamicResource Text.Preferences.DiffMerge.Path}"
+                           HorizontalAlignment="Right" />
+              </Border>
+              <TextBox Grid.Row="1" Grid.Column="1"
+                       Height="28"
+                       CornerRadius="3"
+                       Text="{Binding ExternalMergeToolPath, Mode=TwoWay}"
+                       PlaceholderText="{DynamicResource Text.Preferences.DiffMerge.Path.Placeholder}"
+                       IsVisible="{Binding ExternalMergeToolType, Converter={x:Static c:IntConverters.IsGreaterThanZero}}">
+                <TextBox.InnerRightContent>
+                  <Button Classes="icon_button" Width="30" Height="30" Click="SelectExternalMergeTool">
+                    <Path Data="{StaticResource Icons.Folder.Open}" Fill="{DynamicResource Brush.FG1}"/>
+                  </Button>
+                </TextBox.InnerRightContent>
+              </TextBox>
+
+              <Border Grid.Row="2" Grid.Column="0"
+                      Height="32"
+                      Margin="0,0,16,0"
+                      IsVisible="{Binding ExternalMergeToolType, Converter={x:Static c:IntConverters.IsGreaterThanZero}}">
+                <TextBlock Text="{DynamicResource Text.Preferences.DiffMerge.DiffArgs}"
+                           HorizontalAlignment="Right" />
+              </Border>
+              <TextBox Grid.Row="2" Grid.Column="1"
+                       Height="28"
+                       CornerRadius="3"
+                       Text="{Binding ExternalMergeToolDiffArgs, Mode=TwoWay}"
+                       IsVisible="{Binding ExternalMergeToolType, Converter={x:Static c:IntConverters.IsGreaterThanZero}}">
+                <TextBox.InnerRightContent>
+                  <Border Width="28" Height="28" Background="Transparent" ToolTip.Tip="{DynamicResource Text.Preferences.DiffMerge.DiffArgs.Tip}">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="{DynamicResource Brush.FG1}" Opacity="0.8"/>
+                  </Border>
+                </TextBox.InnerRightContent>
+              </TextBox>
+
+              <Border Grid.Row="3" Grid.Column="0"
+                      Height="32"
+                      Margin="0,0,16,0"
+                      IsVisible="{Binding ExternalMergeToolType, Converter={x:Static c:IntConverters.IsGreaterThanZero}}">
+                <TextBlock Text="{DynamicResource Text.Preferences.DiffMerge.MergeArgs}"
+                           HorizontalAlignment="Right" />
+              </Border>
+              <TextBox Grid.Row="3" Grid.Column="1"
+                       Height="28"
+                       CornerRadius="3"
+                       Text="{Binding ExternalMergeToolMergeArgs, Mode=TwoWay}"
+                       IsVisible="{Binding ExternalMergeToolType, Converter={x:Static c:IntConverters.IsGreaterThanZero}}">
+                <TextBox.InnerRightContent>
+                  <Border Width="28" Height="28" Background="Transparent" ToolTip.Tip="{DynamicResource Text.Preferences.DiffMerge.MergeArgs.Tip}">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="{DynamicResource Brush.FG1}" Opacity="0.8"/>
+                  </Border>
+                </TextBox.InnerRightContent>
+              </TextBox>
+
+              <TextBlock Grid.Row="4" Grid.Column="0"
+                         Text="{DynamicResource Text.Preferences.CustomDiff.Renderer}"
+                         HorizontalAlignment="Right"
+                         Margin="0,0,16,0"/>
+              <CheckBox Grid.Row="4" Grid.Column="1"
+                        Content="{DynamicResource Text.Preferences.CustomDiff.Enable}"
+                        IsChecked="{Binding EnableCustomDiffRenderers, Mode=TwoWay}"/>
+            </Grid>
+          </StackPanel>
+        </TabItem>
+
+        <TabItem>
+          <TabItem.Header>
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.Preferences.CustomDiff}"/>
+          </TabItem.Header>
+
+          <Grid MinHeight="360" Margin="0,8,0,16">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="200"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    BorderThickness="1" BorderBrush="{DynamicResource Brush.Border2}"
+                    Background="{DynamicResource Brush.Contents}">
+              <Grid RowDefinitions="*,1,Auto">
+                <ListBox Grid.Row="0"
+                         Background="Transparent"
+                         ItemsSource="{Binding CustomDiffRenderers}"
+                         SelectedItem="{Binding #ThisControl.SelectedCustomDiffRenderer, Mode=TwoWay}"
+                         SelectionMode="Single">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="MinHeight" Value="0"/>
+                      <Setter Property="Height" Value="26"/>
+                      <Setter Property="Padding" Value="4,2"/>
+                    </Style>
+                  </ListBox.Styles>
+
+                  <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                  </ListBox.ItemsPanel>
+
+                  <ListBox.ItemTemplate>
+                    <DataTemplate DataType="m:CustomDiffRenderer">
+                      <Grid Margin="4,0" ColumnDefinitions="Auto,*">
+                        <Path Grid.Column="0" Width="12" Height="12" Data="{StaticResource Icons.Code}" Fill="{DynamicResource Brush.FG1}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                      </Grid>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource Brush.Border2}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
+
+                <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto,Auto" Background="{DynamicResource Brush.ToolBar}">
+                  <Button Grid.Column="0"
+                          Classes="icon_button"
+                          Width="28" Height="28"
+                          Click="OnAddCustomDiffRenderer">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Plus}"/>
+                  </Button>
+                  <Button Grid.Column="1"
+                          Classes="icon_button"
+                          Width="28" Height="28"
+                          Click="OnRemoveSelectedCustomDiffRenderer">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Minus}"/>
+                  </Button>
+                  <Button Grid.Column="3"
+                          Classes="icon_button"
+                          Width="28" Height="28"
+                          Click="OnMoveSelectedCustomDiffRendererUp"
+                          IsVisible="{Binding #ThisControl.SelectedCustomDiffRenderer, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Path Width="14" Height="14" Margin="0,6,0,0" Data="{StaticResource Icons.Up}"/>
+                  </Button>
+                  <Button Grid.Column="4"
+                          Classes="icon_button"
+                          Width="28" Height="28"
+                          Click="OnMoveSelectedCustomDiffRendererDown"
+                          IsVisible="{Binding #ThisControl.SelectedCustomDiffRenderer, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Path Width="14" Height="14" Margin="0,6,0,0" Data="{StaticResource Icons.Down}"/>
+                  </Button>
+                </Grid>
+              </Grid>
+            </Border>
+
+            <ContentControl Grid.Column="1" Margin="16,0,0,0">
+              <ContentControl.Content>
+                <Binding Path="SelectedCustomDiffRenderer" ElementName="ThisControl">
+                  <Binding.TargetNullValue>
+                    <Path Width="64" Height="64"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Fill="{DynamicResource Brush.FG2}"
+                          Data="{StaticResource Icons.Empty}"/>
+                  </Binding.TargetNullValue>
+                </Binding>
+              </ContentControl.Content>
+
+              <ContentControl.DataTemplates>
+                <DataTemplate DataType="m:CustomDiffRenderer">
+                  <StackPanel Orientation="Vertical">
+                    <CheckBox Content="{DynamicResource Text.Preferences.CustomDiff.Enabled}" IsChecked="{Binding IsEnabled, Mode=TwoWay}"/>
+                    <CheckBox Margin="0,6,0,0"
+                              Content="{DynamicResource Text.Preferences.CustomDiff.ClearPrevious}"
+                              IsChecked="{Binding ClearPreviousContentOnLoad, Mode=TwoWay}"/>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Preferences.CustomDiff.Name}"/>
+                    <TextBox Margin="0,4,0,0" CornerRadius="3" Height="28" Text="{Binding Name, Mode=TwoWay}"/>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Preferences.CustomDiff.Patterns}"/>
+                    <TextBox Margin="0,4,0,0" CornerRadius="3" Height="28" Text="{Binding Patterns, Mode=TwoWay}">
+                      <TextBox.InnerRightContent>
+                        <Border Width="28" Height="28" Background="Transparent" VerticalAlignment="Center" ToolTip.Tip="{DynamicResource Text.Preferences.CustomDiff.Patterns.Tip}">
+                          <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="{DynamicResource Brush.FG1}"/>
+                        </Border>
+                      </TextBox.InnerRightContent>
+                    </TextBox>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Preferences.CustomDiff.Executable}"/>
+                    <TextBox Margin="0,4,0,0" Height="28" CornerRadius="3" Text="{Binding Executable, Mode=TwoWay}">
+                      <TextBox.InnerRightContent>
+                        <Button Classes="icon_button" Width="30" Height="30" Click="SelectExecutableForCustomDiffRenderer">
+                          <Path Data="{StaticResource Icons.Folder.Open}" Fill="{DynamicResource Brush.FG1}"/>
+                        </Button>
+                      </TextBox.InnerRightContent>
+                    </TextBox>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Preferences.CustomDiff.Arguments}"/>
+                    <TextBox Margin="0,4,0,0" Height="28" CornerRadius="3" Text="{Binding Arguments, Mode=TwoWay}">
+                      <TextBox.InnerRightContent>
+                        <Border Width="28" Height="28" Background="Transparent" VerticalAlignment="Center" ToolTip.Tip="{DynamicResource Text.Preferences.CustomDiff.Arguments.Tip}">
+                          <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="{DynamicResource Brush.FG1}"/>
+                        </Border>
+                      </TextBox.InnerRightContent>
+                    </TextBox>
+                  </StackPanel>
+                </DataTemplate>
+              </ContentControl.DataTemplates>
+            </ContentControl>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <TabItem.Header>
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.Configure.CustomAction}"/>
+          </TabItem.Header>
+
+          <Grid MinHeight="360" Margin="0,8,0,16">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="200"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    BorderThickness="1" BorderBrush="{DynamicResource Brush.Border2}"
+                    Background="{DynamicResource Brush.Contents}">
+              <Grid RowDefinitions="*,1,Auto">
+                <ListBox Grid.Row="0"
+                         Background="Transparent"
+                         ItemsSource="{Binding CustomActions}"
+                         SelectedItem="{Binding #ThisControl.SelectedCustomAction, Mode=TwoWay}"
+                         SelectionMode="Single">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="MinHeight" Value="0"/>
+                      <Setter Property="Height" Value="26"/>
+                      <Setter Property="Padding" Value="4,2"/>
+                    </Style>
+                  </ListBox.Styles>
+
+                  <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                  </ListBox.ItemsPanel>
+
+                  <ListBox.ItemTemplate>
+                    <DataTemplate DataType="m:CustomAction">
+                      <Grid Margin="4,0" ColumnDefinitions="Auto,*">
+                        <Path Grid.Column="0" Width="12" Height="12" Data="{StaticResource Icons.Action}" Fill="{DynamicResource Brush.FG1}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="6,0,0,0" TextTrimming="CharacterEllipsis"/>
+                      </Grid>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource Brush.Border2}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
+
+                <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto,Auto" Background="{DynamicResource Brush.ToolBar}">
+                  <Button Grid.Column="0"
+                          Classes="icon_button"
+                          Width="28" Height="28"
+                          Click="OnAddCustomAction">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Plus}"/>
+                  </Button>
+                  <Button Grid.Column="1"
+                          Classes="icon_button"
+                          Width="28" Height="28"
+                          Click="OnRemoveSelectedCustomAction">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Minus}"/>
+                  </Button>
+                  <Button Grid.Column="3"
+                          Classes="icon_button"
+                          Width="28" Height="28"
+                          Click="OnMoveSelectedCustomActionUp"
+                          IsVisible="{Binding #ThisControl.SelectedCustomAction, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Path Width="14" Height="14" Margin="0,6,0,0" Data="{StaticResource Icons.Up}"/>
+                  </Button>
+                  <Button Grid.Column="4"
+                          Classes="icon_button"
+                          Width="28" Height="28"
+                          Click="OnMoveSelectedCustomActionDown"
+                          IsVisible="{Binding #ThisControl.SelectedCustomAction, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Path Width="14" Height="14" Margin="0,6,0,0" Data="{StaticResource Icons.Down}"/>
+                  </Button>
+                </Grid>
+              </Grid>
+            </Border>
+
+            <ContentControl Grid.Column="1" Margin="16,0,0,0">
+              <ContentControl.Content>
+                <Binding Path="SelectedCustomAction" ElementName="ThisControl">
+                  <Binding.TargetNullValue>
+                    <Path Width="64" Height="64"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Fill="{DynamicResource Brush.FG2}"
+                          Data="{StaticResource Icons.Empty}"/>
+                  </Binding.TargetNullValue>
+                </Binding>
+              </ContentControl.Content>
+
+              <ContentControl.DataTemplates>
+                <DataTemplate DataType="m:CustomAction">
+                  <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{DynamicResource Text.Configure.CustomAction.Name}"/>
+                    <TextBox Margin="0,4,0,0" CornerRadius="3" Height="28" Text="{Binding Name, Mode=TwoWay}"/>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Configure.CustomAction.Scope}"/>
+                    <ComboBox Margin="0,4,0,0" Height="28" HorizontalAlignment="Stretch" SelectedIndex="{Binding Scope, Mode=TwoWay}">
+                      <ComboBoxItem Content="{DynamicResource Text.Configure.CustomAction.Scope.Repository}"/>
+                      <ComboBoxItem Content="{DynamicResource Text.Configure.CustomAction.Scope.Commit}"/>
+                      <ComboBoxItem Content="{DynamicResource Text.Configure.CustomAction.Scope.Branch}"/>
+                      <ComboBoxItem Content="{DynamicResource Text.Configure.CustomAction.Scope.Tag}"/>
+                      <ComboBoxItem Content="{DynamicResource Text.Configure.CustomAction.Scope.Remote}"/>
+                      <ComboBoxItem Content="{DynamicResource Text.Configure.CustomAction.Scope.File}"/>
+                    </ComboBox>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Configure.CustomAction.InputControls}"/>
+                    <Button Margin="0,4,0,0" Classes="flat" Height="28" Click="EditCustomActionControls">
+                      <StackPanel Orientation="Horizontal">
+                        <Path Width="14" Height="14" Data="{StaticResource Icons.Edit}" Fill="{DynamicResource Brush.FG1}"/>
+                        <TextBlock Margin="4,0" Text="{DynamicResource Text.Configure.CustomAction.InputControls.Edit}"/>
+                        <Border Height="16" Background="{DynamicResource Brush.Badge}" CornerRadius="8" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Controls.Count}" Margin="8,0" FontSize="10" Foreground="{DynamicResource Brush.BadgeFG}"/>
+                        </Border>
+                      </StackPanel>
+                    </Button>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Configure.CustomAction.Executable}"/>
+                    <TextBox Margin="0,4,0,0" Height="28" CornerRadius="3" Text="{Binding Executable, Mode=TwoWay}">
+                      <TextBox.InnerRightContent>
+                        <Button Classes="icon_button" Width="30" Height="30" Click="SelectExecutableForCustomAction">
+                          <Path Data="{StaticResource Icons.Folder.Open}" Fill="{DynamicResource Brush.FG1}"/>
+                        </Button>
+                      </TextBox.InnerRightContent>
+                    </TextBox>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Configure.CustomAction.Arguments}"/>
+                    <TextBox Margin="0,4,0,0" Height="28" CornerRadius="3" Text="{Binding Arguments, Mode=TwoWay}">
+                      <TextBox.InnerRightContent>
+                        <Border Width="28" Height="28" Background="Transparent" VerticalAlignment="Center" ToolTip.Tip="{DynamicResource Text.Configure.CustomAction.Arguments.Tip}">
+                          <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="{DynamicResource Brush.FG1}"/>
+                        </Border>
+                      </TextBox.InnerRightContent>
+                    </TextBox>
+
+                    <CheckBox Margin="0,8,0,0" Content="{DynamicResource Text.Configure.CustomAction.WaitForExit}" IsChecked="{Binding WaitForExit, Mode=TwoWay}"/>
+                  </StackPanel>
+                </DataTemplate>
+              </ContentControl.DataTemplates>
+            </ContentControl>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <TabItem.Header>
+            <TextBlock Classes="tab_header" Text="{DynamicResource Text.Preferences.AI}"/>
+          </TabItem.Header>
+
+          <Grid Margin="0,8,0,16" MinHeight="400">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="200"/>
+              <ColumnDefinition Width="*" MaxWidth="400"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    BorderThickness="1" BorderBrush="{DynamicResource Brush.Border2}"
+                    Background="{DynamicResource Brush.Contents}">
+              <Grid RowDefinitions="*,1,Auto">
+                <ListBox Grid.Row="0"
+                         Background="Transparent"
+                         ItemsSource="{Binding OpenAIServices}"
+                         SelectedItem="{Binding #ThisControl.SelectedOpenAIService, Mode=TwoWay}"
+                         SelectionMode="Single">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="MinHeight" Value="0"/>
+                      <Setter Property="Height" Value="26"/>
+                      <Setter Property="Padding" Value="4,2"/>
+                    </Style>
+                  </ListBox.Styles>
+
+                  <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                  </ListBox.ItemsPanel>
+
+                  <ListBox.ItemTemplate>
+                    <DataTemplate DataType="ai:Service">
+                      <Grid ColumnDefinitions="Auto,*">
+                        <Path Grid.Column="0" Width="14" Height="14" Data="{StaticResource Icons.AIAssist}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="8,0" TextTrimming="CharacterEllipsis"/>
+                      </Grid>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Rectangle Grid.Row="1" Height="1" Fill="{DynamicResource Brush.Border2}" HorizontalAlignment="Stretch" VerticalAlignment="Bottom"/>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Background="{DynamicResource Brush.ToolBar}">
+                  <Button Classes="icon_button" Click="OnAddOpenAIService">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Plus}"/>
+                  </Button>
+
+                  <Button Classes="icon_button" Click="OnRemoveSelectedOpenAIService">
+                    <Path Width="14" Height="14" Data="{StaticResource Icons.Minus}"/>
+                  </Button>
+                </StackPanel>
+              </Grid>
+            </Border>
+
+            <ContentControl Grid.Column="1" Margin="16,0,0,0">
+              <ContentControl.Content>
+                <Binding Path="#ThisControl.SelectedOpenAIService">
+                  <Binding.TargetNullValue>
+                    <Path Width="64" Height="64"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Fill="{DynamicResource Brush.FG2}"
+                          Data="{StaticResource Icons.Empty}"/>
+                  </Binding.TargetNullValue>
+                </Binding>
+              </ContentControl.Content>
+
+              <ContentControl.DataTemplates>
+                <DataTemplate DataType="ai:Service">
+                  <ScrollViewer MaxHeight="640" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                  <StackPanel Orientation="Vertical" MaxWidth="680">
+                    <TextBlock Text="{DynamicResource Text.Preferences.AI.Name}"/>
+                    <TextBox Margin="0,4,0,0" CornerRadius="3" Height="28" Text="{Binding Name, Mode=TwoWay}"/>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Preferences.AI.Server}"/>
+                    <TextBox Margin="0,4,0,0" CornerRadius="3" Height="28" Text="{Binding Server, Mode=TwoWay}"/>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Preferences.AI.ApiKey}"/>
+                    <TextBox Margin="0,4,0,0" CornerRadius="3" Height="28" Text="{Binding ApiKey, Mode=TwoWay}" PasswordChar="*" RevealPassword="{Binding ReadApiKeyFromEnv, Mode=OneWay}"/>
+                    <CheckBox Margin="0,4,0,0"
+                              Height="28"
+                              Content="{DynamicResource Text.Preferences.AI.ReadApiKeyFromEnv}"
+                              IsChecked="{Binding ReadApiKeyFromEnv, Mode=TwoWay}"/>
+
+                    <TextBlock Margin="0,8,0,0" Text="{DynamicResource Text.Preferences.AI.Model}"/>
+                    <TextBox Margin="0,4,0,0"
+                             CornerRadius="3"
+                             Height="28"
+                             Text="{Binding Model, Mode=TwoWay}"
+                             IsEnabled="{Binding !AutoFetchAvailableModels, Mode=OneWay}"/>
+                    <CheckBox Margin="0,4,0,0"
+                              Height="28"
+                              Content="{DynamicResource Text.Preferences.AI.Model.AutoFetchAvailableModels}"
+                              IsChecked="{Binding AutoFetchAvailableModels, Mode=TwoWay}"/>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Preferences.AI.AdditionalPrompt}"/>
+                    <TextBox Height="120"
+                             Margin="0,4,0,0"
+                             CornerRadius="3"
+                             VerticalContentAlignment="Top"
+                             Text="{Binding AdditionalPrompt, Mode=TwoWay}"
+                             AcceptsReturn="true"
+                             TextWrapping="Wrap"/>
+
+                    <TextBlock Margin="0,12,0,0" Text="{DynamicResource Text.Preferences.AI.ReviewPrompt}"/>
+                    <TextBox Height="180"
+                             Margin="0,4,0,0"
+                             CornerRadius="3"
+                             VerticalContentAlignment="Top"
+                             Text="{Binding AIReviewPrompt, Mode=TwoWay}"
+                             AcceptsReturn="true"
+                             TextWrapping="Wrap"/>
+                  </StackPanel>
+                  </ScrollViewer>
+                </DataTemplate>
+              </ContentControl.DataTemplates>
+            </ContentControl>
+          </Grid>
+        </TabItem>
+      </TabControl>
+    </Border>
+  </Grid>
+</v:ChromelessWindow>
