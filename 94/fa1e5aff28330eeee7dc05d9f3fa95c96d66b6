@@ -1,0 +1,775 @@
+.gitattributes
+  s_e6c367c90a61e5::t_94a6fec3b6cb0b 1-14
+.gitignore
+  s_e6c367c90a61e5::t_1ce772dd5310f1 1-49
+depends/AvaloniaEdit/.gitattributes
+  s_3509689d63d66e::t_3d9cfe634ad9df 1-63
+depends/AvaloniaEdit/.gitignore
+  s_3509689d63d66e::t_751e667b8a6755 1-257
+depends/AvaloniaEdit/.runsettings
+  s_3509689d63d66e::t_06a3e0170a3928 1-30
+depends/AvaloniaEdit/AvaloniaEdit.slnx
+  s_3509689d63d66e::t_2b10405a34e7a3 1-13
+depends/AvaloniaEdit/Directory.Build.props
+  s_3509689d63d66e::t_19ca5f39ab1a24 1-31
+depends/AvaloniaEdit/Directory.Packages.props
+  s_3509689d63d66e::t_404d10d7957a1a 1-30
+depends/AvaloniaEdit/LICENSE
+  s_3509689d63d66e::t_f3bbc9671baa4e 1-21
+depends/AvaloniaEdit/NuGet.config
+  s_3509689d63d66e::t_9c2765a39f67ca 1-12
+depends/AvaloniaEdit/README.md
+  s_3509689d63d66e::t_e036699f9c64ad 1-88
+depends/AvaloniaEdit/azure-pipelines.yml
+  s_3509689d63d66e::t_f3238a83b9db35 1-37
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/App.axaml
+  s_3509689d63d66e::t_12b367fa08d4e5 1-28
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/App.axaml.cs
+  s_3509689d63d66e::t_abe89bb78beeeb 1-56
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/AvaloniaEdit.Demo.csproj
+  s_3509689d63d66e::t_b15fd8b09bfe05 1-28
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/CustomMargin.cs
+  s_3509689d63d66e::t_d68065a477cb13 1-142
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/MainWindow.axaml
+  s_3509689d63d66e::t_6b973d461c2ba2 1-80
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/MainWindow.axaml.cs
+  s_3509689d63d66e::t_bb000090e89713 1-502
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Program.cs
+  s_3509689d63d66e::t_cb2be29c03aa77 1-17
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/ResourceLoader.cs
+  s_3509689d63d66e::t_aa375bea379bf4 1-24
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/document.adoc
+  s_3509689d63d66e::t_4675a31a523017 1-154
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.asp.vb.net
+  s_3509689d63d66e::t_6bc05c757d0771 1-25
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.batchfile
+  s_3509689d63d66e::t_04aa898686aeb8 1-29
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.c
+  s_3509689d63d66e::t_ee0f20cdd98efb 1-124
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.clojure
+  s_3509689d63d66e::t_a532bb7bd4ea36 1-47
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.coffee
+  s_3509689d63d66e::t_26f95588eb66d5 1-14
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.cpp
+  s_3509689d63d66e::t_4f35830ae8b0b4 1-94
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.cs
+  s_3509689d63d66e::t_ed5f28545db308 1-61
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.css
+  s_3509689d63d66e::t_354ff614ce945e 1-21
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.css.less
+  s_3509689d63d66e::t_6f361f1620ea5c 1-18
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.css.scss
+  s_3509689d63d66e::t_ff94c9e86fd342 1-31
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.cuda-cpp
+  s_3509689d63d66e::t_cfc969cbf4b081 1-42
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.dart
+  s_3509689d63d66e::t_4594507a582bf6 1-65
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.diff
+  s_3509689d63d66e::t_9a36ff97d76a51 1-19
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.dockerfile
+  s_3509689d63d66e::t_09920b0e63cce5 1-17
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.fsharp
+  s_3509689d63d66e::t_12cdf708f1429b 1-17
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.gitignore
+  s_3509689d63d66e::t_c8b0f4b111bf04 1-18
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.go
+  s_3509689d63d66e::t_ff48da27aaaa5c 1-64
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.groovy
+  s_3509689d63d66e::t_7cc934dedfc539 1-56
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.hlsl
+  s_3509689d63d66e::t_b555d360a1b6fb 1-174
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.ignore
+  s_3509689d63d66e::t_e54e125390a320 1-20
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.ini
+  s_3509689d63d66e::t_f6fc530be17ea9 1-276
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.java
+  s_3509689d63d66e::t_0717a6cdaecc9f 1-46
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.js
+  s_3509689d63d66e::t_15dff3fb717026 1-88
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.js.jsx
+  s_3509689d63d66e::t_f674bbda18a527 1-15
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.json
+  s_3509689d63d66e::t_a6c286c5c0be9b 1-22
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.json.comments
+  s_3509689d63d66e::t_04267f80ed67f3 1-7
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.julia
+  s_3509689d63d66e::t_d20b17d061c02e 1-57
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.lua
+  s_3509689d63d66e::t_5f437e74cf4e88 1-46
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.makefile
+  s_3509689d63d66e::t_40693770705326 1-86
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.objc
+  s_3509689d63d66e::t_f1905c54be9300 1-94
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.objcpp
+  s_3509689d63d66e::t_76babfec7410e2 1-66
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.pascal
+  s_3509689d63d66e::t_c6fe60f47ecb51 1-12
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.perl
+  s_3509689d63d66e::t_2be04ea79a169e 1-32
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.perl.6
+  s_3509689d63d66e::t_a7592e17459a92 1-28
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.php
+  s_3509689d63d66e::t_a5efcaac600dfd 1-22
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.powershell
+  s_3509689d63d66e::t_fd6803adae5a66 1-61
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.python
+  s_3509689d63d66e::t_1ab4bc8cfbd0ab 1-38
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.r
+  s_3509689d63d66e::t_2f9fee1701be77 1-19
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.ruby
+  s_3509689d63d66e::t_e2e40284d59699 1-27
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.rust
+  s_3509689d63d66e::t_e2c189c5b76f3a 1-38
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.shaderlab
+  s_3509689d63d66e::t_4d3004da08c9c0 1-26
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.shell
+  s_3509689d63d66e::t_2ad7034692d477 1-35
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.sql
+  s_3509689d63d66e::t_85f22f95caec2f 1-84
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.swift
+  s_3509689d63d66e::t_266b24c4be3005 1-24
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.ts
+  s_3509689d63d66e::t_ec7a9e9eb7b83e 1-61
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.tsx
+  s_3509689d63d66e::t_63fc195a4b96e3 1-14
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/source.yaml
+  s_3509689d63d66e::t_c67ca832ffeb59 1-29
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.bibtex
+  s_3509689d63d66e::t_af7b38ff678b26 1-49
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.html.cshtml
+  s_3509689d63d66e::t_1fb9331a5b09f3 1-30
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.html.derivative
+  s_3509689d63d66e::t_86343f0ca61c0d 1-20
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.html.handlebars
+  s_3509689d63d66e::t_3bea6721e81956 1-14
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.html.markdown
+  s_3509689d63d66e::t_9cdf1f308b028a 1-157
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.pug
+  s_3509689d63d66e::t_96b0faccac6431 1-10
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.tex
+  s_3509689d63d66e::t_b1bb57f47554d8 1-12
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.tex.latex
+  s_3509689d63d66e::t_036a13700ac67c 1-46
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.xml
+  s_3509689d63d66e::t_91fcd6f0c04699 1-34
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/Resources/SampleFiles/text.xml.xsl
+  s_3509689d63d66e::t_6fe8eff14c41dc 1-21
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/ViewModels/MainWIndowViewModel.cs
+  s_3509689d63d66e::t_04be0e431590f2 1-52
+depends/AvaloniaEdit/src/AvaloniaEdit.Demo/ViewModels/ThemeViewModel.cs
+  s_3509689d63d66e::t_a84e0e71011317 1-16
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/AvaloniaEdit.TextMate.csproj
+  s_3509689d63d66e::t_7044f0ba607c66 1-18
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/Compatibility/Math.cs
+  s_3509689d63d66e::t_0ace40c0a3359f 1-11
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/DocumentSnapshot.cs
+  s_3509689d63d66e::t_454aceaf8d9cef 1-194
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/GenericLineTransformer.cs
+  s_3509689d63d66e::t_6a8f7f9f6dab8c 1-99
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/Properties/InternalsVisibleTo.cs
+  s_3509689d63d66e::t_7c1161799406fa 1-3
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/TextEditorModel.cs
+  s_3509689d63d66e::t_ce4054557b3b1c 1-276
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/TextMate.cs
+  s_3509689d63d66e::t_43456997fc6768 1-373
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/TextMateColoringTransformer.cs
+  s_3509689d63d66e::t_85d44c97718972 1-535
+depends/AvaloniaEdit/src/AvaloniaEdit.TextMate/TextTransformation.cs
+  s_3509689d63d66e::t_db3d9796678a24 1-94
+depends/AvaloniaEdit/src/AvaloniaEdit/AvaloniaEdit.csproj
+  s_3509689d63d66e::t_8c804c5a70e05c 1-35
+depends/AvaloniaEdit/src/AvaloniaEdit/AvaloniaEditCommands.cs
+  s_3509689d63d66e::t_631bfbfd6d1c60 1-171
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/CompletionAcceptAction.cs
+  s_3509689d63d66e::t_349e0bdc7428b7 1-25
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/CompletionList.cs
+  s_3509689d63d66e::t_0bda4bf963e0a7 1-530
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/CompletionList.xaml
+  s_3509689d63d66e::t_ff94737185f3a4 1-36
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/CompletionListBox.cs
+  s_3509689d63d66e::t_27f5dd510eeee0 1-110
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/CompletionTipContentControl.cs
+  s_3509689d63d66e::t_6540651f7cd493 1-8
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/CompletionTipContentControl.xaml
+  s_3509689d63d66e::t_f286c316c9bd41 1-30
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/CompletionWindow.cs
+  s_3509689d63d66e::t_5e0dcf7645f3ef 1-270
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/CompletionWindowBase.cs
+  s_3509689d63d66e::t_e19fa61e2fb548 1-412
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/ICompletionData.cs
+  s_3509689d63d66e::t_e7818eb5f11222 1-73
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/IOverloadProvider.cs
+  s_3509689d63d66e::t_6b8d05e653d8e9 1-53
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/InsightWindow.cs
+  s_3509689d63d66e::t_df6d0a3303207b 1-93
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/InsightWindow.xaml
+  s_3509689d63d66e::t_187eb5581dd051 1-61
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/OverloadInsightWindow.cs
+  s_3509689d63d66e::t_5bdf95f06e0cbb 1-75
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/OverloadViewer.cs
+  s_3509689d63d66e::t_28162b66f5fa51 1-129
+depends/AvaloniaEdit/src/AvaloniaEdit/CodeCompletion/PopupWithCustomPosition.cs
+  s_3509689d63d66e::t_59c0f1fe469aed 1-23
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/DataObjectCopyingEventArgs.cs
+  s_3509689d63d66e::t_f4fdec1af5785e 1-21
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/DocumentChangeEventArgs.cs
+  s_3509689d63d66e::t_582fcf4d636ea7 1-119
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/DocumentChangeOperation.cs
+  s_3509689d63d66e::t_8a6d8b703d4e5a 1-66
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/DocumentChangedEventArgs.cs
+  s_3509689d63d66e::t_3aa7caad526b7b 1-25
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/DocumentLine.LineNode.cs
+  s_3509689d63d66e::t_3db83f7f88007d 1-95
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/DocumentLine.cs
+  s_3509689d63d66e::t_3e8372324100ae 1-279
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/DocumentLineTree.cs
+  s_3509689d63d66e::t_c0229486bb2fec 1-782
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/DocumentTextWriter.cs
+  s_3509689d63d66e::t_d385655515e82a 1-78
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/IDocument.cs
+  s_3509689d63d66e::t_e47293d7ef0f37 1-320
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/ILineTracker.cs
+  s_3509689d63d66e::t_f050ce627cb2f2 1-70
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/ITextAnchor.cs
+  s_3509689d63d66e::t_16258ee6e929b4 1-139
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/ITextSource.cs
+  s_3509689d63d66e::t_0a074228c51d39 1-356
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/IUndoableOperation.cs
+  s_3509689d63d66e::t_d7fcb93ef0a839 1-43
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/LineManager.cs
+  s_3509689d63d66e::t_77d4a751f43685 1-340
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/NewLineFinder.cs
+  s_3509689d63d66e::t_af5282c1db2ae3 1-158
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/OffsetChangeMap.cs
+  s_3509689d63d66e::t_0d237dfd7de916 1-347
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/RopeTextSource.cs
+  s_3509689d63d66e::t_ca0fb0117b8c33 1-161
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/SimpleSegment.cs
+  s_3509689d63d66e::t_27ca53dc72d0ee 1-171
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextAnchor.cs
+  s_3509689d63d66e::t_64ce541d2e703c 1-145
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextAnchorNode.cs
+  s_3509689d63d66e::t_720e088c2b09ac 1-105
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextAnchorTree.cs
+  s_3509689d63d66e::t_dd596e7149e504 1-847
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextDocument.cs
+  s_3509689d63d66e::t_f0c5e9c9491b34 1-1191
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextDocumentWeakEventManager.cs
+  s_3509689d63d66e::t_14a6a6d0e0e430 1-107
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextLocation.cs
+  s_3509689d63d66e::t_1518b3dea1bd73 1-255
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextSegment.cs
+  s_3509689d63d66e::t_76c24a8ed59095 1-279
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextSegmentCollection.cs
+  s_3509689d63d66e::t_8d1cc899f105b6 1-1059
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextSourceVersionProvider.cs
+  s_3509689d63d66e::t_2b621693bc579d 1-126
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/TextUtilities.cs
+  s_3509689d63d66e::t_50aad9fa871f20 1-453
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/UndoOperationGroup.cs
+  s_3509689d63d66e::t_21244d1a247cdb 1-78
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/UndoStack.cs
+  s_3509689d63d66e::t_9e529e2c724dd7 1-472
+depends/AvaloniaEdit/src/AvaloniaEdit/Document/WeakLineTracker.cs
+  s_3509689d63d66e::t_fd281394288393 1-105
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/AbstractMargin.cs
+  s_3509689d63d66e::t_d60654bb131a93 1-157
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/Caret.cs
+  s_3509689d63d66e::t_6673b1cc46dd55 1-557
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/CaretLayer.cs
+  s_3509689d63d66e::t_f9cdfaf21a9b71 1-149
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/CaretNavigationCommandHandler.cs
+  s_3509689d63d66e::t_d7f21d0e46c881 1-468
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/CaretWeakEventHandler.cs
+  s_3509689d63d66e::t_b39af0535bbb5a 1-40
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/DottedLineMargin.cs
+  s_3509689d63d66e::t_e42cdaddb59f19 1-64
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/DragDropException.cs
+  s_3509689d63d66e::t_dfa5d7054775f9 1-52
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/EditingCommandHandler.cs
+  s_3509689d63d66e::t_d12f9b0b553e37 1-807
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/EmptySelection.cs
+  s_3509689d63d66e::t_434cc317befef0 1-92
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/HotkeyConfiguration.cs
+  s_3509689d63d66e::t_8514da27528c4b 1-22
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/IReadOnlySectionProvider.cs
+  s_3509689d63d66e::t_84eca745d9bd64 1-46
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/LineNumberMargin.cs
+  s_3509689d63d66e::t_d5d3597d2716ff 1-267
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/NoReadOnlySections.cs
+  s_3509689d63d66e::t_3e7b9c547415f4 1-65
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/RectangleSelection.cs
+  s_3509689d63d66e::t_0395385e845de4 1-415
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/Selection.cs
+  s_3509689d63d66e::t_08ca47e8983c7d 1-303
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/SelectionColorizer.cs
+  s_3509689d63d66e::t_cd1fb6055a9923 1-71
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/SelectionLayer.cs
+  s_3509689d63d66e::t_a9cb005eafafc3 1-75
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/SelectionMouseHandler.cs
+  s_3509689d63d66e::t_d8a51116776bae 1-802
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/SelectionSegment.cs
+  s_3509689d63d66e::t_714d5b71500c23 1-94
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/SimpleSelection.cs
+  s_3509689d63d66e::t_d15cda2224fc36 1-170
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/TextArea.cs
+  s_3509689d63d66e::t_b1ff7bf4b4dadf 1-1341
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/TextArea.xaml
+  s_3509689d63d66e::t_7497c48d493f11 1-41
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/TextAreaDefaultInputHandlers.cs
+  s_3509689d63d66e::t_9d2dc2d7172bf3 1-131
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/TextAreaInputHandler.cs
+  s_3509689d63d66e::t_b4880e17d4e92f 1-265
+depends/AvaloniaEdit/src/AvaloniaEdit/Editing/TextSegmentReadOnlySectionProvider.cs
+  s_3509689d63d66e::t_de06c9f1735133 1-97
+depends/AvaloniaEdit/src/AvaloniaEdit/Folding/FoldingElementGenerator.cs
+  s_3509689d63d66e::t_77c6eb881a5a38 1-218
+depends/AvaloniaEdit/src/AvaloniaEdit/Folding/FoldingManager.cs
+  s_3509689d63d66e::t_6303523e2e95b9 1-396
+depends/AvaloniaEdit/src/AvaloniaEdit/Folding/FoldingMargin.cs
+  s_3509689d63d66e::t_951cbc58b5dd2a 1-362
+depends/AvaloniaEdit/src/AvaloniaEdit/Folding/FoldingMarginMarker.cs
+  s_3509689d63d66e::t_e72e53841ea58f 1-121
+depends/AvaloniaEdit/src/AvaloniaEdit/Folding/FoldingSection.cs
+  s_3509689d63d66e::t_2d95cd5022b068 1-151
+depends/AvaloniaEdit/src/AvaloniaEdit/Folding/NewFolding.cs
+  s_3509689d63d66e::t_cf35da71fd5acd 1-79
+depends/AvaloniaEdit/src/AvaloniaEdit/Folding/XmlFoldingStrategy.cs
+  s_3509689d63d66e::t_45e6de91d541a3 1-258
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/DocumentHighlighter.cs
+  s_3509689d63d66e::t_a7d26df319d00e 1-354
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightedLine.cs
+  s_3509689d63d66e::t_31b0bade78e2bb 1-337
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightedSection.cs
+  s_3509689d63d66e::t_3abf009246b213 1-52
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingBrush.cs
+  s_3509689d63d66e::t_085ea28ec677f4 1-92
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingColor.cs
+  s_3509689d63d66e::t_9674ea31fea959 1-356
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingColorizer.cs
+  s_3509689d63d66e::t_cac8e78fe418fb 1-383
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingDefinitionInvalidException.cs
+  s_3509689d63d66e::t_3009f1cb311eae 1-49
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingDefinitionTypeConverter.cs
+  s_3509689d63d66e::t_a93455810d678c 1-58
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingEngine.cs
+  s_3509689d63d66e::t_10d7a7ed7c85a0 1-348
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingManager.cs
+  s_3509689d63d66e::t_dc491ca0fbc797 1-250
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingRule.cs
+  s_3509689d63d66e::t_622a36dfe2f117 1-45
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingRuleSet.cs
+  s_3509689d63d66e::t_08ad76b2a044e7 1-60
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HighlightingSpan.cs
+  s_3509689d63d66e::t_d7b90c63d4a592 1-78
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HtmlClipboard.cs
+  s_3509689d63d66e::t_215ec14663a0bd 1-108
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HtmlOptions.cs
+  s_3509689d63d66e::t_5c7542450611c4 1-77
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/HtmlRichTextWriter.cs
+  s_3509689d63d66e::t_7dfbba1fde5532 1-265
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/IHighlighter.cs
+  s_3509689d63d66e::t_92ead3c40f7edd 1-122
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/IHighlightingDefinition.cs
+  s_3509689d63d66e::t_8dad29e1763b00 1-62
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/IHighlightingDefinitionReferenceResolver.cs
+  s_3509689d63d66e::t_97db6bdaa27b12 1-31
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/ASPX.xshd
+  s_3509689d63d66e::t_0fd7b9d8f60a8a 1-16
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/Boo.xshd
+  s_3509689d63d66e::t_36f8ed18876997 1-212
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/CPP-Mode.xshd
+  s_3509689d63d66e::t_cd3ba75ec69c21 1-195
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/CSS-Mode.xshd
+  s_3509689d63d66e::t_b7665efd0c0a22 1-56
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/CSharp-Mode.xshd
+  s_3509689d63d66e::t_d8d62c3e873eee 1-310
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/Coco-Mode.xshd
+  s_3509689d63d66e::t_f313d620e25547 1-74
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/HTML-Mode.xshd
+  s_3509689d63d66e::t_1fca28ec8c799e 1-388
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/Java-Mode.xshd
+  s_3509689d63d66e::t_c216374f468710 1-152
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/JavaScript-Mode.xshd
+  s_3509689d63d66e::t_2d91547516555b 1-128
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/Json.xshd
+  s_3509689d63d66e::t_533ccb51a99c43 1-72
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/MarkDown-Mode.xshd
+  s_3509689d63d66e::t_da43e25dcc8091 1-56
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/MarkDownWithFontSize-Mode.xshd
+  s_3509689d63d66e::t_c78c17650dddd8 1-76
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/ModeV1.xsd
+  s_3509689d63d66e::t_b566777b860605 1-296
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/ModeV2.xsd
+  s_3509689d63d66e::t_3d72d9d5555db0 1-171
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/PHP-Mode.xshd
+  s_3509689d63d66e::t_dc35e98d1801c1 1-158
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/Patch-Mode.xshd
+  s_3509689d63d66e::t_4bffe7c7b28a1e 1-35
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/PowerShell.xshd
+  s_3509689d63d66e::t_c0e71cae5a4fa4 1-146
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/Python-Mode.xshd
+  s_3509689d63d66e::t_7fe790ea8ca64c 1-104
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/Resources.cs
+  s_3509689d63d66e::t_1b8b9050189738 1-68
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/TSQL-Mode.xshd
+  s_3509689d63d66e::t_c1d87d5376e67e 1-618
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/Tex-Mode.xshd
+  s_3509689d63d66e::t_2fa56d107449ee 1-108
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/VB-Mode.xshd
+  s_3509689d63d66e::t_fc44affb9dfbe0 1-256
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/XML-Mode.xshd
+  s_3509689d63d66e::t_316c5d22a62d91 1-63
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Resources/XmlDoc.xshd
+  s_3509689d63d66e::t_b767bf90882f2f 1-57
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/RichText.cs
+  s_3509689d63d66e::t_d85ade1f31cdef 1-269
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/RichTextColorizer.cs
+  s_3509689d63d66e::t_f29f3281bffe63 1-53
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/RichTextModel.cs
+  s_3509689d63d66e::t_620b605bab5ec2 1-310
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/RichTextModelWriter.cs
+  s_3509689d63d66e::t_06743251358785 1-125
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/HighlightingLoader.cs
+  s_3509689d63d66e::t_c8c8571d52321f 1-121
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/IXshdVisitor.cs
+  s_3509689d63d66e::t_ebde64659e0f62 1-44
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/SaveXshdVisitor.cs
+  s_3509689d63d66e::t_156af6666327f4 1-195
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/V1Loader.cs
+  s_3509689d63d66e::t_16caf78125b929 1-335
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/V2Loader.cs
+  s_3509689d63d66e::t_f3af7ce4315dee 1-370
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XmlHighlightingDefinition.cs
+  s_3509689d63d66e::t_5bff9061aeaef4 1-426
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdColor.cs
+  s_3509689d63d66e::t_2f53eb8af3474e 1-106
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdElement.cs
+  s_3509689d63d66e::t_38fb23cf240717 1-41
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdImport.cs
+  s_3509689d63d66e::t_7bf4dafce7fce2 1-37
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdKeywords.cs
+  s_3509689d63d66e::t_6fc929adbde759 1-47
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdProperty.cs
+  s_3509689d63d66e::t_e9b2f24c0c6f87 1-43
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdReference.cs
+  s_3509689d63d66e::t_67beea927bcc38 1-123
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdRule.cs
+  s_3509689d63d66e::t_4e2f887ff359e8 1-47
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdRuleSet.cs
+  s_3509689d63d66e::t_a55811aea13796 1-62
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdSpan.cs
+  s_3509689d63d66e::t_7326d71eb466db 1-94
+depends/AvaloniaEdit/src/AvaloniaEdit/Highlighting/Xshd/XshdSyntaxDefinition.cs
+  s_3509689d63d66e::t_f624061e3bf49b 1-64
+depends/AvaloniaEdit/src/AvaloniaEdit/Indentation/CSharp/CSharpIndentationStrategy.cs
+  s_3509689d63d66e::t_815a0296da6aad 1-97
+depends/AvaloniaEdit/src/AvaloniaEdit/Indentation/CSharp/DocumentAccessor.cs
+  s_3509689d63d66e::t_b5dbce090b19ca 1-107
+depends/AvaloniaEdit/src/AvaloniaEdit/Indentation/CSharp/IndentationReformatter.cs
+  s_3509689d63d66e::t_93d1b1bb7faec3 1-530
+depends/AvaloniaEdit/src/AvaloniaEdit/Indentation/DefaultIndentationStrategy.cs
+  s_3509689d63d66e::t_b88ad0bebff67c 1-55
+depends/AvaloniaEdit/src/AvaloniaEdit/Indentation/IIndentationStrategy.cs
+  s_3509689d63d66e::t_e38143141d4b09 1-39
+depends/AvaloniaEdit/src/AvaloniaEdit/Properties/InternalsVisibleTo.cs
+  s_3509689d63d66e::t_eb83b2a20a69bf 1-3
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/BackgroundGeometryBuilder.cs
+  s_3509689d63d66e::t_6ef42cf99e1ede 1-386
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/CollapsedLineSection.cs
+  s_3509689d63d66e::t_a97d6b2b857969 1-102
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/ColorizingTransformer.cs
+  s_3509689d63d66e::t_8786d8c7d6d986 1-120
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/ColumnRulerRenderer.cs
+  s_3509689d63d66e::t_20bcd820c6797d 1-78
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/CurrentLineHighlightRenderer.cs
+  s_3509689d63d66e::t_b0b3d1397f63d7 1-100
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/DocumentColorizingTransformer.cs
+  s_3509689d63d66e::t_8f7b9883e0a774 1-96
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/FormattedTextElement.cs
+  s_3509689d63d66e::t_f672959316e581 1-155
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/GlobalTextRunProperties.cs
+  s_3509689d63d66e::t_2c9d99faa0d453 1-46
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/HeightTree.cs
+  s_3509689d63d66e::t_45a989191fe93a 1-1122
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/HeightTreeLineNode.cs
+  s_3509689d63d66e::t_3e4ad2ce940e1b 1-66
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/HeightTreeNode.cs
+  s_3509689d63d66e::t_2ba4836d4cfada 1-163
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/IBackgroundRenderer.cs
+  s_3509689d63d66e::t_7dab7954d5ce2f 1-40
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/ITextRunConstructionContext.cs
+  s_3509689d63d66e::t_504d8ed9fdd382 1-63
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/ITextViewConnect.cs
+  s_3509689d63d66e::t_5ab8a05f4056a7 1-37
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/IVisualLineTransformer.cs
+  s_3509689d63d66e::t_c29f21c326e618 1-33
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/InlineObjectRun.cs
+  s_3509689d63d66e::t_258c584261f4f3 1-120
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/Layer.cs
+  s_3509689d63d66e::t_05b0177a83b4ef 1-48
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/LayerPosition.cs
+  s_3509689d63d66e::t_3056af1c48d520 1-106
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/LinkElementGenerator.cs
+  s_3509689d63d66e::t_dea8329fda2067 1-161
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/PointerHoverLogic.cs
+  s_3509689d63d66e::t_5cb391398dec6c 1-151
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/SimpleTextSource.cs
+  s_3509689d63d66e::t_180e81911e21ad 1-45
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/SingleCharacterElementGenerator.cs
+  s_3509689d63d66e::t_2821ab7d02f468 1-268
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/TextLayer.cs
+  s_3509689d63d66e::t_72b9cb930b2a8c 1-82
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/TextView.cs
+  s_3509689d63d66e::t_5c704b8ef4e484 1-2137
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/TextViewCachedElements.cs
+  s_3509689d63d66e::t_8111dd258c069d 1-42
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/TextViewWeakEventManager.cs
+  s_3509689d63d66e::t_8e3716a6d077e9 1-62
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLine.cs
+  s_3509689d63d66e::t_503fa9c22c6a52 1-840
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLineConstructionStartEventArgs.cs
+  s_3509689d63d66e::t_d766796b40475f 1-42
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLineElement.cs
+  s_3509689d63d66e::t_4806e87a44e8f7 1-262
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLineElementGenerator.cs
+  s_3509689d63d66e::t_f27aebdafca84d 1-76
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLineElementTextRunProperties.cs
+  s_3509689d63d66e::t_036f390d05ef2a 1-244
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLineLinkText.cs
+  s_3509689d63d66e::t_f0a7d6a646f0bf 1-162
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLineText.cs
+  s_3509689d63d66e::t_9f0005e54c6aaa 1-135
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLineTextParagraphProperties.cs
+  s_3509689d63d66e::t_ac895aa34a0c5c 1-46
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLineTextSource.cs
+  s_3509689d63d66e::t_76fb0a7114fbbb 1-141
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualLinesInvalidException.cs
+  s_3509689d63d66e::t_d9be90dc812e27 1-50
+depends/AvaloniaEdit/src/AvaloniaEdit/Rendering/VisualYPosition.cs
+  s_3509689d63d66e::t_78ff65248845a4 1-61
+depends/AvaloniaEdit/src/AvaloniaEdit/RoutedCommand.cs
+  s_3509689d63d66e::t_b430d4898c702c 1-194
+depends/AvaloniaEdit/src/AvaloniaEdit/SR.Designer.cs
+  s_3509689d63d66e::t_394557fe628036 1-197
+depends/AvaloniaEdit/src/AvaloniaEdit/SR.resx
+  s_3509689d63d66e::t_4dd598ad313451 1-165
+depends/AvaloniaEdit/src/AvaloniaEdit/SR.zh-Hans.resx
+  s_3509689d63d66e::t_f27884c5b7c3c2 1-59
+depends/AvaloniaEdit/src/AvaloniaEdit/Search/ISearchStrategy.cs
+  s_3509689d63d66e::t_79f2e660fc96c7 1-95
+depends/AvaloniaEdit/src/AvaloniaEdit/Search/RegexSearchStrategy.cs
+  s_3509689d63d66e::t_b616984030d0c8 1-80
+depends/AvaloniaEdit/src/AvaloniaEdit/Search/SearchCommands.cs
+  s_3509689d63d66e::t_5333cb160e6674 1-179
+depends/AvaloniaEdit/src/AvaloniaEdit/Search/SearchPanel.cs
+  s_3509689d63d66e::t_76c6348908cae8 1-688
+depends/AvaloniaEdit/src/AvaloniaEdit/Search/SearchPanel.xaml
+  s_3509689d63d66e::t_d77f41feb502d4 1-256
+depends/AvaloniaEdit/src/AvaloniaEdit/Search/SearchResultBackgroundRenderer.cs
+  s_3509689d63d66e::t_a11d48be02a13f 1-81
+depends/AvaloniaEdit/src/AvaloniaEdit/Search/SearchStrategyFactory.cs
+  s_3509689d63d66e::t_3118330aeb87f3 1-88
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/IActiveElement.cs
+  s_3509689d63d66e::t_88c753af492dde 1-48
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/InsertionContext.cs
+  s_3509689d63d66e::t_7d709597be645d 1-432
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/Snippet.cs
+  s_3509689d63d66e::t_57715bf5abc186 1-60
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetAnchorElement.cs
+  s_3509689d63d66e::t_67e4b8952ab212 1-110
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetBoundElement.cs
+  s_3509689d63d66e::t_b5ec6c59083f0e 1-133
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetCaretElement.cs
+  s_3509689d63d66e::t_ebc6d180c74ca0 1-70
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetContainerElement.cs
+  s_3509689d63d66e::t_a9e9958f6b9803 1-57
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetElement.cs
+  s_3509689d63d66e::t_52f2bc43b33dfe 1-39
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetEventArgs.cs
+  s_3509689d63d66e::t_702c3899682224 1-72
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetInputHandler.cs
+  s_3509689d63d66e::t_d10cce15686a34 1-121
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetReplaceableTextElement.cs
+  s_3509689d63d66e::t_081d73e968ea96 1-236
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetSelectionElement.cs
+  s_3509689d63d66e::t_925110a080c1ee 1-57
+depends/AvaloniaEdit/src/AvaloniaEdit/Snippets/SnippetTextElement.cs
+  s_3509689d63d66e::t_ace87d55e4c6ed 1-46
+depends/AvaloniaEdit/src/AvaloniaEdit/TextEditor.cs
+  s_3509689d63d66e::t_6406448c152c50 1-1377
+depends/AvaloniaEdit/src/AvaloniaEdit/TextEditor.xaml
+  s_3509689d63d66e::t_5abb1b5af78aba 1-22
+depends/AvaloniaEdit/src/AvaloniaEdit/TextEditorComponent.cs
+  s_3509689d63d66e::t_fa1ff0d10d3a0c 1-55
+depends/AvaloniaEdit/src/AvaloniaEdit/TextEditorOptions.cs
+  s_3509689d63d66e::t_9047e76263b40c 1-690
+depends/AvaloniaEdit/src/AvaloniaEdit/TextViewPosition.cs
+  s_3509689d63d66e::t_82ab072bb88edb 1-185
+depends/AvaloniaEdit/src/AvaloniaEdit/Themes/Base.xaml
+  s_3509689d63d66e::t_ad000045cd9dc5 1-11
+depends/AvaloniaEdit/src/AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml
+  s_3509689d63d66e::t_bf7b45a2f2600c 1-39
+depends/AvaloniaEdit/src/AvaloniaEdit/Themes/Simple/AvaloniaEdit.xaml
+  s_3509689d63d66e::t_5d72630eb43ed7 1-39
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/BusyManager.cs
+  s_3509689d63d66e::t_537d4c86d36909 1-51
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/CallbackOnDispose.cs
+  s_3509689d63d66e::t_a4eeacaab09642 1-46
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/CharRope.cs
+  s_3509689d63d66e::t_78217e577648b5 1-270
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/CompressingTreeList.cs
+  s_3509689d63d66e::t_f7c74b65a65017 1-1010
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/Constants.cs
+  s_3509689d63d66e::t_9e3245ae778c79 1-28
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/DataObjectEx.cs
+  s_3509689d63d66e::t_83cab0a395bdd3 1-16
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/DelayedEvents.cs
+  s_3509689d63d66e::t_6bb27206d15c47 1-64
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/Deque.cs
+  s_3509689d63d66e::t_f3ea11b7e88f0e 1-184
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/ExtensionMethods.cs
+  s_3509689d63d66e::t_22b94303b6fe44 1-312
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/FileReader.cs
+  s_3509689d63d66e::t_6444e9c581b839 1-288
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/IFreezable.cs
+  s_3509689d63d66e::t_4b20db03ba7a54 1-123
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/IServiceContainer.cs
+  s_3509689d63d66e::t_ff0cb4ae8ee846 1-61
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/NullSafeCollection.cs
+  s_3509689d63d66e::t_1571059c0382c3 1-45
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/ObserveAddRemoveCollection.cs
+  s_3509689d63d66e::t_f900010e4165b4 1-86
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/PixelSnapHelpers.cs
+  s_3509689d63d66e::t_66beab2d3e053a 1-110
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/PropertyChangedWeakEventManager.cs
+  s_3509689d63d66e::t_fae6975f7a8436 1-32
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/RichTextWriter.cs
+  s_3509689d63d66e::t_547ffb3d04fc3b 1-126
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/Rope.cs
+  s_3509689d63d66e::t_181bd3756b82c5 1-898
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/RopeNode.cs
+  s_3509689d63d66e::t_a7a284eb176df5 1-713
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/RopeTextReader.cs
+  s_3509689d63d66e::t_5f931234ed3322 1-120
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/StringSegment.cs
+  s_3509689d63d66e::t_7e324fdb3b36d8 1-109
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/TextFormatterFactory.cs
+  s_3509689d63d66e::t_2e3f9e23c29d3c 1-72
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/ThrowUtil.cs
+  s_3509689d63d66e::t_8aa1bf84fd8d9d 1-71
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/ValueStringBuilder.AppendSpanFormattable.cs
+  s_3509689d63d66e::t_3d52b494f3538c 1-26
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/ValueStringBuilder.cs
+  s_3509689d63d66e::t_90f909faa3973d 1-285
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/ValueStringBuilder_1.cs
+  s_3509689d63d66e::t_db298d88a2dce0 1-332
+depends/AvaloniaEdit/src/AvaloniaEdit/Utils/WeakEventManagerBase.cs
+  s_3509689d63d66e::t_08976fd988e35e 1-357
+depends/AvaloniaEdit/src/AvaloniaEdit/XmlnsAttributes.cs
+  s_3509689d63d66e::t_f3921c53d81d80 1-7
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/AvaloniaEdit.Tests.csproj
+  s_3509689d63d66e::t_aa2bbbe08fb5c6 1-22
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/AvaloniaMocks/UnitTestApplication.cs
+  s_3509689d63d66e::t_5f0463126d669e 1-33
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/ChangeTrackingTest.cs
+  s_3509689d63d66e::t_f9b9d665be7314 1-76
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/CollapsingTests.cs
+  s_3509689d63d66e::t_980802042e4e13 1-171
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/HeightTests.cs
+  s_3509689d63d66e::t_baca045731721d 1-91
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/LineManagerTests.cs
+  s_3509689d63d66e::t_162db812ed689f 1-586
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/RandomizedLineManagerTest.cs
+  s_3509689d63d66e::t_efabea3aba850f 1-201
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/TextAnchorTest.cs
+  s_3509689d63d66e::t_f254134ba4ced1 1-329
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/TextSegmentTreeTest.cs
+  s_3509689d63d66e::t_43eb6b68eede89 1-366
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/TextUtilitiesTests.cs
+  s_3509689d63d66e::t_894bcbd6b6810f 1-91
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Document/UndoStackTests.cs
+  s_3509689d63d66e::t_863f1f1647216b 1-92
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Editing/ChangeDocumentTests.cs
+  s_3509689d63d66e::t_84d86df5cf554d 1-78
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Editing/TextSegmentReadOnlySectionTests.cs
+  s_3509689d63d66e::t_d387afa495dede 1-183
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Highlighting/HighlightedLineMergeTests.cs
+  s_3509689d63d66e::t_f3cb2d49776b11 1-180
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Highlighting/HtmlClipboardTests.cs
+  s_3509689d63d66e::t_173e5c6061d600 1-56
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Properties/InternalsVisibleTo.cs
+  s_3509689d63d66e::t_310274a9677da4 1-3
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Rendering/TextViewTests.cs
+  s_3509689d63d66e::t_09ad21cfe47d56 1-56
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Search/FindTests.cs
+  s_3509689d63d66e::t_fbca4f58656546 1-129
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Search/SearchPanelTests.cs
+  s_3509689d63d66e::t_548a9134b96e11 1-222
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Snippets/InsertionContextTests.cs
+  s_3509689d63d66e::t_b6e07aad916482 1-1833
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/TextMate/DocumentSnapshotTests.cs
+  s_3509689d63d66e::t_8eb15f38f66db9 1-948
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/TextMate/TextEditorModelTests.cs
+  s_3509689d63d66e::t_a185a763bbe8b4 1-1332
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/TextMate/TextMateInstallationTests.cs
+  s_3509689d63d66e::t_6dce7dc0ecc4c0 1-149
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Utils/CaretNavigationTests.cs
+  s_3509689d63d66e::t_c157e48eb07f11 1-154
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Utils/CompressingTreeListTests.cs
+  s_3509689d63d66e::t_7692a2d35f81f6 1-153
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Utils/DequeTests.cs
+  s_3509689d63d66e::t_09c237b1e54064 1-1157
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Utils/ExtensionMethodsTests.cs
+  s_3509689d63d66e::t_0c84144c8a30b3 1-51
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Utils/IndentationStringTests.cs
+  s_3509689d63d66e::t_62f6781b4a9957 1-51
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Utils/RopeTests.cs
+  s_3509689d63d66e::t_96da57c7e12892 1-207
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/Utils/ValueStringBuilderTests.cs
+  s_3509689d63d66e::t_0dbc37a432d876 1-445
+depends/AvaloniaEdit/test/AvaloniaEdit.Tests/WeakReferenceTests.cs
+  s_3509689d63d66e::t_007e87fb40e855 1-116
+src/Models/StructuredDiff.cs
+  s_3509689d63d66e::t_45e97184930e9a 1-307
+src/Models/StructuredDiffBuilder.cs
+  s_3509689d63d66e::t_08163cc6f1485a 1-2381
+src/Models/TextEncoding.cs
+  s_3509689d63d66e::t_a954fad15c4838 1-69
+src/ViewModels/DropStash.cs
+  s_e6c367c90a61e5::t_472f456e1949b6 1-66
+src/ViewModels/StructuredDiffContext.cs
+  s_3509689d63d66e::t_d2c4c88285ddca 1-221
+src/Views/StructuredDiffSheetView.axaml
+  s_3509689d63d66e::t_d17824d5654b96 1-58
+src/Views/StructuredDiffSheetView.axaml.cs
+  s_3509689d63d66e::t_f02a99e6756576 1-89
+src/Views/StructuredDiffView.axaml
+  s_3509689d63d66e::t_125bfe8eb686b6 1-295
+src/Views/StructuredDiffView.axaml.cs
+  s_3509689d63d66e::t_f5e30e7911d5a4 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "94fa1e5aff28330eeee7dc05d9f3fa95c96d66b6",
+  "prompts": {},
+  "sessions": {
+    "s_3509689d63d66e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f2811-08d9-77e3-8ff1-77124d068b70",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    },
+    "s_e6c367c90a61e5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3a8d-e2be-7be1-a931-d9c7f9c8a5bc",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    }
+  }
+}
