@@ -1,0 +1,29 @@
+src/Views/StructuredDiffView.axaml
+  s_c969bb87f555b8::t_4c9df071639c56 31-49,82-117,119-138,175-186
+src/ViewModels/StructuredDiffContext.cs
+  s_c969bb87f555b8::t_e0473e6194a71e 20-24,163-182
+  s_c969bb87f555b8::t_a1644cce7dab82 183
+src/Models/StructuredDiffBuilder.cs
+  s_c969bb87f555b8::t_84e978a4c536f0 551-576
+  s_c969bb87f555b8::t_8b7b6724bc6889 1342,1442-1444,1462-1474,1522,1524,1856,1946,1954-1957,1959-1960,1962-1975,1979-2068
+  s_c969bb87f555b8::t_60175040eb967f 1976-1978
+src/Models/StructuredDiff.cs
+  s_c969bb87f555b8::t_dfd085c37fc8ec 293
+  s_c969bb87f555b8::t_29dd752b180672 292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "4fc6521f8c127e06170ad2bd80b4982a92e9f193",
+  "prompts": {},
+  "sessions": {
+    "s_c969bb87f555b8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0e364d76fffevn2StszvshV3w5",
+        "model": "unknown"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    }
+  }
+}

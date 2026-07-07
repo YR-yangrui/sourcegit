@@ -1,0 +1,37 @@
+src/Commands/Command.cs
+  s_008fe47ab514a7::t_2e07c64b4bffb6 4
+  s_4214e41d588bef::t_7ae05bca6461d2 160-189
+src/Models/TextEncoding.cs
+  s_008fe47ab514a7::t_ab50476bf724fd 1-69
+src/Commands/QueryFileContent.cs
+  s_4214e41d588bef::t_2d42a9cdc0323e 37-38
+  s_4214e41d588bef::t_61b05cb0b2d16c 39-67
+src/Commands/Diff.cs
+  s_4214e41d588bef::t_dee37e5bc69a33 97
+src/Commands/GetFileChangeForAI.cs
+  s_4214e41d588bef::t_0d336227a3fd5b 25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "01229f4c9f71fb85fdd22504eeab71669d94a21f",
+  "prompts": {},
+  "sessions": {
+    "s_008fe47ab514a7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1773-2ba7-7950-8884-2f25edd4e4ed",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    },
+    "s_4214e41d588bef": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0fd3a7b24ffeQr62U5zfWl3QeJ",
+        "model": "unknown"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    }
+  }
+}
