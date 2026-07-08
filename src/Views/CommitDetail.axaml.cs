@@ -108,6 +108,7 @@ namespace SourceGit.Views
             menu.Items.Add(explore);
             menu.Items.Add(new MenuItem { Header = "-" });
             menu.Items.Add(history);
+            menu.Items.Add(CreateAIReviewMenuItem(repo, commit, changes, App.Text("AIReview.Changes")));
             menu.Items.Add(patch);
             menu.Items.Add(new MenuItem { Header = "-" });
             menu.Items.Add(copyPath);
@@ -153,6 +154,7 @@ namespace SourceGit.Views
             };
 
             var menu = new ContextMenu();
+            menu.Items.Add(CreateAIReviewMenuItem(repo, commit, changes, App.Text("AIReview.Changes")));
             menu.Items.Add(patch);
             menu.Items.Add(new MenuItem() { Header = "-" });
 
@@ -372,6 +374,7 @@ namespace SourceGit.Views
             menu.Items.Add(new MenuItem { Header = "-" });
             menu.Items.Add(history);
             menu.Items.Add(blame);
+            menu.Items.Add(CreateAIReviewMenuItem(repo, commit, [change], App.Text("AIReview.Changes")));
             menu.Items.Add(patch);
             menu.Items.Add(new MenuItem { Header = "-" });
 
@@ -519,6 +522,60 @@ namespace SourceGit.Views
             return menu;
         }
 
+        private MenuItem CreateAIReviewMenuItem(ViewModels.Repository repo, Models.Commit commit, List<Models.Change> changes, string header)
+        {
+            var aiReview = new MenuItem();
+            aiReview.Header = header;
+            aiReview.Icon = this.CreateMenuIcon("Icons.AIAssist");
+
+            var services = repo.GetPreferredOpenAIServices();
+            if (services.Count == 0)
+            {
+                aiReview.Click += async (_, e) =>
+                {
+                    await this.ShowDialogAsync(new Preferences(PreferencesAITabIndex));
+                    e.Handled = true;
+                };
+            }
+            else if (services.Count == 1)
+            {
+                aiReview.Click += (_, e) =>
+                {
+                    DoOpenAIReview(repo, services[0], commit, changes);
+                    e.Handled = true;
+                };
+            }
+            else
+            {
+                foreach (var service in services)
+                {
+                    var dup = service;
+                    var item = new MenuItem();
+                    item.Header = service.Name;
+                    item.Click += (_, e) =>
+                    {
+                        DoOpenAIReview(repo, dup, commit, changes);
+                        e.Handled = true;
+                    };
+
+                    aiReview.Items.Add(item);
+                }
+            }
+
+            return aiReview;
+        }
+
+        private void DoOpenAIReview(ViewModels.Repository repo, AI.Service service, Models.Commit commit, List<Models.Change> changes)
+        {
+            var owner = TopLevel.GetTopLevel(this) as Window;
+            if (owner == null)
+                return;
+
+            var assistant = new ViewModels.AIAssistant(repo, service, commit, changes);
+            var view = new AIAssistant() { DataContext = assistant };
+            view.Show(owner);
+        }
+
         private void OnTabHeaderPointerPressed(object sender, PointerPressedEventArgs e)
         {
             if (ViewModels.Preferences.Instance.UseTwoColumnsLayoutInHistories)
@@ -596,5 +653,7 @@ namespace SourceGit.Views
                 CreateChangeContextMenu(change)?.Open(grid);
             e.Handled = true;
         }
+
+        private const int PreferencesAITabIndex = 7;
     }
 }

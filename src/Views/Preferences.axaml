@@ -815,7 +815,20 @@
               </Grid>
             </Border>
 
-            <ContentControl Grid.Column="1" Margin="16,0,0,0">
+            <Grid Grid.Column="1" Margin="16,0,0,0" RowDefinitions="Auto,*">
+              <Button Grid.Row="0"
+                      Classes="flat"
+                      Height="28"
+                      HorizontalAlignment="Right"
+                      Margin="0,0,0,8"
+                      Click="OpenCustomDiffRendererGuide">
+                <StackPanel Orientation="Horizontal">
+                  <Path Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="{DynamicResource Brush.FG1}"/>
+                  <TextBlock Margin="6,0,0,0" Text="{DynamicResource Text.Preferences.CustomDiff.OpenGuide}"/>
+                </StackPanel>
+              </Button>
+
+              <ContentControl Grid.Row="1">
               <ContentControl.Content>
                 <Binding Path="SelectedCustomDiffRenderer" ElementName="ThisControl">
                   <Binding.TargetNullValue>
@@ -868,7 +881,8 @@
                   </StackPanel>
                 </DataTemplate>
               </ContentControl.DataTemplates>
-            </ContentControl>
+              </ContentControl>
+            </Grid>
           </Grid>
         </TabItem>
 

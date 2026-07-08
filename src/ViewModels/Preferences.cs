@@ -971,7 +971,7 @@ namespace SourceGit.ViewModels
         private bool _enableCustomDiffRenderers = false;
         private bool _ignoreWhitespaceChangesInDiff = false;
         private bool _ignoreCRAtEOLInDiff = true;
-        private bool _useSyntaxHighlighting = false;
+        private bool _useSyntaxHighlighting = true;
         private bool _enableDiffViewWordWrap = false;
         private bool _showHiddenSymbolsInDiffView = false;
         private bool _useFullTextDiff = false;

@@ -24,7 +24,6 @@ namespace SourceGit.Models
         public StructuredDiffKind Kind { get; set; } = StructuredDiffKind.Spreadsheet;
         public string Summary { get; set; } = string.Empty;
         public string FormattedText { get; set; } = string.Empty;
-        public TextDiff FormattedTextDiff { get; set; } = null;
         public TextDiff RawTextDiff { get; set; } = null;
         public List<StructuredDiffSheet> Sheets { get; set; } = [];
         public List<StructuredDiffNode> Nodes { get; set; } = [];
@@ -179,6 +178,13 @@ namespace SourceGit.Models
         public bool IsAdded => Change == StructuredDiffChangeKind.Added;
         public bool IsDeleted => Change == StructuredDiffChangeKind.Deleted;
         public bool IsModified => Change == StructuredDiffChangeKind.Modified;
+        public string ChangeMark => Change switch
+        {
+            StructuredDiffChangeKind.Added => "+",
+            StructuredDiffChangeKind.Deleted => "-",
+            StructuredDiffChangeKind.Modified => "~",
+            _ => string.Empty,
+        };
         public string ChangeLabel => Change == StructuredDiffChangeKind.None ? string.Empty : Change.ToString();
         public string Summary => $"{Path}  +{Count(StructuredDiffChangeKind.Added)} -{Count(StructuredDiffChangeKind.Deleted)} ~{Count(StructuredDiffChangeKind.Modified)}";
         public List<StructuredPropertyGroup> PropertyGroups => BuildPropertyGroups();
@@ -231,6 +237,7 @@ namespace SourceGit.Models
         public string Name { get; set; } = string.Empty;
         public List<StructuredPropertyChange> Changes { get; set; } = [];
         public string Header => $"{Name}  +{Count(StructuredDiffChangeKind.Added)} -{Count(StructuredDiffChangeKind.Deleted)} ~{Count(StructuredDiffChangeKind.Modified)}";
+        public string ChangeSummary => $"+{Count(StructuredDiffChangeKind.Added)} -{Count(StructuredDiffChangeKind.Deleted)} ~{Count(StructuredDiffChangeKind.Modified)}";
         public StructuredDiffChangeKind Change
         {
             get
@@ -283,6 +290,8 @@ namespace SourceGit.Models
         public bool IsAdded => Change == StructuredDiffChangeKind.Added;
         public bool IsDeleted => Change == StructuredDiffChangeKind.Deleted;
         public bool IsModified => Change == StructuredDiffChangeKind.Modified;
+        public bool IsOldValueChanged => Change is StructuredDiffChangeKind.Deleted or StructuredDiffChangeKind.Modified;
+        public bool IsNewValueChanged => Change is StructuredDiffChangeKind.Added or StructuredDiffChangeKind.Modified;
         public string ChangeLabel => Change == StructuredDiffChangeKind.None ? string.Empty : Change.ToString();
         public string GroupName
         {

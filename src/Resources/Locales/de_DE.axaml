@@ -632,6 +632,7 @@ $1, $2, … Werte der Eingabe-Steuerelemente</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Patterns" xml:space="preserve">File patterns:</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Patterns.Tip" xml:space="preserve">Use ';' or ',' to separate patterns, for example: *.prefab;*.unity</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Renderer" xml:space="preserve">Custom Renderer</x:String>
+  <x:String x:Key="Text.Preferences.CustomDiff.OpenGuide" xml:space="preserve">Open Guide</x:String>
   <x:String x:Key="Text.Preferences.General" xml:space="preserve">ALLGEMEIN</x:String>
   <x:String x:Key="Text.Preferences.General.Check4UpdatesOnStartup" xml:space="preserve">Beim Programmstart nach Aktualisierungen suchen</x:String>
   <x:String x:Key="Text.Preferences.General.ExportPerfettoTraceOnExit" xml:space="preserve">Export Perfetto trace on exit</x:String>

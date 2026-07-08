@@ -227,6 +227,11 @@ namespace SourceGit.ViewModels
             WebLinks = Models.CommitLink.Get(repo.Remotes);
         }
 
+        public void UseChangesTab()
+        {
+            ActiveTabIndex = 1;
+        }
+
         public void Dispose()
         {
             if (_disposed)

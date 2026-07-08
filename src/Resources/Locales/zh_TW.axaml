@@ -702,6 +702,7 @@
   <x:String x:Key="Text.Preferences.CustomDiff.Patterns" xml:space="preserve">檔案匹配:</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Patterns.Tip" xml:space="preserve">使用 ';' 或 ',' 分隔多個匹配，例如: *.prefab;*.unity</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Renderer" xml:space="preserve">自訂渲染器</x:String>
+  <x:String x:Key="Text.Preferences.CustomDiff.OpenGuide" xml:space="preserve">開啟說明</x:String>
   <x:String x:Key="Text.Preferences.General" xml:space="preserve">一般設定</x:String>
   <x:String x:Key="Text.Preferences.General.Check4UpdatesOnStartup" xml:space="preserve">啟動時檢查軟體更新</x:String>
   <x:String x:Key="Text.Preferences.General.ExportPerfettoTraceOnExit" xml:space="preserve">正常結束時匯出 Perfetto 追蹤</x:String>

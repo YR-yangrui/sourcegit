@@ -47,7 +47,8 @@ namespace SourceGit.Views
         {
             IsReadOnly = true;
             ShowLineNumbers = false;
-            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            WordWrap = true;
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
 
             TextArea.TextView.Margin = new Thickness(4, 0);
@@ -169,6 +170,41 @@ namespace SourceGit.Views
             e.Handled = true;
         }
 
+        private async void OnCopyReviewResultClicked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.AIAssistant { ReviewResult: { } result } && !string.IsNullOrWhiteSpace(result.CopyText))
+                await this.CopyTextAsync(result.CopyText);
+
+            e.Handled = true;
+        }
+
+        private async void OnCopyFindingClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is Control { DataContext: ViewModels.AIReviewFinding finding } && !string.IsNullOrWhiteSpace(finding.CopyText))
+                await this.CopyTextAsync(finding.CopyText);
+
+            e.Handled = true;
+        }
+
+        private void OnDismissFindingClicked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.AIAssistant vm &&
+                sender is Control { DataContext: ViewModels.AIReviewFinding finding })
+            {
+                vm.DismissFinding(finding);
+            }
+
+            e.Handled = true;
+        }
+
+        private async void OnCopyClicked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.AIAssistant vm && !string.IsNullOrWhiteSpace(vm.CopyText))
+                await this.CopyTextAsync(vm.CopyText);
+
+            e.Handled = true;
+        }
+
         private async void OnRegenClicked(object sender, RoutedEventArgs e)
         {
             if (DataContext is ViewModels.AIAssistant vm)
@@ -176,5 +212,6 @@ namespace SourceGit.Views
 
             e.Handled = true;
         }
+
     }
 }

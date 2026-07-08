@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 using Avalonia;
@@ -569,6 +570,21 @@ namespace SourceGit.Views
             var idx = ViewModels.Preferences.Instance.CustomDiffRenderers.IndexOf(SelectedCustomDiffRenderer);
             if (idx < ViewModels.Preferences.Instance.CustomDiffRenderers.Count - 1)
                 ViewModels.Preferences.Instance.CustomDiffRenderers.Move(idx + 1, idx);
+
+            e.Handled = true;
+        }
+
+        private async void OpenCustomDiffRendererGuide(object sender, RoutedEventArgs e)
+        {
+            var guide = Path.Combine(AppContext.BaseDirectory, "docs", "custom-diff-renderer.md");
+            if (File.Exists(guide))
+            {
+                Native.OS.OpenBrowser(new Uri(guide).AbsoluteUri);
+            }
+            else
+            {
+                await new Alert().ShowAsync(this, $"Custom diff renderer guide not found: {guide}", true);
+            }
 
             e.Handled = true;
         }

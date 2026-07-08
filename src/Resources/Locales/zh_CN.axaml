@@ -23,11 +23,15 @@
   <x:String x:Key="Text.AddWorktree.WhatToCheckout.CreateNew" xml:space="preserve">创建新分支</x:String>
   <x:String x:Key="Text.AddWorktree.WhatToCheckout.Existing" xml:space="preserve">已有分支</x:String>
   <x:String x:Key="Text.AIAssistant" xml:space="preserve">AI助手</x:String>
+  <x:String x:Key="Text.AIAssistant.GenerateCommitMessage" xml:space="preserve">AI提交信息</x:String>
   <x:String x:Key="Text.AIAssistant.Model" xml:space="preserve">模型</x:String>
   <x:String x:Key="Text.AIAssistant.Regen" xml:space="preserve">重新生成</x:String>
   <x:String x:Key="Text.AIAssistant.Tip" xml:space="preserve">使用AI助手生成提交信息</x:String>
   <x:String x:Key="Text.AIAssistant.Use" xml:space="preserve">应用</x:String>
   <x:String x:Key="Text.AIReview" xml:space="preserve">AI Review</x:String>
+  <x:String x:Key="Text.AIReview.Changes" xml:space="preserve">AI Review 变更</x:String>
+  <x:String x:Key="Text.AIReview.Commit" xml:space="preserve">AI Review 提交</x:String>
+  <x:String x:Key="Text.AIReview.NoChanges" xml:space="preserve">没有可供 AI Review 的变更。</x:String>
   <x:String x:Key="Text.AIReview.NoStagedChanges" xml:space="preserve">没有已暂存的文件可供 AI Review。</x:String>
   <x:String x:Key="Text.AIReview.Tip" xml:space="preserve">使用 AI Review 审查已暂存变更</x:String>
   <x:String x:Key="Text.App.Hide" xml:space="preserve">隐藏 SourceGit</x:String>
@@ -706,6 +710,7 @@
   <x:String x:Key="Text.Preferences.CustomDiff.Patterns" xml:space="preserve">文件匹配：</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Patterns.Tip" xml:space="preserve">使用 ';' 或 ',' 分隔多个匹配，例如：*.prefab;*.unity</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Renderer" xml:space="preserve">自定义渲染器</x:String>
+  <x:String x:Key="Text.Preferences.CustomDiff.OpenGuide" xml:space="preserve">打开说明</x:String>
   <x:String x:Key="Text.Preferences.General" xml:space="preserve">通用配置</x:String>
   <x:String x:Key="Text.Preferences.General.Check4UpdatesOnStartup" xml:space="preserve">启动时检测软件更新</x:String>
   <x:String x:Key="Text.Preferences.General.ExportPerfettoTraceOnExit" xml:space="preserve">正常退出时导出 Perfetto 跟踪</x:String>

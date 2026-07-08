@@ -6,7 +6,6 @@ namespace SourceGit.ViewModels
     public class StructuredDiffContext : ObservableObject
     {
         public Models.StructuredDiff Diff { get; }
-        public TextDiffContext FormattedPrefabDiff { get; private set; }
         public TextDiffContext RawPrefabDiff { get; private set; }
 
         public bool IsTable => Diff.Kind is Models.StructuredDiffKind.Spreadsheet or Models.StructuredDiffKind.ConfigBytes;
@@ -14,8 +13,18 @@ namespace SourceGit.ViewModels
         public bool HasRawPrefabDiff => RawPrefabDiff != null;
         public string TableFilterButtonText => _showOnlyChangedRows ? "显示全部" : "只显示本地改动";
         public string PrefabFilterButtonText => _showOnlyChangedPrefabNodes ? "显示全部" : "只显示Diff";
+        public bool ShowOnlyChangedPrefabNodes
+        {
+            get => _showOnlyChangedPrefabNodes;
+            set
+            {
+                if (!SetProperty(ref _showOnlyChangedPrefabNodes, value))
+                    return;
+
+                RefreshPrefabNodeFilter();
+            }
+        }
         public bool IsShowingPrefabHierarchy => _prefabViewMode == PrefabViewMode.Hierarchy;
-        public bool IsShowingFormattedPrefabDiff => _prefabViewMode == PrefabViewMode.Formatted;
         public bool IsShowingRawPrefabDiff => _prefabViewMode == PrefabViewMode.Raw;
         public int PrefabAddedNodes => CountPrefabNodes(Models.StructuredDiffChangeKind.Added);
         public int PrefabDeletedNodes => CountPrefabNodes(Models.StructuredDiffChangeKind.Deleted);
@@ -71,11 +80,6 @@ namespace SourceGit.ViewModels
             SetPrefabViewMode(PrefabViewMode.Hierarchy);
         }
 
-        public void ShowFormattedPrefabDiff()
-        {
-            SetPrefabViewMode(PrefabViewMode.Formatted);
-        }
-
         public void ToggleTableFilter()
         {
             _showOnlyChangedRows = !_showOnlyChangedRows;
@@ -87,6 +91,12 @@ namespace SourceGit.ViewModels
         public void TogglePrefabFilter()
         {
             _showOnlyChangedPrefabNodes = !_showOnlyChangedPrefabNodes;
+            OnPropertyChanged(nameof(ShowOnlyChangedPrefabNodes));
+            RefreshPrefabNodeFilter();
+        }
+
+        private void RefreshPrefabNodeFilter()
+        {
             OnPropertyChanged(nameof(VisiblePrefabNodes));
             OnPropertyChanged(nameof(PrefabFilterButtonText));
             RefreshPrefabTextDiffs();
@@ -96,9 +106,7 @@ namespace SourceGit.ViewModels
 
         private void RefreshPrefabTextDiffs()
         {
-            FormattedPrefabDiff = CreatePrefabTextDiffContext(Diff.FormattedTextDiff, FormattedPrefabDiff);
             RawPrefabDiff = CreatePrefabTextDiffContext(Diff.RawTextDiff, RawPrefabDiff);
-            OnPropertyChanged(nameof(FormattedPrefabDiff));
             OnPropertyChanged(nameof(RawPrefabDiff));
             OnPropertyChanged(nameof(HasRawPrefabDiff));
         }
@@ -145,7 +153,6 @@ namespace SourceGit.ViewModels
 
             _prefabViewMode = mode;
             OnPropertyChanged(nameof(IsShowingPrefabHierarchy));
-            OnPropertyChanged(nameof(IsShowingFormattedPrefabDiff));
             OnPropertyChanged(nameof(IsShowingRawPrefabDiff));
         }
 
@@ -214,7 +221,6 @@ namespace SourceGit.ViewModels
         private enum PrefabViewMode
         {
             Hierarchy,
-            Formatted,
             Raw,
         }
     }

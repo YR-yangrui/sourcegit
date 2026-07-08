@@ -16,6 +16,10 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
       - name: Download build
         uses: actions/download-artifact@v8
         with:
@@ -26,6 +30,7 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
           RUNTIME: ${{ matrix.runtime }}
+          SOURCEGIT_BUILD: build/SourceGit
         run: ./build/scripts/package.win.ps1
       - name: Upload package artifact
         uses: actions/upload-artifact@v7

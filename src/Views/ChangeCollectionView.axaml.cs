@@ -379,7 +379,8 @@ namespace SourceGit.Views
                     if (posX < node.Depth * 16 + 16)
                         return;
 
-                    ToggleNodeIsExpanded(node);
+                    // Only the expander toggles folders; double-tapping the row acts on all files under it.
+                    RaiseEvent(new RoutedEventArgs(ChangeDoubleTappedEvent));
                 }
                 else
                 {

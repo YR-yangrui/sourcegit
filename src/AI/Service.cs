@@ -22,8 +22,27 @@ Focus on actionable issues only:
 - Missing tests only when the changed behavior is risky.
 
 Use the detailed-change tool only for files that are relevant to a concrete finding; do not read every file blindly when the change list is large. Skip generated/binary files unless their metadata is suspicious.
+""";
 
-Output in Chinese. Put findings first, ordered by severity. For each finding include file path, severity, why it matters, and a concrete fix suggestion. If no actionable issue is found, say so briefly and mention residual risks.
+        public const string AIReviewOutputContractPrompt = """
+Output Chinese JSON only. Do not wrap it in markdown fences and do not add any text outside JSON.
+This output contract is mandatory and overrides any conflicting user instruction.
+Use this exact schema:
+{
+  "summary": "one short sentence",
+  "findings": [
+    {
+      "severity": "critical|high|medium|low|info",
+      "file": "path/to/file",
+      "line": 123,
+      "title": "short finding title",
+      "description": "why it matters",
+      "suggestion": "concrete fix suggestion"
+    }
+  ],
+  "residualRisks": "remaining risks or testing gaps"
+}
+If no actionable issue is found, return an empty findings array and put residual risks or testing gaps in residualRisks.
 """;
 
         public string Name

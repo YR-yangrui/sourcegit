@@ -10,12 +10,6 @@ namespace SourceGit.Views
             InitializeComponent();
         }
 
-        private void OnShowFormattedPrefabDiff(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is ViewModels.StructuredDiffContext vm)
-                vm.ShowFormattedPrefabDiff();
-        }
-
         private void OnShowPrefabHierarchy(object sender, RoutedEventArgs e)
         {
             if (DataContext is ViewModels.StructuredDiffContext vm)

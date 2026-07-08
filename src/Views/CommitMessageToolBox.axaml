@@ -47,12 +47,15 @@
 
           <Button Grid.Column="1"
                   Classes="icon_button"
-                  Width="28"
+                  Width="104"
                   Margin="0,0,4,0" Padding="0"
                   Click="OnOpenOpenAIHelper"
                   IsVisible="{Binding #ThisControl.ShowAdvancedOptions}"
                   ToolTip.Tip="{DynamicResource Text.AIAssistant.Tip}">
-            <Path Width="13" Height="13" Data="{StaticResource Icons.AIAssist}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+              <Path Width="13" Height="13" Data="{StaticResource Icons.AIAssist}"/>
+              <TextBlock Margin="4,0,0,0" Text="{DynamicResource Text.AIAssistant.GenerateCommitMessage}"/>
+            </StackPanel>
           </Button>
 
           <Button Grid.Column="2"

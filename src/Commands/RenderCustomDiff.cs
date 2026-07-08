@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -179,6 +181,32 @@ namespace SourceGit.Commands
             {
                 TryDeleteDirectory(tempDir);
                 return null;
+            }
+        }
+
+        public async Task<string> RunForAIAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                using var input = await PrepareInputAsync(cancellationToken).ConfigureAwait(false);
+                if (input == null)
+                    return string.Empty;
+
+                var result = await RunRendererAsync(input.OldFile, input.NewFile, input.TempDir, cancellationToken)
+                    .ConfigureAwait(false);
+                if (!result.IsSuccess || string.IsNullOrWhiteSpace(result.StdOut))
+                    return string.Empty;
+
+                return await ConvertRendererOutputForAIAsync(result.StdOut, input.TempDir, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
 
@@ -432,6 +460,40 @@ namespace SourceGit.Commands
                 RendererName = _renderer.Name,
                 Message = "The custom diff renderer did not output HTML or an HTML file path.",
             };
+        }
+
+        private async Task<string> ConvertRendererOutputForAIAsync(string stdout, string tempDir, CancellationToken cancellationToken)
+        {
+            var html = ExtractHtml(stdout);
+            if (!string.IsNullOrWhiteSpace(html))
+                return HtmlToPlainText(html);
+
+            var path = FindHtmlPath(stdout, tempDir);
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                var content = await File.ReadAllTextAsync(path, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+                return HtmlToPlainText(content);
+            }
+
+            return stdout.Trim();
+        }
+
+        private static string HtmlToPlainText(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+                return string.Empty;
+
+            // Custom renderers usually target WebView. For AI review we only need a compact,
+            // readable text approximation, so strip scripts/styles and preserve table breaks.
+            var text = Regex.Replace(html, @"<\s*(script|style)[^>]*>.*?<\s*/\s*\1\s*>", string.Empty, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            text = Regex.Replace(text, @"<\s*(br|/p|/div|/tr|/li|/h[1-6])\b[^>]*>", "\n", RegexOptions.IgnoreCase);
+            text = Regex.Replace(text, @"<\s*(td|th)\b[^>]*>", "\t", RegexOptions.IgnoreCase);
+            text = Regex.Replace(text, @"<[^>]+>", " ", RegexOptions.Singleline);
+            text = WebUtility.HtmlDecode(text);
+            text = Regex.Replace(text, @"[ \t\f\v]+", " ");
+            text = Regex.Replace(text, @" *\n *", "\n");
+            text = Regex.Replace(text, @"\n{3,}", "\n\n");
+            return text.Trim();
         }
 
         private string ExpandArguments(string arguments, string oldFile, string newFile)

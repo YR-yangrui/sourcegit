@@ -531,12 +531,16 @@ namespace SourceGit.ViewModels
 
                 if (_detailContext is CommitDetail detail)
                 {
+                    detail.UseChangesTab();
                     detail.Commit = c;
                     span.Set("detailAction", "reuse_commit_detail");
                 }
                 else
                 {
-                    DetailContext = new CommitDetail(_repo, _commitDetailSharedData) { Commit = c };
+                    var newDetail = new CommitDetail(_repo, _commitDetailSharedData);
+                    newDetail.UseChangesTab();
+                    newDetail.Commit = c;
+                    DetailContext = newDetail;
                     span.Set("detailAction", "create_commit_detail");
                 }
 

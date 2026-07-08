@@ -4,15 +4,52 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:v="using:SourceGit.Views"
                     xmlns:vm="using:SourceGit.ViewModels"
-                    mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="400"
+                    mc:Ignorable="d" d:DesignWidth="760" d:DesignHeight="480"
                     x:Class="SourceGit.Views.AIAssistant"
                     x:DataType="vm:AIAssistant"
                     x:Name="ThisControl"
                     Icon="/App.ico"
                     Title="{DynamicResource Text.AIAssistant}"
-                    Width="520" Height="400"
+                    Width="760" Height="480"
                     CanResize="True"
                     WindowStartupLocation="CenterOwner">
+  <v:ChromelessWindow.Styles>
+    <Style Selector="Border.review_card">
+      <Setter Property="Margin" Value="0,0,0,10"/>
+      <Setter Property="Padding" Value="12"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Background" Value="{DynamicResource Brush.Window}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border2}"/>
+    </Style>
+
+    <Style Selector="Border.severity">
+      <Setter Property="Width" Value="5"/>
+      <Setter Property="CornerRadius" Value="3"/>
+      <Setter Property="Background" Value="#6B7280"/>
+    </Style>
+
+    <Style Selector="Border.severity.critical">
+      <Setter Property="Background" Value="#DC2626"/>
+    </Style>
+
+    <Style Selector="Border.severity.high">
+      <Setter Property="Background" Value="#EA580C"/>
+    </Style>
+
+    <Style Selector="Border.severity.medium">
+      <Setter Property="Background" Value="#D97706"/>
+    </Style>
+
+    <Style Selector="Border.severity.low">
+      <Setter Property="Background" Value="#2563EB"/>
+    </Style>
+
+    <Style Selector="Border.severity.info">
+      <Setter Property="Background" Value="#059669"/>
+    </Style>
+  </v:ChromelessWindow.Styles>
+
   <Grid RowDefinitions="Auto,*,Auto">
     <!-- TitleBar -->
     <Grid Grid.Row="0" Height="28" IsVisible="{Binding !#ThisControl.UseSystemWindowFrame}">
@@ -42,10 +79,114 @@
                       BorderThickness="1"
                       BorderBrush="{DynamicResource Brush.Border2}"
                       Background="{DynamicResource Brush.Contents}"
+                      IsVisible="{Binding ShowRawText}"
                       Content="{Binding Text}"/>
 
+    <ScrollViewer Grid.Row="1"
+                  Margin="8"
+                  HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto"
+                  IsVisible="{Binding HasReviewResult}">
+      <StackPanel Spacing="10">
+        <Border Classes="review_card">
+          <StackPanel Spacing="6">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <TextBlock Grid.Column="0"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         Text="{Binding ReviewResult.Summary}"
+                         TextWrapping="Wrap"/>
+              <Button Grid.Column="1"
+                      Classes="flat"
+                      Height="24"
+                      Margin="12,0,0,0"
+                      Padding="8,0"
+                      Content="{DynamicResource Text.Copy}"
+                      Click="OnCopyReviewResultClicked"/>
+              <Border Grid.Column="2"
+                      Margin="12,0,0,0"
+                      Padding="8,3"
+                      CornerRadius="10"
+                      Background="{DynamicResource Brush.Accent}">
+                <TextBlock FontSize="11"
+                           Foreground="White"
+                           Text="{Binding ReviewResult.FindingCountText}"/>
+              </Border>
+            </Grid>
+            <TextBlock Foreground="{DynamicResource Brush.FG2}"
+                       Text="{Binding ReviewResult.ResidualRisks}"
+                       TextWrapping="Wrap"/>
+          </StackPanel>
+        </Border>
+
+        <ItemsControl ItemsSource="{Binding ReviewResult.Findings}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:AIReviewFinding">
+              <Border Classes="review_card">
+                <Grid ColumnDefinitions="Auto,*">
+                  <Border Grid.Column="0"
+                          Classes="severity"
+                          Classes.critical="{Binding IsCritical}"
+                          Classes.high="{Binding IsHigh}"
+                          Classes.medium="{Binding IsMedium}"
+                          Classes.low="{Binding IsLow}"
+                          Classes.info="{Binding IsInfo}"/>
+                  <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="6">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                      <Border Grid.Column="0"
+                              Padding="8,3"
+                              CornerRadius="10"
+                              Background="{DynamicResource Brush.Contents}">
+                        <TextBlock FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding SeverityLabel}"/>
+                      </Border>
+                      <TextBlock Grid.Column="1"
+                                 Margin="8,0,0,0"
+                                 FontSize="14"
+                                 FontWeight="SemiBold"
+                                 Text="{Binding Title}"
+                                 TextWrapping="Wrap"/>
+                      <Button Grid.Column="2"
+                              Classes="flat"
+                              Height="24"
+                              Margin="8,0,0,0"
+                              Padding="8,0"
+                              Content="{DynamicResource Text.Copy}"
+                              Click="OnCopyFindingClicked"/>
+                      <Button Grid.Column="3"
+                              Classes="flat"
+                              Height="24"
+                              Margin="4,0,0,0"
+                              Padding="8,0"
+                              Content="{DynamicResource Text.Close}"
+                              Click="OnDismissFindingClicked"/>
+                    </Grid>
+
+                    <TextBlock Foreground="{DynamicResource Brush.Accent}"
+                               FontFamily="{DynamicResource Fonts.Monospace}"
+                               Text="{Binding Location}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding Description}"
+                               TextWrapping="Wrap"/>
+                    <Border Padding="8"
+                            CornerRadius="6"
+                            Background="{DynamicResource Brush.Contents}">
+                      <TextBlock Text="{Binding Suggestion}"
+                                 Foreground="{DynamicResource Brush.FG2}"
+                                 TextWrapping="Wrap"/>
+                    </Border>
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+
     <!-- Options -->
-    <Grid Grid.Row="2" Margin="8,0,8,8" ColumnDefinitions="Auto,*,18,Auto,Auto">
+    <Grid Grid.Row="2" Margin="8,0,8,8" ColumnDefinitions="Auto,*,18,Auto,Auto,Auto">
       <TextBlock Grid.Column="0"
                  Classes="group_header_label"
                  Text="{DynamicResource Text.AIAssistant.Model}"/>
@@ -74,6 +215,15 @@
               Click="OnUseClicked"/>
       
       <Button Grid.Column="4"
+              Classes="flat"
+              Height="28"
+              Margin="0,0,8,0"
+              Padding="12,0"
+              Content="{DynamicResource Text.Copy}"
+              IsEnabled="{Binding CanCopyResponse}"
+              Click="OnCopyClicked"/>
+
+      <Button Grid.Column="5"
               Classes="flat"
               Height="28"
               Padding="12,0"

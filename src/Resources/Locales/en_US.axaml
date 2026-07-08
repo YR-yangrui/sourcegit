@@ -19,11 +19,15 @@
   <x:String x:Key="Text.AddWorktree.WhatToCheckout.CreateNew" xml:space="preserve">Create New Branch</x:String>
   <x:String x:Key="Text.AddWorktree.WhatToCheckout.Existing" xml:space="preserve">Existing Branch</x:String>
   <x:String x:Key="Text.AIAssistant" xml:space="preserve">AI Assistant</x:String>
+  <x:String x:Key="Text.AIAssistant.GenerateCommitMessage" xml:space="preserve">AI Commit</x:String>
   <x:String x:Key="Text.AIAssistant.Model" xml:space="preserve">MODEL</x:String>
   <x:String x:Key="Text.AIAssistant.Regen" xml:space="preserve">RE-GENERATE</x:String>
   <x:String x:Key="Text.AIAssistant.Tip" xml:space="preserve">Use AI to generate commit message</x:String>
   <x:String x:Key="Text.AIAssistant.Use" xml:space="preserve">Use</x:String>
   <x:String x:Key="Text.AIReview" xml:space="preserve">AI Review</x:String>
+  <x:String x:Key="Text.AIReview.Changes" xml:space="preserve">AI Review Changes</x:String>
+  <x:String x:Key="Text.AIReview.Commit" xml:space="preserve">AI Review Commit</x:String>
+  <x:String x:Key="Text.AIReview.NoChanges" xml:space="preserve">No changes found for AI Review.</x:String>
   <x:String x:Key="Text.AIReview.NoStagedChanges" xml:space="preserve">No staged files for AI Review.</x:String>
   <x:String x:Key="Text.AIReview.Tip" xml:space="preserve">Review staged changes with AI Review</x:String>
   <x:String x:Key="Text.App.Hide" xml:space="preserve">Hide SourceGit</x:String>
@@ -702,6 +706,7 @@
   <x:String x:Key="Text.Preferences.CustomDiff.Patterns" xml:space="preserve">File patterns:</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Patterns.Tip" xml:space="preserve">Use ';' or ',' to separate patterns, for example: *.prefab;*.unity</x:String>
   <x:String x:Key="Text.Preferences.CustomDiff.Renderer" xml:space="preserve">Custom Renderer</x:String>
+  <x:String x:Key="Text.Preferences.CustomDiff.OpenGuide" xml:space="preserve">Open Guide</x:String>
   <x:String x:Key="Text.Preferences.General" xml:space="preserve">GENERAL</x:String>
   <x:String x:Key="Text.Preferences.General.Check4UpdatesOnStartup" xml:space="preserve">Check for updates on startup</x:String>
   <x:String x:Key="Text.Preferences.General.ExportPerfettoTraceOnExit" xml:space="preserve">Export Perfetto trace on exit</x:String>

@@ -27,6 +27,8 @@ obj/
 node_modules/
 package.json
 package-lock.json
+__pycache__/
+*.pyc
 
 
 # Flatpak
@@ -34,6 +36,8 @@ package-lock.json
 
 build/resources/
 build/SourceGit/
+build/SourceGit-single-*/
+build/dev-run/
 build/SourceGit.app/
 build/*.zip
 build/*.tar.gz
@@ -47,3 +51,4 @@ src/Properties/launchSettings.json
 
 publish/
 publish-*/
+packages/

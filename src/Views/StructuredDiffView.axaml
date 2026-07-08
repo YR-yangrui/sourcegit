@@ -11,46 +11,215 @@
              x:DataType="vm:StructuredDiffContext">
   <UserControl.Styles>
     <Style Selector="Border.state">
-      <Setter Property="Width" Value="4"/>
-      <Setter Property="Margin" Value="0,0,6,0"/>
-      <Setter Property="CornerRadius" Value="2"/>
+      <Setter Property="Width" Value="3"/>
+      <Setter Property="CornerRadius" Value="0"/>
       <Setter Property="Background" Value="Transparent"/>
     </Style>
 
     <Style Selector="Border.state.added">
-      <Setter Property="Background" Value="#33AA44"/>
+      <Setter Property="Background" Value="#18834A"/>
     </Style>
 
     <Style Selector="Border.state.deleted">
-      <Setter Property="Background" Value="#CC3333"/>
+      <Setter Property="Background" Value="#BF3C3C"/>
     </Style>
 
     <Style Selector="Border.state.modified">
-      <Setter Property="Background" Value="#D8A400"/>
+      <Setter Property="Background" Value="#A66B00"/>
+    </Style>
+
+    <Style Selector="Border.prefab_panel">
+      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Background" Value="#FFFFFF"/>
+      <Setter Property="ClipToBounds" Value="True"/>
     </Style>
 
     <Style Selector="Border.prefab_stat">
-      <Setter Property="MinWidth" Value="94"/>
-      <Setter Property="Padding" Value="10,6"/>
-      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="MinHeight" Value="22"/>
+      <Setter Property="Padding" Value="8,2"/>
+      <Setter Property="CornerRadius" Value="999"/>
       <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border2}"/>
-      <Setter Property="Background" Value="{DynamicResource Brush.Window}"/>
+      <Setter Property="BorderBrush" Value="#CFD9E3"/>
+      <Setter Property="Background" Value="#FFFFFF"/>
+    </Style>
+
+    <Style Selector="Border.prefab_stat.added">
+      <Setter Property="BorderBrush" Value="#9BD2AF"/>
+      <Setter Property="Background" Value="#E5F6EB"/>
+    </Style>
+
+    <Style Selector="Border.prefab_stat.deleted">
+      <Setter Property="BorderBrush" Value="#E5A6A6"/>
+      <Setter Property="Background" Value="#FDEAEA"/>
+    </Style>
+
+    <Style Selector="Border.prefab_stat.modified">
+      <Setter Property="BorderBrush" Value="#E7C478"/>
+      <Setter Property="Background" Value="#FFF1D6"/>
     </Style>
 
     <Style Selector="TextBlock.prefab_stat_value">
-      <Setter Property="FontSize" Value="18"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_muted">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="Foreground" Value="#6B7A8D"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_section_title">
+      <Setter Property="Foreground" Value="#6B7A8D"/>
+      <Setter Property="FontSize" Value="11"/>
       <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
-    <Style Selector="TextBlock.prefab_stat_label">
-      <Setter Property="FontSize" Value="11"/>
-      <Setter Property="Foreground" Value="{DynamicResource Brush.FG2}"/>
+    <Style Selector="Button.prefab_action">
+      <Setter Property="MinHeight" Value="26"/>
+      <Setter Property="Padding" Value="10,2"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#CFD9E3"/>
+      <Setter Property="Background" Value="#FFFFFF"/>
+      <Setter Property="Foreground" Value="#1E293B"/>
+    </Style>
+
+    <Style Selector="CheckBox.prefab_filter">
+      <Setter Property="Foreground" Value="#6B7A8D"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_tree_mark">
+      <Setter Property="Width" Value="16"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="Foreground" Value="#6B7A8D"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_tree_mark.added">
+      <Setter Property="Foreground" Value="#18834A"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_tree_mark.deleted">
+      <Setter Property="Foreground" Value="#BF3C3C"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_tree_mark.modified">
+      <Setter Property="Foreground" Value="#A66B00"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_tree_name">
+      <Setter Property="Foreground" Value="#6B7A8D"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_tree_name.added">
+      <Setter Property="Foreground" Value="#18834A"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_tree_name.deleted">
+      <Setter Property="Foreground" Value="#BF3C3C"/>
+      <Setter Property="TextDecorations" Value="Strikethrough"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_tree_name.modified">
+      <Setter Property="Foreground" Value="#A66B00"/>
+    </Style>
+
+    <Style Selector="Border.prefab_status">
+      <Setter Property="MinHeight" Value="20"/>
+      <Setter Property="Padding" Value="7,1"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#CFD9E3"/>
+      <Setter Property="Background" Value="#FFFFFF"/>
+    </Style>
+
+    <Style Selector="Border.prefab_status.added">
+      <Setter Property="BorderBrush" Value="#9BD2AF"/>
+      <Setter Property="Background" Value="#E5F6EB"/>
+    </Style>
+
+    <Style Selector="Border.prefab_status.deleted">
+      <Setter Property="BorderBrush" Value="#E5A6A6"/>
+      <Setter Property="Background" Value="#FDEAEA"/>
+    </Style>
+
+    <Style Selector="Border.prefab_status.modified">
+      <Setter Property="BorderBrush" Value="#E7C478"/>
+      <Setter Property="Background" Value="#FFF1D6"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_status_text">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="#6B7A8D"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_status_text.added">
+      <Setter Property="Foreground" Value="#18834A"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_status_text.deleted">
+      <Setter Property="Foreground" Value="#BF3C3C"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_status_text.modified">
+      <Setter Property="Foreground" Value="#A66B00"/>
+    </Style>
+
+    <Style Selector="Border.prefab_component">
+      <Setter Property="Margin" Value="0,0,0,10"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#CFD9E3"/>
+      <Setter Property="Background" Value="#FFFFFF"/>
+      <Setter Property="ClipToBounds" Value="True"/>
+    </Style>
+
+    <Style Selector="ToggleButton.prefab_component_head">
+      <Setter Property="MinHeight" Value="34"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="BorderThickness" Value="0,0,0,1"/>
+      <Setter Property="BorderBrush" Value="#E6EDF3"/>
+      <Setter Property="Background" Value="#F8FBFD"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+
+    <Style Selector="Border.prefab_value">
+      <Setter Property="MinHeight" Value="24"/>
+      <Setter Property="Padding" Value="7,2"/>
+      <Setter Property="CornerRadius" Value="4"/>
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <Style Selector="Border.prefab_value.added">
+      <Setter Property="Background" Value="#E5F6EB"/>
+    </Style>
+
+    <Style Selector="Border.prefab_value.deleted">
+      <Setter Property="Background" Value="#FDEAEA"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_value_text">
+      <Setter Property="FontFamily" Value="{DynamicResource Fonts.Monospace}"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="#1E293B"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_value_text.added">
+      <Setter Property="Foreground" Value="#18834A"/>
+    </Style>
+
+    <Style Selector="TextBlock.prefab_value_text.deleted">
+      <Setter Property="Foreground" Value="#BF3C3C"/>
     </Style>
   </UserControl.Styles>
 
   <Grid RowDefinitions="Auto,*" Background="{DynamicResource Brush.Contents}">
-    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" IsVisible="{Binding IsTable}">
       <TextBlock Grid.Column="0"
                  Margin="8,6"
                  Foreground="{DynamicResource Brush.FG2}"
@@ -78,218 +247,248 @@
       </TabControl.ContentTemplate>
     </TabControl>
 
-    <Grid Grid.Row="1" RowDefinitions="Auto,*" IsVisible="{Binding IsHierarchy}">
-      <Border Grid.Row="0"
-              BorderThickness="0,1,0,1"
-              BorderBrush="{DynamicResource Brush.Border2}"
-              Background="{DynamicResource Brush.Window}">
-        <Grid ColumnDefinitions="*,Auto" Margin="10,8">
-          <StackPanel Grid.Column="0" Spacing="8">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <Border Classes="prefab_stat">
-                <StackPanel>
-                  <TextBlock Classes="prefab_stat_value" Foreground="#33AA44" Text="{Binding PrefabAddedNodes}"/>
-                  <TextBlock Classes="prefab_stat_label" Text="新增节点"/>
-                </StackPanel>
-              </Border>
-              <Border Classes="prefab_stat">
-                <StackPanel>
-                  <TextBlock Classes="prefab_stat_value" Foreground="#CC3333" Text="{Binding PrefabDeletedNodes}"/>
-                  <TextBlock Classes="prefab_stat_label" Text="删除节点"/>
-                </StackPanel>
-              </Border>
-              <Border Classes="prefab_stat">
-                <StackPanel>
-                  <TextBlock Classes="prefab_stat_value" Foreground="#D8A400" Text="{Binding PrefabModifiedNodes}"/>
-                  <TextBlock Classes="prefab_stat_label" Text="修改节点"/>
-                </StackPanel>
-              </Border>
-              <Border Classes="prefab_stat">
-                <StackPanel>
-                  <TextBlock Classes="prefab_stat_value" Text="{Binding PrefabChangedProperties}"/>
-                  <TextBlock Classes="prefab_stat_label" Text="属性改动"/>
-                </StackPanel>
-              </Border>
-            </StackPanel>
-            <TextBlock Foreground="{DynamicResource Brush.FG2}"
-                       FontSize="11"
-                       Text="{Binding PrefabSummaryText}"/>
-          </StackPanel>
+    <Border Grid.Row="1" Classes="prefab_panel" IsVisible="{Binding IsHierarchy}">
+      <Grid>
+        <Grid ColumnDefinitions="37*,6,63*" IsVisible="{Binding IsShowingPrefabHierarchy}">
+          <Grid Grid.Column="0" RowDefinitions="36,*" MinWidth="260" Background="#F7FAFC">
+            <Border Grid.Row="0"
+                    Padding="12,0"
+                    BorderThickness="0,0,0,1"
+                    BorderBrush="#CFD9E3"
+                    Background="#F4F8FB">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0"
+                           Classes="prefab_section_title"
+                           VerticalAlignment="Center"
+                           Text="Hierarchy"/>
+                <CheckBox Grid.Column="1"
+                          Classes="prefab_filter"
+                          Content="仅变更"
+                          IsChecked="{Binding ShowOnlyChangedPrefabNodes, Mode=TwoWay}"/>
+              </Grid>
+            </Border>
 
-          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Spacing="8">
-            <Button Classes="flat"
-                    Content="Hierarchy"
-                    Click="OnShowPrefabHierarchy"/>
-            <Button Classes="flat"
-                    Content="格式化Diff"
-                    Click="OnShowFormattedPrefabDiff"/>
-            <Button Classes="flat"
-                    Content="原始Diff"
-                    IsEnabled="{Binding HasRawPrefabDiff}"
-                    Click="OnShowRawPrefabDiff"/>
-            <Button Classes="flat"
-                    Content="{Binding PrefabFilterButtonText}"
-                    Click="OnTogglePrefabFilter"/>
-          </StackPanel>
-        </Grid>
-      </Border>
+            <TreeView Grid.Row="1"
+                      ItemsSource="{Binding VisiblePrefabNodes}"
+                      SelectedItem="{Binding SelectedNode, Mode=TwoWay}"
+                      Background="Transparent"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+              <TreeView.Styles>
+                <Style Selector="TreeViewItem">
+                  <Setter Property="MinHeight" Value="26"/>
+                  <Setter Property="Padding" Value="0"/>
+                  <Setter Property="IsExpanded" Value="True"/>
+                </Style>
+              </TreeView.Styles>
 
-      <Grid Grid.Row="1" ColumnDefinitions="340,*" IsVisible="{Binding IsShowingPrefabHierarchy}">
-        <Border Grid.Column="0" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource Brush.Border2}">
-          <TreeView ItemsSource="{Binding VisiblePrefabNodes}"
-                    SelectedItem="{Binding SelectedNode, Mode=TwoWay}"
-                    Background="Transparent"
-                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <TreeView.Styles>
-              <Style Selector="TreeViewItem">
-                <Setter Property="MinHeight" Value="26"/>
-                <Setter Property="Padding" Value="0"/>
-                <Setter Property="IsExpanded" Value="True"/>
-              </Style>
-            </TreeView.Styles>
+              <TreeView.DataTemplates>
+                <TreeDataTemplate DataType="m:StructuredDiffNode" ItemsSource="{Binding Children}">
+                  <Grid ColumnDefinitions="16,18,*,Auto" Height="26" Margin="0,0,10,0">
+                    <TextBlock Grid.Column="1"
+                               Classes="prefab_tree_mark"
+                               Classes.added="{Binding IsAdded}"
+                               Classes.deleted="{Binding IsDeleted}"
+                               Classes.modified="{Binding IsModified}"
+                               Text="{Binding ChangeMark}"/>
+                    <TextBlock Grid.Column="2"
+                               Classes="prefab_tree_name"
+                               Classes.added="{Binding IsAdded}"
+                               Classes.deleted="{Binding IsDeleted}"
+                               Classes.modified="{Binding IsModified}"
+                               Text="{Binding Name}"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Column="3"
+                               Margin="8,0,0,0"
+                               Classes="prefab_muted"
+                               Text="{Binding ChangeLabel}"/>
+                  </Grid>
+                </TreeDataTemplate>
+              </TreeView.DataTemplates>
+            </TreeView>
+          </Grid>
 
-            <TreeView.DataTemplates>
-              <TreeDataTemplate DataType="m:StructuredDiffNode" ItemsSource="{Binding Children}">
-                <Grid ColumnDefinitions="Auto,*,Auto" Height="26">
-                  <Border Grid.Column="0"
-                          Classes="state"
-                          Classes.added="{Binding IsAdded}"
-                          Classes.deleted="{Binding IsDeleted}"
-                          Classes.modified="{Binding IsModified}"/>
-                  <TextBlock Grid.Column="1"
-                             Text="{Binding Name}"
+          <Border Grid.Column="1"
+                  BorderThickness="1,0"
+                  BorderBrush="#CFD9E3"
+                  Background="#DCE6EE"/>
+
+          <Grid Grid.Column="2" RowDefinitions="36,Auto,*" MinWidth="360" Background="#FFFFFF">
+            <Border Grid.Row="0"
+                    Padding="12,0"
+                    BorderThickness="0,0,0,1"
+                    BorderBrush="#CFD9E3"
+                    Background="#F4F8FB">
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0"
+                           Classes="prefab_section_title"
+                           VerticalAlignment="Center"
+                           Text="Inspector"/>
+                <StackPanel Grid.Column="1"
+                            Margin="14,0,0,0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Spacing="6">
+                  <Border Classes="prefab_stat added">
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Classes="prefab_stat_value" Foreground="#18834A" Text="+"/>
+                      <TextBlock Classes="prefab_stat_value" Foreground="#18834A" Text="{Binding PrefabAddedNodes}"/>
+                      <TextBlock Classes="prefab_stat_value" Foreground="#18834A" Text=" 节点"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Classes="prefab_stat deleted">
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Classes="prefab_stat_value" Foreground="#BF3C3C" Text="-"/>
+                      <TextBlock Classes="prefab_stat_value" Foreground="#BF3C3C" Text="{Binding PrefabDeletedNodes}"/>
+                      <TextBlock Classes="prefab_stat_value" Foreground="#BF3C3C" Text=" 节点"/>
+                    </StackPanel>
+                  </Border>
+                  <Border Classes="prefab_stat modified">
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Classes="prefab_stat_value" Foreground="#A66B00" Text="{Binding PrefabChangedProperties}"/>
+                      <TextBlock Classes="prefab_stat_value" Foreground="#A66B00" Text=" 属性变更"/>
+                    </StackPanel>
+                  </Border>
+                </StackPanel>
+                <Button Grid.Column="2"
+                        Classes="prefab_action"
+                        Content="原始 Diff"
+                        IsEnabled="{Binding HasRawPrefabDiff}"
+                        Click="OnShowRawPrefabDiff"/>
+              </Grid>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Padding="18,16,18,12"
+                    BorderThickness="0,0,0,1"
+                    BorderBrush="#E6EDF3"
+                    Background="#FFFFFF">
+              <StackPanel Spacing="5">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock FontSize="18"
+                             FontWeight="Bold"
+                             Foreground="#1E293B"
+                             Text="{Binding SelectedNode.Name}"
                              TextTrimming="CharacterEllipsis"/>
-                  <TextBlock Grid.Column="2"
-                             Margin="8,0,6,0"
-                             FontSize="10"
-                             Foreground="{DynamicResource Brush.FG2}"
-                             Text="{Binding ChangeLabel}"/>
-                </Grid>
-              </TreeDataTemplate>
-            </TreeView.DataTemplates>
-          </TreeView>
-        </Border>
+                  <Border Classes="prefab_status"
+                          Classes.added="{Binding SelectedNode.IsAdded}"
+                          Classes.deleted="{Binding SelectedNode.IsDeleted}"
+                          Classes.modified="{Binding SelectedNode.IsModified}">
+                    <TextBlock Classes="prefab_status_text"
+                               Classes.added="{Binding SelectedNode.IsAdded}"
+                               Classes.deleted="{Binding SelectedNode.IsDeleted}"
+                               Classes.modified="{Binding SelectedNode.IsModified}"
+                               Text="{Binding SelectedNode.ChangeLabel}"/>
+                  </Border>
+                </StackPanel>
+                <TextBlock FontFamily="{DynamicResource Fonts.Monospace}"
+                           FontSize="12"
+                           Foreground="#6B7A8D"
+                           Text="{Binding SelectedNode.Path}"
+                           TextTrimming="CharacterEllipsis"/>
+                <TextBlock Classes="prefab_muted"
+                           Text="{Binding SelectedNode.Summary}"/>
+              </StackPanel>
+            </Border>
 
-        <Grid Grid.Column="1" RowDefinitions="Auto,*">
-          <Border Grid.Row="0"
-                  Margin="10,10,10,8"
-                  Padding="10,8"
-                  CornerRadius="6"
-                  BorderThickness="1"
-                  BorderBrush="{DynamicResource Brush.Border2}"
-                  Background="{DynamicResource Brush.Window}">
-            <StackPanel Spacing="4">
-              <TextBlock Text="{Binding SelectedNode.Path}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-              <TextBlock Text="{Binding SelectedNode.Summary}" FontSize="11" Foreground="{DynamicResource Brush.FG2}"/>
-            </StackPanel>
-          </Border>
+            <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+              <Border Padding="18,12,18,18">
+                <ItemsControl ItemsSource="{Binding SelectedNode.PropertyGroups}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="m:StructuredPropertyGroup">
+                      <Border Classes="prefab_component">
+                        <StackPanel>
+                          <ToggleButton Classes="prefab_component_head"
+                                        IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                            <Grid ColumnDefinitions="3,Auto,*,Auto" Margin="0">
+                              <Border Grid.Column="0"
+                                      Classes="state"
+                                      Classes.added="{Binding IsAdded}"
+                                      Classes.deleted="{Binding IsDeleted}"
+                                      Classes.modified="{Binding IsModified}"/>
+                              <TextBlock Grid.Column="1"
+                                         Margin="12,0,6,0"
+                                         VerticalAlignment="Center"
+                                         Foreground="#6B7A8D"
+                                         Text="{Binding IsExpanded, Converter={x:Static c:BoolConverters.IsExpandedToTriangle}}"/>
+                              <TextBlock Grid.Column="2"
+                                         VerticalAlignment="Center"
+                                         FontWeight="SemiBold"
+                                         Foreground="#1E293B"
+                                         Text="{Binding Name}"
+                                         TextTrimming="CharacterEllipsis"/>
+                              <TextBlock Grid.Column="3"
+                                         Margin="10,0,12,0"
+                                         VerticalAlignment="Center"
+                                         Classes="prefab_muted"
+                                         Text="{Binding ChangeSummary}"/>
+                            </Grid>
+                          </ToggleButton>
 
-          <ScrollViewer Grid.Row="1" Margin="10,0,10,10" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding SelectedNode.PropertyGroups}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="m:StructuredPropertyGroup">
-                  <StackPanel Margin="0,0,0,8">
-                    <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay}"
-                                  HorizontalAlignment="Stretch"
-                                  HorizontalContentAlignment="Stretch"
-                                  Padding="0"
-                                  BorderThickness="1"
-                                  BorderBrush="{DynamicResource Brush.Border2}"
-                                  Background="{DynamicResource Brush.Window}">
-                      <Grid ColumnDefinitions="4,Auto,*" Margin="0,0,8,0">
-                        <Border Grid.Column="0"
-                                Classes="state"
-                                Margin="0"
-                                CornerRadius="0"
-                                Classes.added="{Binding IsAdded}"
-                                Classes.deleted="{Binding IsDeleted}"
-                                Classes.modified="{Binding IsModified}"/>
-                        <TextBlock Grid.Column="1"
-                                   Margin="8,6,0,6"
-                                   Width="16"
-                                   Text="{Binding IsExpanded, Converter={x:Static c:BoolConverters.IsExpandedToTriangle}}"/>
-                        <TextBlock Grid.Column="2"
-                                   Margin="0,6,0,6"
-                                   Text="{Binding Header}"
-                                   TextTrimming="CharacterEllipsis"/>
-                      </Grid>
-                    </ToggleButton>
-
-                    <Grid RowDefinitions="Auto,*" IsVisible="{Binding IsExpanded}">
-                      <Border Grid.Row="0"
-                              BorderThickness="1"
-                              BorderBrush="{DynamicResource Brush.Border2}"
-                              Background="{DynamicResource Brush.Window}">
-                        <Grid ColumnDefinitions="4,220,*,*">
-                          <TextBlock Grid.Column="1" Margin="18,6,8,6" Text="属性" FontWeight="SemiBold"/>
-                          <TextBlock Grid.Column="2" Margin="8,6" Text="旧值" FontWeight="SemiBold"/>
-                          <TextBlock Grid.Column="3" Margin="8,6" Text="新值" FontWeight="SemiBold"/>
-                        </Grid>
+                          <ItemsControl IsVisible="{Binding IsExpanded}" ItemsSource="{Binding Changes}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate DataType="m:StructuredPropertyChange">
+                                <Border BorderThickness="0,1,0,0"
+                                        BorderBrush="#E6EDF3"
+                                        Background="#FFFFFF">
+                                  <Grid ColumnDefinitions="3,190,*,24,*" MinHeight="34">
+                                    <Border Grid.Column="0"
+                                            Classes="state"
+                                            Classes.added="{Binding IsAdded}"
+                                            Classes.deleted="{Binding IsDeleted}"
+                                            Classes.modified="{Binding IsModified}"/>
+                                    <TextBlock Grid.Column="1"
+                                               Margin="12,7,12,7"
+                                               FontFamily="{DynamicResource Fonts.Monospace}"
+                                               FontSize="12"
+                                               Foreground="#6B7A8D"
+                                               Text="{Binding DisplayKey}"
+                                               TextWrapping="Wrap"/>
+                                    <Border Grid.Column="2"
+                                            Margin="0,5,4,5"
+                                            Classes="prefab_value"
+                                            Classes.deleted="{Binding IsOldValueChanged}">
+                                      <TextBlock Classes="prefab_value_text"
+                                                 Classes.deleted="{Binding IsOldValueChanged}"
+                                                 Text="{Binding OldValue}"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="3"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"
+                                               Foreground="#6B7A8D"
+                                               Text="→"/>
+                                    <Border Grid.Column="4"
+                                            Margin="4,5,12,5"
+                                            Classes="prefab_value"
+                                            Classes.added="{Binding IsNewValueChanged}">
+                                      <TextBlock Classes="prefab_value_text"
+                                                 Classes.added="{Binding IsNewValueChanged}"
+                                                 Text="{Binding NewValue}"/>
+                                    </Border>
+                                  </Grid>
+                                </Border>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </StackPanel>
                       </Border>
-
-                      <ItemsControl Grid.Row="1" ItemsSource="{Binding Changes}">
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate DataType="m:StructuredPropertyChange">
-                            <Border BorderThickness="1,0,1,1"
-                                    BorderBrush="{DynamicResource Brush.Border2}"
-                                    Background="{DynamicResource Brush.Window}">
-                              <Grid ColumnDefinitions="4,220,*,*">
-                                <Border Grid.Column="0"
-                                        Classes="state"
-                                        Margin="0"
-                                        CornerRadius="0"
-                                        Classes.added="{Binding IsAdded}"
-                                        Classes.deleted="{Binding IsDeleted}"
-                                        Classes.modified="{Binding IsModified}"/>
-                                <TextBlock Grid.Column="1"
-                                           Margin="18,6,8,6"
-                                           Text="{Binding DisplayKey}"
-                                           FontFamily="{DynamicResource Fonts.Monospace}"
-                                           TextWrapping="NoWrap"
-                                           TextTrimming="CharacterEllipsis"/>
-                                <TextBlock Grid.Column="2"
-                                           Margin="8,6"
-                                           Text="{Binding OldValue}"
-                                           FontFamily="{DynamicResource Fonts.Monospace}"
-                                           TextWrapping="NoWrap"
-                                           TextTrimming="CharacterEllipsis"/>
-                                <TextBlock Grid.Column="3"
-                                           Margin="8,6"
-                                           Text="{Binding NewValue}"
-                                           FontFamily="{DynamicResource Fonts.Monospace}"
-                                           TextWrapping="NoWrap"
-                                           TextTrimming="CharacterEllipsis"/>
-                              </Grid>
-                            </Border>
-                          </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
-                    </Grid>
-                  </StackPanel>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </ScrollViewer>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </Border>
+            </ScrollViewer>
+          </Grid>
         </Grid>
+
+        <ContentControl Content="{Binding RawPrefabDiff}" IsVisible="{Binding IsShowingRawPrefabDiff}">
+          <ContentControl.DataTemplates>
+            <DataTemplate DataType="vm:TextDiffContext">
+              <v:TextDiffView SelectedChunk="{Binding SelectedChunk, Mode=OneWay}"/>
+            </DataTemplate>
+          </ContentControl.DataTemplates>
+        </ContentControl>
+
       </Grid>
-
-      <ContentControl Grid.Row="1" Content="{Binding FormattedPrefabDiff}" IsVisible="{Binding IsShowingFormattedPrefabDiff}">
-        <ContentControl.DataTemplates>
-          <DataTemplate DataType="vm:TextDiffContext">
-            <v:TextDiffView SelectedChunk="{Binding SelectedChunk, Mode=OneWay}"/>
-          </DataTemplate>
-        </ContentControl.DataTemplates>
-      </ContentControl>
-
-      <ContentControl Grid.Row="1" Content="{Binding RawPrefabDiff}" IsVisible="{Binding IsShowingRawPrefabDiff}">
-        <ContentControl.DataTemplates>
-          <DataTemplate DataType="vm:TextDiffContext">
-            <v:TextDiffView SelectedChunk="{Binding SelectedChunk, Mode=OneWay}"/>
-          </DataTemplate>
-        </ContentControl.DataTemplates>
-      </ContentControl>
-
-    </Grid>
+    </Border>
   </Grid>
 </UserControl>

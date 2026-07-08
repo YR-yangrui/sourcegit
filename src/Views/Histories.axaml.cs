@@ -1112,6 +1112,8 @@ namespace SourceGit.Views
                 e.Handled = true;
             };
             menu.Items.Add(createTag);
+
+            menu.Items.Add(CreateCommitAIReviewMenuItem(repo, commit));
             menu.Items.Add(new MenuItem() { Header = "-" });
 
             if (!repo.IsBare)
@@ -1529,6 +1531,72 @@ namespace SourceGit.Views
 
             return menu;
         }
+
+        private MenuItem CreateCommitAIReviewMenuItem(ViewModels.Repository repo, Models.Commit commit)
+        {
+            var aiReview = new MenuItem();
+            aiReview.Header = App.Text("AIReview.Commit");
+            aiReview.Icon = this.CreateMenuIcon("Icons.AIAssist");
+
+            var services = repo.GetPreferredOpenAIServices();
+            if (services.Count == 0)
+            {
+                aiReview.Click += async (_, e) =>
+                {
+                    await this.ShowDialogAsync(new Preferences(PreferencesAITabIndex));
+                    e.Handled = true;
+                };
+            }
+            else if (services.Count == 1)
+            {
+                aiReview.Click += async (_, e) =>
+                {
+                    await DoOpenAIReviewForCommitAsync(repo, services[0], commit);
+                    e.Handled = true;
+                };
+            }
+            else
+            {
+                foreach (var service in services)
+                {
+                    var dup = service;
+                    var item = new MenuItem();
+                    item.Header = service.Name;
+                    item.Click += async (_, e) =>
+                    {
+                        await DoOpenAIReviewForCommitAsync(repo, dup, commit);
+                        e.Handled = true;
+                    };
+
+                    aiReview.Items.Add(item);
+                }
+            }
+
+            return aiReview;
+        }
+
+        private async Task DoOpenAIReviewForCommitAsync(ViewModels.Repository repo, AI.Service service, Models.Commit commit)
+        {
+            var changes = await new Commands.CompareRevisions(repo.FullPath, commit.FirstParentToCompare, commit.SHA)
+                .ReadAsync()
+                .ConfigureAwait(true);
+
+            if (changes.Count == 0)
+            {
+                repo.SendNotification(App.Text("AIReview.NoChanges"), true);
+                return;
+            }
+
+            var owner = TopLevel.GetTopLevel(this) as Window;
+            if (owner == null)
+                return;
+
+            var assistant = new ViewModels.AIAssistant(repo, service, commit, changes);
+            var view = new AIAssistant() { DataContext = assistant };
+            view.Show(owner);
+        }
+
+        private const int PreferencesAITabIndex = 7;
 
         private void FillCurrentBranchMenu(ContextMenu menu, ViewModels.Repository repo, Models.Branch current)
         {

@@ -30,10 +30,15 @@ namespace SourceGit.Views
     {
         public class VerticalSeparatorMargin : AbstractMargin
         {
+            public VerticalSeparatorMargin(bool hideWhenSyntaxHighlighting = false)
+            {
+                _hideWhenSyntaxHighlighting = hideWhenSyntaxHighlighting;
+            }
+
             public override void Render(DrawingContext context)
             {
                 var presenter = this.FindAncestorOfType<ThemedTextDiffPresenter>();
-                if (presenter != null)
+                if (presenter != null && !IsHidden(presenter))
                 {
                     var pen = new Pen(presenter.LineBrush);
                     context.DrawLine(pen, new Point(0.5, 0), new Point(0.5, Bounds.Height));
@@ -42,16 +47,28 @@ namespace SourceGit.Views
 
             protected override Size MeasureOverride(Size availableSize)
             {
+                if (this.FindAncestorOfType<ThemedTextDiffPresenter>() is { } presenter && IsHidden(presenter))
+                    return new Size(0, 0);
+
                 return new Size(1, 0);
             }
+
+            private bool IsHidden(ThemedTextDiffPresenter presenter)
+            {
+                return _hideWhenSyntaxHighlighting && presenter.UseSyntaxHighlighting;
+            }
+
+            private readonly bool _hideWhenSyntaxHighlighting;
         }
 
         public class LineNumberMargin : AbstractMargin
         {
-            public LineNumberMargin(bool usePresenter, bool isOld)
+            public LineNumberMargin(bool usePresenter, bool isOld, bool hideWhenSyntaxHighlighting = false, bool preferNewLineWhenSyntaxHighlighting = false)
             {
                 _usePresenter = usePresenter;
                 _isOld = isOld;
+                _hideWhenSyntaxHighlighting = hideWhenSyntaxHighlighting;
+                _preferNewLineWhenSyntaxHighlighting = preferNewLineWhenSyntaxHighlighting;
 
                 Margin = new Thickness(8, 0);
                 ClipToBounds = true;
@@ -61,6 +78,8 @@ namespace SourceGit.Views
             {
                 var presenter = this.FindAncestorOfType<ThemedTextDiffPresenter>();
                 if (presenter == null)
+                    return;
+                if (IsHidden(presenter))
                     return;
 
                 var isOld = _isOld;
@@ -82,7 +101,7 @@ namespace SourceGit.Views
                             break;
 
                         var info = lines[index - 1];
-                        var lineNumber = isOld ? info.OldLine : info.NewLine;
+                        var lineNumber = GetLineNumber(info, presenter, isOld);
                         if (string.IsNullOrEmpty(lineNumber))
                             continue;
 
@@ -101,6 +120,14 @@ namespace SourceGit.Views
 
             protected override Size MeasureOverride(Size availableSize)
             {
+                if (this.FindAncestorOfType<ThemedTextDiffPresenter>() is { } presenter && IsHidden(presenter))
+                {
+                    Margin = new Thickness(0);
+                    return new Size(0, 0);
+                }
+
+                Margin = new Thickness(8, 0);
+
                 if (DataContext is not ViewModels.TextDiffContext ctx)
                     return new Size(0, 0);
 
@@ -116,8 +143,27 @@ namespace SourceGit.Views
                 return new Size(test.Width, 0);
             }
 
+            private bool IsHidden(ThemedTextDiffPresenter presenter)
+            {
+                return _hideWhenSyntaxHighlighting && presenter.UseSyntaxHighlighting;
+            }
+
+            private string GetLineNumber(Models.TextDiffLine info, ThemedTextDiffPresenter presenter, bool isOld)
+            {
+                if (presenter.UseSyntaxHighlighting && _preferNewLineWhenSyntaxHighlighting)
+                {
+                    // Syntax-highlighted unified diffs use a single line-number column.
+                    // Prefer the target file line and fall back to the source line for deletions.
+                    return string.IsNullOrEmpty(info.NewLine) ? info.OldLine : info.NewLine;
+                }
+
+                return isOld ? info.OldLine : info.NewLine;
+            }
+
             private readonly bool _usePresenter;
             private readonly bool _isOld;
+            private readonly bool _hideWhenSyntaxHighlighting;
+            private readonly bool _preferNewLineWhenSyntaxHighlighting;
         }
 
         public class LineModifyTypeMargin : AbstractMargin
@@ -568,6 +614,7 @@ namespace SourceGit.Views
             if (change.Property == UseSyntaxHighlightingProperty)
             {
                 UpdateTextMate();
+                InvalidateTextAreaMargins();
             }
             else if (change.Property == ShowHiddenSymbolsProperty)
             {
@@ -601,6 +648,17 @@ namespace SourceGit.Views
         {
             base.OnDataContextChanged(e);
             AutoScrollToFirstChange();
+        }
+
+        private void InvalidateTextAreaMargins()
+        {
+            foreach (var margin in TextArea.LeftMargins)
+            {
+                margin.InvalidateMeasure();
+                margin.InvalidateVisual();
+            }
+
+            TextArea.TextView.Redraw();
         }
 
         protected override void OnSizeChanged(SizeChangedEventArgs e)
@@ -1065,9 +1123,9 @@ namespace SourceGit.Views
     {
         public CombinedTextDiffPresenter() : base(new TextArea(), new TextDocument())
         {
-            TextArea.LeftMargins.Add(new LineNumberMargin(false, true));
-            TextArea.LeftMargins.Add(new VerticalSeparatorMargin());
-            TextArea.LeftMargins.Add(new LineNumberMargin(false, false));
+            TextArea.LeftMargins.Add(new LineNumberMargin(false, true, false, true));
+            TextArea.LeftMargins.Add(new VerticalSeparatorMargin(true));
+            TextArea.LeftMargins.Add(new LineNumberMargin(false, false, true));
             TextArea.LeftMargins.Add(new VerticalSeparatorMargin());
             TextArea.LeftMargins.Add(new LineModifyTypeMargin());
         }

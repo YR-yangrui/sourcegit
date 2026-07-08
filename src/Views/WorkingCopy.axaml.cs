@@ -116,8 +116,9 @@ namespace SourceGit.Views
         {
             if (DataContext is ViewModels.WorkingCopy vm)
             {
-                var next = UnstagedChangesView.GetNextChangeWithoutSelection();
-                await vm.StageChangesAsync(vm.SelectedUnstaged, next);
+                var selectedChanges = UnstagedChangesView.GetSelectedChangesIncludingFolders();
+                var next = UnstagedChangesView.GetNextChangeWithoutSelection(selectedChanges);
+                await vm.StageChangesAsync(selectedChanges, next);
                 UnstagedChangesView.TakeFocus();
                 e.Handled = true;
             }
@@ -127,8 +128,9 @@ namespace SourceGit.Views
         {
             if (DataContext is ViewModels.WorkingCopy vm)
             {
-                var next = StagedChangesView.GetNextChangeWithoutSelection();
-                await vm.UnstageChangesAsync(vm.SelectedStaged, next);
+                var selectedChanges = StagedChangesView.GetSelectedChangesIncludingFolders();
+                var next = StagedChangesView.GetNextChangeWithoutSelection(selectedChanges);
+                await vm.UnstageChangesAsync(selectedChanges, next);
                 StagedChangesView.TakeFocus();
                 e.Handled = true;
             }

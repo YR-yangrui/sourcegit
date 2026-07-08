@@ -50,7 +50,7 @@ namespace SourceGit.Models
                 {
                     var oldText = oldBytes == null ? string.Empty : TextEncoding.Decode(oldBytes);
                     var newText = newBytes == null ? string.Empty : TextEncoding.Decode(newBytes);
-                    return BuildPrefabDiff(repo, oldText, newText);
+                    return BuildPrefabDiff(repo, option, oldText, newText);
                 }
 
                 if (ext == ".bytes")
@@ -1274,61 +1274,166 @@ namespace SourceGit.Models
 
         // ======================== prefab / scene hierarchy ========================
 
-        private static readonly Regex PrefabDocRe = new(@"^--- !u!(\d+) &(\d+)", RegexOptions.Multiline | RegexOptions.Compiled);
-
-        private static readonly Dictionary<int, string> PrefabTypeNames = new()
+        private static StructuredDiff BuildPrefabDiff(string repo, DiffOption option, string oldText, string newText)
         {
-            { 1, "GameObject" }, { 4, "Transform" }, { 20, "Camera" }, { 23, "MeshRenderer" },
-            { 33, "MeshFilter" }, { 54, "Rigidbody2D" }, { 61, "BoxCollider2D" }, { 64, "MeshCollider" },
-            { 65, "BoxCollider" }, { 81, "AudioListener" }, { 82, "AudioSource" }, { 95, "Animator" },
-            { 96, "TrailRenderer" }, { 108, "Light" }, { 111, "Animation" }, { 114, "MonoBehaviour" },
-            { 120, "LineRenderer" }, { 135, "SphereCollider" }, { 136, "CapsuleCollider" },
-            { 137, "SkinnedMeshRenderer" }, { 154, "TerrainCollider" }, { 198, "ParticleSystem" },
-            { 199, "ParticleSystemRenderer" }, { 212, "SpriteRenderer" }, { 218, "Terrain" },
-            { 222, "CanvasRenderer" }, { 223, "Canvas" }, { 224, "RectTransform" }, { 225, "CanvasGroup" },
-            { 258, "HorizontalLayoutGroup" }, { 259, "VerticalLayoutGroup" }, { 264, "GridLayoutGroup" },
-            { 320, "PlayableDirector" }, { 328, "VideoPlayer" }, { 330, "GraphicRaycaster" },
-            { 331, "ScrollRect" }, { 369, "ContentSizeFitter" }, { 372, "AspectRatioFitter" },
-            { 1001, "PrefabInstance" }, { 1183024399, "LookAtConstraint" },
-        };
+            return TryBuildPrefabDiffWithBundledTool(repo, option, oldText, newText) ??
+                BuildPrefabToolUnavailableDiff(oldText, newText);
+        }
 
-        private static readonly Dictionary<string, string> PrefabGuidFallbackNames = new(StringComparer.OrdinalIgnoreCase)
+        private static StructuredDiff TryBuildPrefabDiffWithBundledTool(string repo, DiffOption option, string oldText, string newText)
         {
-            { "fe87c0e1cc204ed48ad3b37840f39efc", "Image" },
-            { "f4688fdb7df04437aeb418b961361dc5", "TMP_Text" },
-            { "99081db55ede7af4399615f956b00b27", "ColorfulImage" },
-            { "4e29b1a8efbd4b44bb3f3716e73f07ff", "Button" },
-            { "1367256648004ba4a9cb869e3436c557", "RawImage" },
-            { "2a4db7a114972834c8e4117be1d82ba3", "LayoutElement" },
-            { "3312d7739989d2b4e91e6319e9a96d76", "Mask" },
-            { "31a19414677d06e4884707c6e22bfee8", "RectMask2D" },
-            { "1344c3c82d178a64d8d011048bf4b4e7", "Toggle" },
-            { "1aa08ab6e0800fa44ae55d278d1423e3", "ScrollRect" },
-            { "30649d3a9faa99c48a7b1166b86bf2a0", "HorizontalLayoutGroup" },
-            { "59f8146938fff824cb5fd77236b75b03", "VerticalLayoutGroup" },
-            { "dc42784cf5e3c4ac9b5c2e1f4476e774", "ContentSizeFitter" },
-            { "cfabb0440166ab443bba8876756a24be", "GridLayoutGroup" },
-        };
+            var toolDir = Path.Combine(AppContext.BaseDirectory, "Resources", "PrefabDiffTool");
+            var bridge = Path.Combine(toolDir, "sourcegit_prefab_bridge.py");
+            if (!File.Exists(bridge))
+                return null;
 
-        private static readonly HashSet<string> PrefabSkipProps = new()
-        {
-            "m_ObjectHideFlags", "m_CorrespondingSourceObject", "m_PrefabInstance", "m_PrefabAsset",
-            "m_EditorHideFlags", "m_EditorClassIdentifier", "serializedVersion", "m_Father", "m_Children",
-            "m_Component", "m_GameObject", "m_TagString", "m_Icon", "m_NavMeshLayer", "m_StaticEditorFlags",
-            "m_ConstrainProportionsScale", "m_SelectOnUp", "m_SelectOnDown", "m_SelectOnLeft", "m_SelectOnRight",
-            "m_NormalTrigger", "m_HighlightedTrigger", "m_PressedTrigger", "m_SelectedTrigger", "m_DisabledTrigger",
-            "m_WrapAround", "m_Name", "m_IsActive", "m_Layer", "m_LocalEulerAnglesHint", "m_RootOrder", "m_Script",
-        };
+            var tempDir = Path.Combine(Path.GetTempPath(), "sourcegit-prefab-diff-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                Directory.CreateDirectory(tempDir);
+                var oldFile = Path.Combine(tempDir, "old.prefab");
+                var newFile = Path.Combine(tempDir, "new.prefab");
+                File.WriteAllText(oldFile, oldText ?? string.Empty, new UTF8Encoding(false));
+                File.WriteAllText(newFile, newText ?? string.Empty, new UTF8Encoding(false));
 
-        private static StructuredDiff BuildPrefabDiff(string repo, string oldText, string newText)
+                var json = RunPrefabBridge(toolDir, bridge, oldFile, newFile, repo, option);
+                if (string.IsNullOrWhiteSpace(json))
+                    return null;
+
+                using var doc = JsonDocument.Parse(json);
+                return BuildPrefabDiffFromToolReport(doc.RootElement, oldText, newText);
+            }
+            catch
+            {
+                // The bundled parser is best-effort because it depends on a Python runtime.
+                // If it cannot run, return null so SourceGit falls back to its normal diff path
+                // instead of showing stale results from the removed native prefab parser.
+                return null;
+            }
+            finally
+            {
+                try
+                {
+                    if (Directory.Exists(tempDir))
+                        Directory.Delete(tempDir, true);
+                }
+                catch
+                {
+                    // Temp cleanup failure should not affect diff rendering.
+                }
+            }
+        }
+
+        private static string RunPrefabBridge(string toolDir, string bridge, string oldFile, string newFile, string repo, DiffOption option)
         {
-            var assetNames = BuildPrefabAssetNameMap(repo, oldText, newText);
-            var oldFormatted = ConvertPrefabYaml(repo, oldText, assetNames);
-            var newFormatted = ConvertPrefabYaml(repo, newText, assetNames);
-            var oldNodes = ParsePrefabDump(oldFormatted);
-            var newNodes = ParsePrefabDump(newFormatted);
+            foreach (var candidate in PythonCandidates())
+            {
+                try
+                {
+                    var start = new ProcessStartInfo(candidate.FileName)
+                    {
+                        WorkingDirectory = toolDir,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true,
+                        StandardOutputEncoding = Encoding.UTF8,
+                        StandardErrorEncoding = Encoding.UTF8,
+                    };
+                    start.Environment["PREFAB_DIFF_PRINT_OUTPUT"] = "1";
+
+                    foreach (var arg in candidate.PrefixArgs)
+                        start.ArgumentList.Add(arg);
+                    start.ArgumentList.Add(bridge);
+                    start.ArgumentList.Add("--old");
+                    start.ArgumentList.Add(oldFile);
+                    start.ArgumentList.Add("--new");
+                    start.ArgumentList.Add(newFile);
+                    start.ArgumentList.Add("--repo");
+                    start.ArgumentList.Add(repo ?? string.Empty);
+                    start.ArgumentList.Add("--path");
+                    start.ArgumentList.Add(option.Path ?? string.Empty);
+                    start.ArgumentList.Add("--project-root");
+                    start.ArgumentList.Add(repo ?? string.Empty);
+                    start.ArgumentList.Add("--filename");
+                    start.ArgumentList.Add(Path.GetFileName(option.Path) ?? string.Empty);
+
+                    using var process = Process.Start(start);
+                    if (process == null)
+                        continue;
+
+                    var stdout = process.StandardOutput.ReadToEndAsync();
+                    var stderr = process.StandardError.ReadToEndAsync();
+                    if (!process.WaitForExit(60000))
+                    {
+                        process.Kill(true);
+                        continue;
+                    }
+
+                    var output = stdout.GetAwaiter().GetResult();
+                    _ = stderr.GetAwaiter().GetResult();
+                    if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
+                        return output;
+                }
+                catch
+                {
+                    // Try the next common Python launcher.
+                }
+            }
+
+            return null;
+        }
+
+        private static StructuredDiff BuildPrefabToolUnavailableDiff(string oldText, string newText)
+        {
+            var diff = new StructuredDiff()
+            {
+                Kind = StructuredDiffKind.PrefabHierarchy,
+                Summary = "Unity-Prefab-Diff tool unavailable",
+                RawTextDiff = BuildLineByLineTextDiff("raw prefab diff", SplitRawText(oldText), SplitRawText(newText)),
+            };
+
+            var node = new StructuredDiffNode()
+            {
+                Path = "Unity-Prefab-Diff Tool",
+                Name = "Unity-Prefab-Diff Tool",
+                Change = StructuredDiffChangeKind.Modified,
+                Properties =
+                [
+                    new StructuredPropertyChange()
+                    {
+                        Key = "[Error]",
+                        OldValue = string.Empty,
+                        NewValue = "The bundled Unity-Prefab-Diff bridge could not run. Check that Resources/PrefabDiffTool is included next to SourceGit.exe and Python 3 is available.",
+                        Change = StructuredDiffChangeKind.Modified,
+                    }
+                ],
+            };
+
+            diff.Nodes.Add(node);
+            FlattenNode(diff.Rows, node, 0);
+            diff.FormattedText = BuildPrefabFormattedText(diff.Rows);
+            return diff;
+        }
+
+        private static IEnumerable<(string FileName, string[] PrefixArgs)> PythonCandidates()
+        {
+            yield return ("python", []);
+            yield return ("python3", []);
+            yield return ("py", ["-3"]);
+        }
+
+        private static StructuredDiff BuildPrefabDiffFromToolReport(JsonElement report, string oldText, string newText)
+        {
             var diff = new StructuredDiff() { Kind = StructuredDiffKind.PrefabHierarchy, Summary = "Prefab hierarchy diff" };
-            var nodeMap = ComparePrefabNodes(oldNodes, newNodes);
+            var nodeMap = new Dictionary<string, StructuredDiffNode>(StringComparer.Ordinal);
+
+            AddReportPaths(nodeMap, report, "oldPaths");
+            AddReportPaths(nodeMap, report, "newPaths");
+            AddRenamedReportPaths(nodeMap, report);
+            ApplyReportNodes(nodeMap, report, "added", StructuredDiffChangeKind.Added);
+            ApplyReportNodes(nodeMap, report, "removed", StructuredDiffChangeKind.Deleted);
+            ApplyModifiedReportNodes(nodeMap, report);
 
             foreach (var node in nodeMap.Values)
             {
@@ -1340,9 +1445,183 @@ namespace SourceGit.Models
             foreach (var root in diff.Nodes)
                 FlattenNode(diff.Rows, root, 0);
             diff.FormattedText = BuildPrefabFormattedText(diff.Rows);
-            diff.FormattedTextDiff = BuildLineByLineTextDiff("formatted prefab diff", oldFormatted, newFormatted);
             diff.RawTextDiff = BuildLineByLineTextDiff("raw prefab diff", SplitRawText(oldText), SplitRawText(newText));
             return diff;
+        }
+
+        private static void AddReportPaths(Dictionary<string, StructuredDiffNode> nodeMap, JsonElement report, string property)
+        {
+            if (!report.TryGetProperty(property, out var paths) || paths.ValueKind != JsonValueKind.Array)
+                return;
+
+            foreach (var path in paths.EnumerateArray())
+                EnsureReportPrefabNode(nodeMap, path.GetString());
+        }
+
+        private static void AddRenamedReportPaths(Dictionary<string, StructuredDiffNode> nodeMap, JsonElement report)
+        {
+            if (!report.TryGetProperty("renamedPaths", out var renamed) || renamed.ValueKind != JsonValueKind.Array)
+                return;
+
+            foreach (var item in renamed.EnumerateArray())
+            {
+                if (item.ValueKind != JsonValueKind.Object)
+                    continue;
+                if (item.TryGetProperty("old", out var oldPath))
+                    EnsureReportPrefabNode(nodeMap, oldPath.GetString());
+                if (item.TryGetProperty("new", out var newPath))
+                    EnsureReportPrefabNode(nodeMap, newPath.GetString());
+            }
+        }
+
+        private static void ApplyReportNodes(Dictionary<string, StructuredDiffNode> nodeMap, JsonElement report, string property, StructuredDiffChangeKind change)
+        {
+            if (!report.TryGetProperty(property, out var nodes) || nodes.ValueKind != JsonValueKind.Array)
+                return;
+
+            foreach (var item in nodes.EnumerateArray())
+            {
+                if (item.ValueKind != JsonValueKind.Object || !item.TryGetProperty("path", out var pathValue))
+                    continue;
+
+                var node = EnsureReportPrefabNode(nodeMap, pathValue.GetString());
+                if (node == null)
+                    continue;
+                node.Change = change;
+                if (!item.TryGetProperty("props", out var props) || props.ValueKind != JsonValueKind.Array)
+                    continue;
+
+                foreach (var prop in props.EnumerateArray())
+                {
+                    if (TryReadReportPair(prop, out var key, out var value))
+                    {
+                        if (IsInternalPrefabReportProperty(key))
+                            continue;
+
+                        node.Properties.Add(new StructuredPropertyChange()
+                        {
+                            Key = key,
+                            OldValue = change == StructuredDiffChangeKind.Deleted ? value : string.Empty,
+                            NewValue = change == StructuredDiffChangeKind.Added ? value : string.Empty,
+                            Change = change,
+                        });
+                    }
+                }
+            }
+        }
+
+        private static void ApplyModifiedReportNodes(Dictionary<string, StructuredDiffNode> nodeMap, JsonElement report)
+        {
+            if (!report.TryGetProperty("modified", out var nodes) || nodes.ValueKind != JsonValueKind.Array)
+                return;
+
+            foreach (var item in nodes.EnumerateArray())
+            {
+                if (item.ValueKind != JsonValueKind.Object || !item.TryGetProperty("path", out var pathValue))
+                    continue;
+
+                var node = EnsureReportPrefabNode(nodeMap, pathValue.GetString());
+                if (node == null)
+                    continue;
+                node.Change = StructuredDiffChangeKind.Modified;
+                AddReportPropertyList(node, item, "added", StructuredDiffChangeKind.Added);
+                AddReportPropertyList(node, item, "removed", StructuredDiffChangeKind.Deleted);
+                AddChangedReportPropertyList(node, item);
+            }
+        }
+
+        private static void AddReportPropertyList(StructuredDiffNode node, JsonElement item, string property, StructuredDiffChangeKind change)
+        {
+            if (!item.TryGetProperty(property, out var props) || props.ValueKind != JsonValueKind.Array)
+                return;
+
+            foreach (var prop in props.EnumerateArray())
+            {
+                if (TryReadReportPair(prop, out var key, out var value) && !IsInternalPrefabReportProperty(key))
+                {
+                    node.Properties.Add(new StructuredPropertyChange()
+                    {
+                        Key = key,
+                        OldValue = change == StructuredDiffChangeKind.Deleted ? value : string.Empty,
+                        NewValue = change == StructuredDiffChangeKind.Added ? value : string.Empty,
+                        Change = change,
+                    });
+                }
+            }
+        }
+
+        private static void AddChangedReportPropertyList(StructuredDiffNode node, JsonElement item)
+        {
+            if (!item.TryGetProperty("changed", out var props) || props.ValueKind != JsonValueKind.Array)
+                return;
+
+            foreach (var prop in props.EnumerateArray())
+            {
+                if (prop.ValueKind != JsonValueKind.Object || !prop.TryGetProperty("key", out var keyValue))
+                    continue;
+
+                var key = keyValue.GetString() ?? string.Empty;
+                if (IsInternalPrefabReportProperty(key))
+                    continue;
+
+                node.Properties.Add(new StructuredPropertyChange()
+                {
+                    Key = key,
+                    OldValue = prop.TryGetProperty("old", out var oldValue) ? JsonReportValue(oldValue) : string.Empty,
+                    NewValue = prop.TryGetProperty("new", out var newValue) ? JsonReportValue(newValue) : string.Empty,
+                    Change = StructuredDiffChangeKind.Modified,
+                });
+            }
+        }
+
+        private static bool TryReadReportPair(JsonElement prop, out string key, out string value)
+        {
+            key = string.Empty;
+            value = string.Empty;
+            if (prop.ValueKind != JsonValueKind.Object || !prop.TryGetProperty("key", out var keyValue))
+                return false;
+
+            key = keyValue.GetString() ?? string.Empty;
+            value = prop.TryGetProperty("value", out var valueElement) ? JsonReportValue(valueElement) : string.Empty;
+            return key.Length > 0;
+        }
+
+        private static string JsonReportValue(JsonElement value)
+        {
+            return value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : value.GetRawText();
+        }
+
+        private static StructuredDiffNode EnsureReportPrefabNode(Dictionary<string, StructuredDiffNode> nodeMap, string path)
+        {
+            return string.IsNullOrWhiteSpace(path) ? null : EnsurePrefabNode(nodeMap, path);
+        }
+
+        private static StructuredDiffNode EnsurePrefabNode(Dictionary<string, StructuredDiffNode> nodes, string path)
+        {
+            if (nodes.TryGetValue(path, out var node))
+                return node;
+
+            var slash = path.LastIndexOf('/');
+            node = new StructuredDiffNode()
+            {
+                Path = path,
+                Name = slash >= 0 ? path.Substring(slash + 1) : path,
+            };
+            nodes[path] = node;
+
+            if (slash > 0)
+            {
+                var parent = EnsurePrefabNode(nodes, path.Substring(0, slash));
+                parent.Children.Add(node);
+                parent.Children.Sort((a, b) => string.CompareOrdinal(a.Path, b.Path));
+            }
+
+            return node;
+        }
+
+        private static bool IsInternalPrefabReportProperty(string key)
+        {
+            return key is "__flags__" or "__id__" or "__parent_id__";
         }
 
         private static TextDiff BuildLineByLineTextDiff(string label, List<string> oldLines, List<string> newLines)
@@ -1425,179 +1704,6 @@ namespace SourceGit.Models
             };
         }
 
-        private sealed class PrefabNodeSource
-        {
-            public string Path { get; set; } = string.Empty;
-            public Dictionary<string, string> Properties { get; set; } = new(StringComparer.Ordinal);
-        }
-
-        private static Dictionary<string, PrefabNodeSource> ParsePrefabDump(List<string> lines)
-        {
-            var nodes = new Dictionary<string, PrefabNodeSource>(StringComparer.Ordinal);
-            var pathCount = new Dictionary<string, int>(StringComparer.Ordinal);
-            PrefabNodeSource current = null;
-            foreach (var line in lines)
-            {
-                if (line.StartsWith("[", StringComparison.Ordinal))
-                {
-                    var end = line.IndexOf(']');
-                    if (end <= 1)
-                        continue;
-
-                    var path = line.Substring(1, end - 1);
-                    if (pathCount.TryGetValue(path, out var count))
-                    {
-                        count++;
-                        pathCount[path] = count;
-                        path += "#" + count.ToString(CultureInfo.InvariantCulture);
-                    }
-                    else
-                    {
-                        pathCount[path] = 1;
-                    }
-
-                    if (!nodes.TryGetValue(path, out current))
-                    {
-                        current = new PrefabNodeSource() { Path = path };
-                        nodes[path] = current;
-                    }
-                    var flags = line.Substring(Math.Min(end + 1, line.Length)).Trim();
-                    if (flags.Length > 0)
-                        current.Properties["__flags__"] = flags;
-                    continue;
-                }
-
-                if (current == null || !line.StartsWith("  ", StringComparison.Ordinal))
-                    continue;
-
-                var trimmed = line.Trim();
-                var colon = trimmed.IndexOf(':');
-                if (colon <= 0)
-                    continue;
-                current.Properties[trimmed.Substring(0, colon)] = trimmed.Substring(colon + 1).Trim();
-            }
-
-            return nodes;
-        }
-
-        private static Dictionary<string, StructuredDiffNode> ComparePrefabNodes(
-            Dictionary<string, PrefabNodeSource> oldNodes,
-            Dictionary<string, PrefabNodeSource> newNodes)
-        {
-            var result = new Dictionary<string, StructuredDiffNode>(StringComparer.Ordinal);
-            var paths = new List<string>();
-            foreach (var path in oldNodes.Keys)
-                AddPrefabPath(paths, path);
-            foreach (var path in newNodes.Keys)
-                AddPrefabPath(paths, path);
-            paths.Sort(StringComparer.Ordinal);
-
-            foreach (var path in paths)
-            {
-                oldNodes.TryGetValue(path, out var oldNode);
-                newNodes.TryGetValue(path, out var newNode);
-                var node = EnsurePrefabNode(result, path);
-                node.Change = oldNode == null && newNode == null
-                    ? StructuredDiffChangeKind.None
-                    : oldNode == null
-                        ? StructuredDiffChangeKind.Added
-                        : newNode == null
-                            ? StructuredDiffChangeKind.Deleted
-                            : StructuredDiffChangeKind.None;
-                ComparePrefabProperties(node, oldNode?.Properties, newNode?.Properties);
-                if (node.Change == StructuredDiffChangeKind.None && node.Properties.Count > 0)
-                    node.Change = StructuredDiffChangeKind.Modified;
-            }
-
-            return result;
-        }
-
-        private static void AddPrefabPath(List<string> paths, string path)
-        {
-            var parts = path.Split('/');
-            var current = string.Empty;
-            foreach (var part in parts)
-            {
-                current = current.Length == 0 ? part : current + "/" + part;
-                AddIfMissing(paths, current);
-            }
-        }
-
-        private static StructuredDiffNode EnsurePrefabNode(Dictionary<string, StructuredDiffNode> nodes, string path)
-        {
-            if (nodes.TryGetValue(path, out var node))
-                return node;
-
-            var slash = path.LastIndexOf('/');
-            node = new StructuredDiffNode()
-            {
-                Path = path,
-                Name = slash >= 0 ? path.Substring(slash + 1) : path,
-            };
-            nodes[path] = node;
-
-            if (slash > 0)
-            {
-                var parent = EnsurePrefabNode(nodes, path.Substring(0, slash));
-                parent.Children.Add(node);
-                parent.Children.Sort((a, b) => string.CompareOrdinal(a.Path, b.Path));
-            }
-
-            return node;
-        }
-
-        private static void ComparePrefabProperties(StructuredDiffNode target, Dictionary<string, string> oldProps, Dictionary<string, string> newProps)
-        {
-            var keys = new List<string>();
-            if (oldProps != null)
-            {
-                foreach (var key in oldProps.Keys)
-                    AddIfMissing(keys, key);
-            }
-            if (newProps != null)
-            {
-                foreach (var key in newProps.Keys)
-                    AddIfMissing(keys, key);
-            }
-            keys.Sort(StringComparer.Ordinal);
-
-            foreach (var key in keys)
-            {
-                if (key == "__flags__")
-                    continue;
-
-                var oldValue = string.Empty;
-                var newValue = string.Empty;
-                var hasOld = oldProps != null && oldProps.TryGetValue(key, out oldValue);
-                var hasNew = newProps != null && newProps.TryGetValue(key, out newValue);
-
-                var change = !hasOld ? StructuredDiffChangeKind.Added : !hasNew ? StructuredDiffChangeKind.Deleted : oldValue != newValue ? StructuredDiffChangeKind.Modified : StructuredDiffChangeKind.None;
-                if (change == StructuredDiffChangeKind.None)
-                    continue;
-
-                target.Properties.Add(new StructuredPropertyChange()
-                {
-                    Key = key,
-                    OldValue = oldValue,
-                    NewValue = newValue,
-                    Change = change,
-                });
-            }
-
-            var oldFlags = oldProps != null && oldProps.TryGetValue("__flags__", out var oldFlagValue) ? oldFlagValue : string.Empty;
-            var newFlags = newProps != null && newProps.TryGetValue("__flags__", out var newFlagValue) ? newFlagValue : string.Empty;
-            if (oldFlags != newFlags)
-            {
-                target.Properties.Add(new StructuredPropertyChange()
-                {
-                    Key = "[Flags]",
-                    OldValue = oldFlags.Length > 0 ? oldFlags : "(none)",
-                    NewValue = newFlags.Length > 0 ? newFlags : "(none)",
-                    Change = StructuredDiffChangeKind.Modified,
-                });
-            }
-        }
-
         private static void FlattenNode(List<StructuredDiffNode> rows, StructuredDiffNode node, int depth)
         {
             node.Depth = depth;
@@ -1606,776 +1712,5 @@ namespace SourceGit.Models
                 FlattenNode(rows, child, depth + 1);
         }
 
-        private sealed class PrefabSection
-        {
-            public int TypeId { get; set; }
-            public string Fid { get; set; } = string.Empty;
-            public string Body { get; set; } = string.Empty;
-        }
-
-        private sealed class PrefabInstanceInfo
-        {
-            public string SourceGuid { get; set; } = string.Empty;
-            public string ParentTransformFid { get; set; } = string.Empty;
-            public string Body { get; set; } = string.Empty;
-        }
-
-        private readonly record struct PrefabInstanceMod(string TargetFid, string TargetGuid, string Property, string Value);
-
-        private static List<string> ConvertPrefabYaml(string repo, string content, Dictionary<string, string> assetNames)
-        {
-            var sections = ParsePrefabSections(content);
-            var byFid = new Dictionary<string, PrefabSection>(StringComparer.Ordinal);
-            var goName = new Dictionary<string, string>(StringComparer.Ordinal);
-            var goActive = new Dictionary<string, bool>(StringComparer.Ordinal);
-            var goTag = new Dictionary<string, string>(StringComparer.Ordinal);
-            var tfmGo = new Dictionary<string, string>(StringComparer.Ordinal);
-            var tfmParent = new Dictionary<string, string>(StringComparer.Ordinal);
-            var tfmChildren = new Dictionary<string, List<string>>(StringComparer.Ordinal);
-            var goTfm = new Dictionary<string, string>(StringComparer.Ordinal);
-            var compGo = new Dictionary<string, List<PrefabSection>>(StringComparer.Ordinal);
-            var prefabInstances = new Dictionary<string, PrefabInstanceInfo>(StringComparer.Ordinal);
-            var prefabInstancesByParent = new Dictionary<string, List<string>>(StringComparer.Ordinal);
-            var transformOrder = new List<string>();
-
-            foreach (var section in sections)
-            {
-                byFid[section.Fid] = section;
-                if (section.TypeId == 1)
-                {
-                    goName[section.Fid] = DecodeUnityEscapes(MatchValue(section.Body, @"m_Name:\s*(.+)", section.Fid));
-                    goActive[section.Fid] = MatchValue(section.Body, @"m_IsActive:\s*(\d+)", "1") != "0";
-                    goTag[section.Fid] = DecodeUnityEscapes(MatchValue(section.Body, @"m_TagString:\s*(.+)", string.Empty));
-                }
-                else if (section.TypeId is 4 or 224)
-                {
-                    var go = MatchValue(section.Body, @"m_GameObject:\s*\{fileID:\s*(-?\d+)\}", string.Empty);
-                    if (go.Length > 0)
-                    {
-                        tfmGo[section.Fid] = go;
-                        goTfm[go] = section.Fid;
-                    }
-
-                    var parent = MatchValue(section.Body, @"m_Father:\s*\{fileID:\s*(-?\d+)\}", string.Empty);
-                    if (parent != "0")
-                        tfmParent[section.Fid] = parent;
-
-                    tfmChildren[section.Fid] = ParseChildren(section.Body);
-                    transformOrder.Add(section.Fid);
-                }
-                else if (section.TypeId == 1001)
-                {
-                    var sourceGuid = MatchValue(section.Body, @"m_SourcePrefab:.*?guid:\s*([0-9a-fA-F]+)", string.Empty);
-                    var parent = MatchValue(section.Body, @"m_TransformParent:\s*\{fileID:\s*(-?\d+)\}", "0");
-                    if (sourceGuid.Length == 0)
-                        continue;
-
-                    prefabInstances[section.Fid] = new PrefabInstanceInfo()
-                    {
-                        SourceGuid = sourceGuid,
-                        ParentTransformFid = parent,
-                        Body = section.Body,
-                    };
-                    if (!prefabInstancesByParent.TryGetValue(parent, out var pis))
-                    {
-                        pis = [];
-                        prefabInstancesByParent[parent] = pis;
-                    }
-                    pis.Add(section.Fid);
-                }
-                else if (section.TypeId != 1001)
-                {
-                    var go = MatchValue(section.Body, @"m_GameObject:\s*\{fileID:\s*(-?\d+)\}", string.Empty);
-                    if (go.Length == 0)
-                        continue;
-                    if (!compGo.TryGetValue(go, out var list))
-                    {
-                        list = [];
-                        compGo[go] = list;
-                    }
-                    list.Add(section);
-                }
-            }
-
-            var lines = new List<string>();
-            var emitted = new HashSet<string>(StringComparer.Ordinal);
-            var emittedPrefabInstances = new HashSet<string>(StringComparer.Ordinal);
-            var refLabels = new Dictionary<string, string>(StringComparer.Ordinal);
-
-            string ResolveLocalRef(string fid)
-            {
-                return refLabels.TryGetValue(fid, out var label) ? label : string.Empty;
-            }
-
-            void RenderNode(string tfmFid, string prefix)
-            {
-                if (!tfmGo.TryGetValue(tfmFid, out var goFid) || emitted.Contains(tfmFid))
-                    return;
-                emitted.Add(tfmFid);
-                emitted.Add(goFid);
-
-                var name = goName.TryGetValue(goFid, out var goDisplay) ? goDisplay : goFid;
-                var path = prefix.Length == 0 ? name : prefix + "/" + name;
-                var flags = new List<string>();
-                if (goActive.TryGetValue(goFid, out var active) && !active)
-                    flags.Add("Inactive");
-                if (goTag.TryGetValue(goFid, out var tag) && tag.Length > 0 && tag != "Untagged")
-                    flags.Add("tag:" + tag);
-                lines.Add(flags.Count > 0 ? $"[{path}]  [{string.Join(", ", flags)}]" : $"[{path}]");
-
-                if (byFid.TryGetValue(tfmFid, out var tfm))
-                {
-                    var typeName = tfm.TypeId == 224 ? "RectTransform" : "Transform";
-                    refLabels[goFid] = path + "/GameObject";
-                    refLabels[tfmFid] = path + "/" + typeName;
-                    if (compGo.TryGetValue(goFid, out var nodeCompsForRefs))
-                    {
-                        foreach (var comp in nodeCompsForRefs)
-                            refLabels[comp.Fid] = path + "/" + PrefabComponentName(comp.TypeId, comp.Body, assetNames);
-                    }
-                    foreach (var prop in ExtractPrefabProps(tfm.Body, assetNames, ResolveLocalRef))
-                        lines.Add("  " + typeName + "." + prop.Key + ": " + prop.Value);
-                }
-
-                if (compGo.TryGetValue(goFid, out var comps))
-                {
-                    foreach (var comp in comps)
-                    {
-                        emitted.Add(comp.Fid);
-                        var compName = PrefabComponentName(comp.TypeId, comp.Body, assetNames);
-                        refLabels[comp.Fid] = path + "/" + compName;
-                        foreach (var prop in ExtractPrefabProps(comp.Body, assetNames, ResolveLocalRef))
-                            lines.Add("  " + compName + "." + prop.Key + ": " + prop.Value);
-                    }
-                }
-
-                if (tfmChildren.TryGetValue(tfmFid, out var children))
-                {
-                    foreach (var child in children)
-                        RenderNode(child, path);
-                }
-
-                if (prefabInstancesByParent.TryGetValue(tfmFid, out var nestedPrefabInstances))
-                {
-                    foreach (var prefabInstanceFid in nestedPrefabInstances)
-                        RenderPrefabInstance(prefabInstanceFid, path);
-                }
-            }
-
-            void RenderPrefabInstance(string prefabInstanceFid, string prefix)
-            {
-                if (!prefabInstances.TryGetValue(prefabInstanceFid, out var prefabInstance) || !emittedPrefabInstances.Add(prefabInstanceFid))
-                    return;
-
-                var sourceName = PrefabAssetLabel(prefabInstance.SourceGuid, assetNames);
-                var mods = NormalizePrefabInstanceMods(ParsePrefabInstanceMods(prefabInstance.Body));
-                var customName = string.Empty;
-                foreach (var mod in mods)
-                {
-                    if (mod.Property == "m_Name")
-                    {
-                        customName = mod.Value;
-                        break;
-                    }
-                }
-
-                var nodeName = customName.Length > 0 ? customName + " (" + sourceName + ")" : sourceName;
-                var path = prefix.Length == 0 ? nodeName : prefix + "/" + nodeName;
-                lines.Add($"[{path}]  [Prefab]");
-                emitted.Add(prefabInstanceFid);
-
-                foreach (var mod in mods)
-                {
-                    if (mod.Property == "m_Name")
-                        continue;
-
-                    var targetPath = ResolvePrefabOverridePath(path, mod, prefabInstance.SourceGuid, assetNames, ResolveLocalRef);
-                    if (!string.Equals(targetPath, path, StringComparison.Ordinal))
-                        lines.Add($"[{targetPath}]  [PrefabOverride]");
-                    var value = NormalizeUnityRefs(mod.Value, assetNames, ResolveLocalRef);
-                    lines.Add("  PrefabOverride." + mod.Property + ": " + value);
-                }
-            }
-
-            foreach (var fid in transformOrder)
-            {
-                if (!tfmParent.ContainsKey(fid))
-                    RenderNode(fid, string.Empty);
-            }
-
-            if (prefabInstancesByParent.TryGetValue("0", out var rootPrefabInstances))
-            {
-                foreach (var prefabInstanceFid in rootPrefabInstances)
-                    RenderPrefabInstance(prefabInstanceFid, string.Empty);
-            }
-
-            foreach (var section in sections)
-            {
-                if (emitted.Contains(section.Fid) || section.TypeId is 4 or 224)
-                    continue;
-                if (section.TypeId == 1 && goTfm.TryGetValue(section.Fid, out var tfm))
-                {
-                    RenderNode(tfm, string.Empty);
-                    continue;
-                }
-
-                var props = ExtractPrefabProps(section.Body, assetNames, ResolveLocalRef);
-                if (props.Count == 0)
-                    continue;
-
-                var label = section.TypeId == 1
-                    ? "GameObject:" + (goName.TryGetValue(section.Fid, out var name) ? name : section.Fid)
-                    : PrefabComponentName(section.TypeId, section.Body, assetNames);
-                lines.Add($"[{label} #{section.Fid}]");
-                foreach (var prop in props)
-                    lines.Add("  " + label + "." + prop.Key + ": " + prop.Value);
-            }
-
-            return lines;
-        }
-
-        private static List<PrefabSection> ParsePrefabSections(string content)
-        {
-            var sections = new List<PrefabSection>();
-            var matches = PrefabDocRe.Matches(content);
-            for (var i = 0; i < matches.Count; i++)
-            {
-                var match = matches[i];
-                var start = match.Index + match.Length;
-                var end = i + 1 < matches.Count ? matches[i + 1].Index : content.Length;
-                sections.Add(new PrefabSection()
-                {
-                    TypeId = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture),
-                    Fid = match.Groups[2].Value,
-                    Body = content.Substring(start, end - start),
-                });
-            }
-
-            return sections;
-        }
-
-        private static string MatchValue(string body, string pattern, string fallback)
-        {
-            var match = Regex.Match(body, pattern);
-            return match.Success ? match.Groups[1].Value.Trim() : fallback;
-        }
-
-        private static List<string> ParseChildren(string body)
-        {
-            var children = new List<string>();
-            var start = body.IndexOf("m_Children:", StringComparison.Ordinal);
-            if (start < 0)
-                return children;
-
-            var end = body.IndexOf("m_Father:", start, StringComparison.Ordinal);
-            var section = end >= 0 ? body.Substring(start, end - start) : body.Substring(start);
-            foreach (Match match in Regex.Matches(section, @"\{fileID:\s*(-?\d+)\}"))
-            {
-                if (match.Groups[1].Value != "0")
-                    children.Add(match.Groups[1].Value);
-            }
-
-            return children;
-        }
-
-        private static string PrefabComponentName(int typeId, string body, Dictionary<string, string> assetNames)
-        {
-            var name = PrefabTypeNames.TryGetValue(typeId, out var typeName) ? typeName : "Type" + typeId.ToString(CultureInfo.InvariantCulture);
-            if (typeId != 114)
-                return name;
-
-            var scriptGuid = MatchValue(body, @"m_Script:.*?guid:\s*([0-9a-f]+)", string.Empty);
-            if (scriptGuid.Length == 0)
-                return "MonoBehaviour";
-
-            if (assetNames != null && assetNames.TryGetValue(scriptGuid, out var scriptName))
-                return scriptName.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) ? Path.GetFileNameWithoutExtension(scriptName) : scriptName;
-
-            if (PrefabGuidFallbackNames.TryGetValue(scriptGuid, out var fallbackName))
-                return fallbackName;
-
-            return "Script:" + scriptGuid.Substring(0, Math.Min(8, scriptGuid.Length));
-        }
-
-        private static Dictionary<string, string> BuildPrefabAssetNameMap(string repo, string oldText, string newText)
-        {
-            var wantedGuids = CollectPrefabGuids(oldText, newText);
-            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            if (wantedGuids.Count == 0 || string.IsNullOrEmpty(repo) || !Directory.Exists(repo))
-                return map;
-
-            var assetsRoot = Path.Combine(repo, "Assets");
-            if (!Directory.Exists(assetsRoot))
-                assetsRoot = repo;
-
-            try
-            {
-                foreach (var meta in Directory.EnumerateFiles(assetsRoot, "*.meta", SearchOption.AllDirectories))
-                {
-                    var content = File.ReadAllText(meta);
-                    var guidMatch = Regex.Match(content, @"^guid:\s*([0-9a-fA-F]+)", RegexOptions.Multiline);
-                    var guid = guidMatch.Success ? guidMatch.Groups[1].Value : string.Empty;
-                    if (guid.Length == 0 || !wantedGuids.Contains(guid))
-                        continue;
-
-                    // Prefab references only store GUID/fileID. Resolving only GUIDs present in this
-                    // diff keeps short prefab views fast while still making cached references readable.
-                    map[guid] = Path.GetFileName(meta.Substring(0, meta.Length - ".meta".Length));
-                    if (map.Count == wantedGuids.Count)
-                        break;
-                }
-            }
-            catch
-            {
-                // Asset name resolution is best-effort; short GUIDs remain as a safe fallback.
-            }
-
-            return map;
-        }
-
-        private static HashSet<string> CollectPrefabGuids(string oldText, string newText)
-        {
-            var guids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            AddPrefabGuids(guids, oldText);
-            AddPrefabGuids(guids, newText);
-            return guids;
-        }
-
-        private static void AddPrefabGuids(HashSet<string> guids, string text)
-        {
-            if (string.IsNullOrEmpty(text))
-                return;
-
-            foreach (Match match in Regex.Matches(text, @"guid:\s*([0-9a-fA-F]+)"))
-            {
-                var guid = match.Groups[1].Value;
-                if (guid.Length > 0)
-                    guids.Add(guid);
-            }
-        }
-
-        private static List<KeyValuePair<string, string>> ExtractPrefabProps(
-            string body,
-            Dictionary<string, string> assetNames,
-            Func<string, string> refResolver = null)
-        {
-            var props = new List<KeyValuePair<string, string>>();
-            var lines = body.Split('\n');
-            foreach (var rawLine in lines)
-            {
-                var stripped = rawLine.Trim();
-                if (stripped.Length == 0 || stripped[0] == '-' || stripped.IndexOf(':') < 0)
-                    continue;
-
-                var colon = stripped.IndexOf(':');
-                var key = stripped.Substring(0, colon).Trim();
-                var value = stripped.Substring(colon + 1).Trim();
-                if (value.Length == 0 || PrefabSkipProps.Contains(key))
-                    continue;
-
-                value = NormalizeUnityRefs(value, assetNames, refResolver);
-                props.Add(new KeyValuePair<string, string>(key, value));
-            }
-
-            return CombineVectorPrefabProps(FormatStandalonePrefabColorProps(CombineColorPrefabProps(props)));
-        }
-
-        private static string NormalizeUnityRefs(string value, Dictionary<string, string> assetNames, Func<string, string> refResolver = null)
-        {
-            if (string.IsNullOrEmpty(value) || value.IndexOf("fileID:", StringComparison.Ordinal) < 0)
-                return DecodeUnityEscapes(value);
-
-            return Regex.Replace(DecodeUnityEscapes(value), @"\{fileID:\s*(-?\d+)(?:\s*,\s*guid:\s*([0-9a-fA-F]+))?(?:\s*,\s*type:\s*\d+)?\s*\}", match =>
-            {
-                var fileId = match.Groups[1].Value;
-                var guid = match.Groups[2].Success ? match.Groups[2].Value : string.Empty;
-                if (fileId == "0")
-                    return "null";
-
-                if (guid.Length > 0)
-                {
-                    var asset = PrefabAssetLabel(guid, assetNames);
-                    return asset.Length > 0 ? $"{{fileID:{fileId}, asset:{asset}}}" : $"{{fileID:{fileId}, guid:{ShortGuid(guid)}}}";
-                }
-
-                var label = refResolver?.Invoke(fileId) ?? string.Empty;
-                return label.Length > 0 ? $"{{fileID:{fileId} -> {label}}}" : $"{{fileID:{fileId}}}";
-            });
-        }
-
-        private static string PrefabAssetLabel(string guid, Dictionary<string, string> assetNames)
-        {
-            if (string.IsNullOrEmpty(guid))
-                return string.Empty;
-            if (assetNames != null && assetNames.TryGetValue(guid, out var assetName))
-                return assetName;
-            if (PrefabGuidFallbackNames.TryGetValue(guid, out var fallbackName))
-                return fallbackName;
-            return ShortGuid(guid);
-        }
-
-        private static string ShortGuid(string guid)
-        {
-            return guid.Substring(0, Math.Min(8, guid.Length)) + "...";
-        }
-
-        private static string ResolvePrefabOverridePath(
-            string instancePath,
-            PrefabInstanceMod mod,
-            string sourceGuid,
-            Dictionary<string, string> assetNames,
-            Func<string, string> refResolver)
-        {
-            var localLabel = refResolver?.Invoke(mod.TargetFid) ?? string.Empty;
-            if (!string.IsNullOrEmpty(localLabel))
-            {
-                var slash = localLabel.LastIndexOf('/');
-                return slash > 0 ? localLabel.Substring(0, slash) : localLabel;
-            }
-
-            var targetGuid = string.IsNullOrEmpty(mod.TargetGuid) ? sourceGuid : mod.TargetGuid;
-            var sourceName = PrefabAssetLabel(targetGuid, assetNames);
-            return instancePath + "/PrefabOverrides/" + sourceName + "#" + mod.TargetFid;
-        }
-
-        private static List<PrefabInstanceMod> ParsePrefabInstanceMods(string body)
-        {
-            var mods = new List<PrefabInstanceMod>();
-            foreach (var block in Regex.Split(body, @"(?=\n\s*- target:)"))
-            {
-                var target = Regex.Match(block, @"target:\s*\{fileID:\s*(-?\d+)(?:,\s*guid:\s*([0-9a-fA-F]+))?");
-                var property = Regex.Match(block, @"propertyPath:\s*(.+)");
-                if (!target.Success || !property.Success)
-                    continue;
-
-                var prop = property.Groups[1].Value.Trim();
-                if (prop.Length == 0 || (prop != "m_Name" && PrefabSkipProps.Contains(prop)))
-                    continue;
-
-                var value = MatchValue(block, @"(?m)^\s+value:\s*(.*)$", string.Empty);
-                if (value.Length == 0)
-                    value = MatchValue(block, @"(?m)^\s+objectReference:\s*(.*)$", string.Empty);
-                mods.Add(new PrefabInstanceMod(
-                    target.Groups[1].Value,
-                    target.Groups[2].Success ? target.Groups[2].Value : string.Empty,
-                    prop,
-                    DecodeUnityEscapes(value.Trim())));
-            }
-
-            return mods;
-        }
-
-        private static List<PrefabInstanceMod> NormalizePrefabInstanceMods(List<PrefabInstanceMod> mods)
-        {
-            return CombineVectorPrefabMods(FormatStandalonePrefabColorMods(CombineColorPrefabMods(mods)));
-        }
-
-        private static string DecodeUnityEscapes(string value)
-        {
-            if (string.IsNullOrEmpty(value) || value.IndexOf("\\u", StringComparison.Ordinal) < 0)
-                return value;
-
-            var builder = new StringBuilder();
-            var matches = Regex.Matches(value, @"\\u([0-9a-fA-F]{4})");
-            var position = 0;
-            for (var i = 0; i < matches.Count; i++)
-            {
-                var match = matches[i];
-                builder.Append(value, position, match.Index - position);
-                var code = int.Parse(match.Groups[1].Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                var next = i + 1 < matches.Count ? matches[i + 1] : null;
-                if (code is >= 0xD800 and <= 0xDBFF && next != null && next.Index == match.Index + match.Length)
-                {
-                    var low = int.Parse(next.Groups[1].Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                    if (low is >= 0xDC00 and <= 0xDFFF)
-                    {
-                        var codePoint = 0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00);
-                        builder.Append(char.ConvertFromUtf32(codePoint));
-                        position = next.Index + next.Length;
-                        i++;
-                        continue;
-                    }
-                }
-
-                // Unity YAML may contain unmatched surrogate escape sequences in damaged text.
-                // Preserve those code units instead of failing the entire structured diff view.
-                builder.Append(code is >= 0xD800 and <= 0xDFFF ? (char)code : char.ConvertFromUtf32(code));
-                position = match.Index + match.Length;
-            }
-
-            builder.Append(value, position, value.Length - position);
-            return builder.ToString();
-        }
-
-        private static List<KeyValuePair<string, string>> FormatStandalonePrefabColorProps(List<KeyValuePair<string, string>> props)
-        {
-            var result = new List<KeyValuePair<string, string>>(props.Count);
-            foreach (var prop in props)
-            {
-                var key = prop.Key;
-                var value = prop.Value;
-                FormatStandalonePrefabColor(ref key, ref value);
-                result.Add(new KeyValuePair<string, string>(key, value));
-            }
-
-            return result;
-        }
-
-        private static List<PrefabInstanceMod> FormatStandalonePrefabColorMods(List<PrefabInstanceMod> mods)
-        {
-            var result = new List<PrefabInstanceMod>(mods.Count);
-            foreach (var mod in mods)
-            {
-                var key = mod.Property;
-                var value = mod.Value;
-                FormatStandalonePrefabColor(ref key, ref value);
-                result.Add(mod with { Property = key, Value = value });
-            }
-
-            return result;
-        }
-
-        private static void FormatStandalonePrefabColor(ref string key, ref string value)
-        {
-            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
-                return;
-
-            if (key.EndsWith(".rgba", StringComparison.Ordinal) && TryFormatPackedPrefabRgba(value, out var packed))
-            {
-                var baseKey = key.Substring(0, key.Length - ".rgba".Length);
-                if (IsColorPrefabKey(baseKey))
-                {
-                    key = baseKey;
-                    value = packed;
-                    return;
-                }
-            }
-
-            if (IsColorPrefabKey(key) && TryFormatInlinePrefabColor(value, out var inline))
-                value = inline;
-        }
-
-        private static bool TryFormatInlinePrefabColor(string value, out string formatted)
-        {
-            formatted = string.Empty;
-            var match = Regex.Match(value, @"^\{\s*r\s*:\s*([^,{}]+)\s*,\s*g\s*:\s*([^,{}]+)\s*,\s*b\s*:\s*([^,{}]+)\s*,\s*a\s*:\s*([^,{}]+)\s*\}$");
-            if (!match.Success)
-                return false;
-
-            var values = new Dictionary<char, string>()
-            {
-                ['r'] = match.Groups[1].Value.Trim(),
-                ['g'] = match.Groups[2].Value.Trim(),
-                ['b'] = match.Groups[3].Value.Trim(),
-                ['a'] = match.Groups[4].Value.Trim(),
-            };
-            formatted = FormatPrefabColorValue(values);
-            return true;
-        }
-
-        private static bool TryFormatPackedPrefabRgba(string value, out string formatted)
-        {
-            formatted = string.Empty;
-            if (!long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var raw))
-                return false;
-
-            var packed = unchecked((uint)raw);
-            if (raw != packed && raw + (1L << 32) != packed)
-                return false;
-
-            var r = packed & 0xFF;
-            var g = (packed >> 8) & 0xFF;
-            var b = (packed >> 16) & 0xFF;
-            var a = (packed >> 24) & 0xFF;
-            var alpha = ((double)a / 255).ToString("0.####", CultureInfo.InvariantCulture);
-            formatted = string.Format(CultureInfo.InvariantCulture, "rgba({0}, {1}, {2}, {3}) #{0:X2}{1:X2}{2:X2}{4:X2} {{rgba: {5}, hex: 0x{6:X8}, r: {0}, g: {1}, b: {2}, a: {4}}}", r, g, b, alpha, a, value, packed);
-            return true;
-        }
-
-        private static bool IsColorPrefabKey(string key)
-        {
-            return key.IndexOf("color", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                key.IndexOf("tint", StringComparison.OrdinalIgnoreCase) >= 0;
-        }
-
-        private static bool TryParsePrefabChannelKey(string key, string channels, out string name, out char channel)
-        {
-            name = string.Empty;
-            channel = '\0';
-            if (string.IsNullOrEmpty(key) || key.Length < 3 || key[^2] != '.')
-                return false;
-
-            channel = key[^1];
-            if (channels.IndexOf(channel) < 0)
-                return false;
-            name = key.Substring(0, key.Length - 2);
-            return name.Length > 0;
-        }
-
-        private static List<KeyValuePair<string, string>> CombineColorPrefabProps(List<KeyValuePair<string, string>> props)
-        {
-            return CombinePrefabChannelProps(props, "rgba", name => IsColorPrefabKey(name), FormatPrefabColorValue);
-        }
-
-        private static List<KeyValuePair<string, string>> CombineVectorPrefabProps(List<KeyValuePair<string, string>> props)
-        {
-            return CombinePrefabChannelProps(props, "xyzw", _ => true, FormatPrefabVectorValue);
-        }
-
-        private static List<KeyValuePair<string, string>> CombinePrefabChannelProps(
-            List<KeyValuePair<string, string>> props,
-            string channels,
-            Func<string, bool> acceptName,
-            Func<Dictionary<char, string>, string> format)
-        {
-            var grouped = new Dictionary<string, Dictionary<char, (string Value, int Index)>>(StringComparer.Ordinal);
-            for (var i = 0; i < props.Count; i++)
-            {
-                if (!TryParsePrefabChannelKey(props[i].Key, channels, out var name, out var channel) || !acceptName(name) || !float.TryParse(props[i].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
-                    continue;
-                if (!grouped.TryGetValue(name, out var values))
-                {
-                    values = [];
-                    grouped[name] = values;
-                }
-                values[channel] = (props[i].Value, i);
-            }
-
-            var consumed = new HashSet<int>();
-            var combined = new Dictionary<int, KeyValuePair<string, string>>();
-            foreach (var entry in grouped)
-            {
-                var order = RequiredPrefabChannelOrder(entry.Value.Keys, channels);
-                if (order.Length == 0)
-                    continue;
-
-                var first = int.MaxValue;
-                var values = new Dictionary<char, string>();
-                foreach (var channel in order)
-                {
-                    var item = entry.Value[channel];
-                    consumed.Add(item.Index);
-                    first = Math.Min(first, item.Index);
-                    values[channel] = item.Value;
-                }
-                combined[first] = new KeyValuePair<string, string>(entry.Key, format(values));
-            }
-
-            var result = new List<KeyValuePair<string, string>>();
-            for (var i = 0; i < props.Count; i++)
-            {
-                if (combined.TryGetValue(i, out var item))
-                    result.Add(item);
-                if (!consumed.Contains(i))
-                    result.Add(props[i]);
-            }
-            return result;
-        }
-
-        private static string RequiredPrefabChannelOrder(Dictionary<char, (string Value, int Index)>.KeyCollection present, string channels)
-        {
-            bool Has(char channel) => present.Contains(channel);
-            if (channels == "rgba")
-                return Has('r') && Has('g') && Has('b') && Has('a') ? "rgba" : string.Empty;
-            if (Has('x') && Has('y') && Has('z') && Has('w'))
-                return "xyzw";
-            if (Has('x') && Has('y') && Has('z'))
-                return "xyz";
-            return Has('x') && Has('y') ? "xy" : string.Empty;
-        }
-
-        private static string FormatPrefabVectorValue(Dictionary<char, string> values)
-        {
-            var keys = new List<char>(values.Keys);
-            keys.Sort();
-            var parts = new List<string>();
-            foreach (var key in keys)
-                parts.Add(key + ": " + values[key]);
-            return "{" + string.Join(", ", parts) + "}";
-        }
-
-        private static string FormatPrefabColorValue(Dictionary<char, string> values)
-        {
-            var r = ClampPrefabColor(values['r']);
-            var g = ClampPrefabColor(values['g']);
-            var b = ClampPrefabColor(values['b']);
-            var a = ClampPrefabColor(values['a']);
-            var ri = (int)Math.Round(r * 255);
-            var gi = (int)Math.Round(g * 255);
-            var bi = (int)Math.Round(b * 255);
-            var ai = (int)Math.Round(a * 255);
-            var alpha = a.ToString("0.####", CultureInfo.InvariantCulture);
-            return string.Format(CultureInfo.InvariantCulture, "rgba({0}, {1}, {2}, {3}) #{0:X2}{1:X2}{2:X2}{4:X2} {{r: {5}, g: {6}, b: {7}, a: {8}}}", ri, gi, bi, alpha, ai, values['r'], values['g'], values['b'], values['a']);
-        }
-
-        private static double ClampPrefabColor(string value)
-        {
-            if (!double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed))
-                return 0;
-            return Math.Max(0, Math.Min(1, parsed));
-        }
-
-        private static List<PrefabInstanceMod> CombineColorPrefabMods(List<PrefabInstanceMod> mods)
-        {
-            return CombinePrefabChannelMods(mods, "rgba", name => IsColorPrefabKey(name), FormatPrefabColorValue);
-        }
-
-        private static List<PrefabInstanceMod> CombineVectorPrefabMods(List<PrefabInstanceMod> mods)
-        {
-            return CombinePrefabChannelMods(mods, "xyzw", _ => true, FormatPrefabVectorValue);
-        }
-
-        private static List<PrefabInstanceMod> CombinePrefabChannelMods(
-            List<PrefabInstanceMod> mods,
-            string channels,
-            Func<string, bool> acceptName,
-            Func<Dictionary<char, string>, string> format)
-        {
-            var grouped = new Dictionary<string, Dictionary<char, (string Value, int Index)>>(StringComparer.Ordinal);
-            for (var i = 0; i < mods.Count; i++)
-            {
-                if (!TryParsePrefabChannelKey(mods[i].Property, channels, out var name, out var channel) || !acceptName(name) || !float.TryParse(mods[i].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
-                    continue;
-                var groupKey = mods[i].TargetGuid + "\n" + mods[i].TargetFid + "\n" + name;
-                if (!grouped.TryGetValue(groupKey, out var values))
-                {
-                    values = [];
-                    grouped[groupKey] = values;
-                }
-                values[channel] = (mods[i].Value, i);
-            }
-
-            var consumed = new HashSet<int>();
-            var combined = new Dictionary<int, PrefabInstanceMod>();
-            foreach (var entry in grouped)
-            {
-                var order = RequiredPrefabChannelOrder(entry.Value.Keys, channels);
-                if (order.Length == 0)
-                    continue;
-
-                var first = int.MaxValue;
-                var values = new Dictionary<char, string>();
-                foreach (var channel in order)
-                {
-                    var item = entry.Value[channel];
-                    consumed.Add(item.Index);
-                    first = Math.Min(first, item.Index);
-                    values[channel] = item.Value;
-                }
-                var mod = mods[first];
-                var name = mod.Property.Substring(0, mod.Property.Length - 2);
-                combined[first] = mod with { Property = name, Value = format(values) };
-            }
-
-            var result = new List<PrefabInstanceMod>();
-            for (var i = 0; i < mods.Count; i++)
-            {
-                if (combined.TryGetValue(i, out var item))
-                    result.Add(item);
-                if (!consumed.Contains(i))
-                    result.Add(mods[i]);
-            }
-            return result;
-        }
     }
 }
