@@ -1,0 +1,187 @@
+src/Views/TextDiffView.axaml.cs
+  s_e9ae10e4fe9392::t_bb0d5a5426ac6a 36-37,41,50-52,55-61,66,70-71,82-83,104,130,148-149,161,165,659
+  s_e9ae10e4fe9392::t_3e54755a7a3071 123-129,154,158
+  s_e6c367c90a61e5::t_d71db51e765c2e 33-35,146-147,150-153,155-157,159-160,162,166,617,653-658,660-663,1126-1128
+src/Resources/PrefabDiffTool/sourcegit_prefab_bridge.py
+  s_72e4c6f88263d1::t_327b6bec67452a 6-9
+  s_72e4c6f88263d1::t_0361e176ea2265 1-5,10-56
+src/Models/StructuredDiffBuilder.cs
+  s_72e4c6f88263d1::t_42b8e067be6b8f 53
+  s_72e4c6f88263d1::t_48b801e9109bd9 1277,1279-1280,1283,1285-1288,1290-1291,1293-1297,1299-1301,1303-1304,1306,1308-1311,1313,1315,1317-1320,1322-1323,1327,1329,1331,1333,1335-1341,1343-1362,1365-1367,1369,1371,1373-1376,1378,1380,1384,1387,1389,1391-1394,1396,1398-1411,1413-1416,1419,1421-1423,1426,1428-1429,1431-1436,1438,1440-1441,1444-1449,1452,1454-1458,1461,1463,1466,1468-1473,1477,1479-1482,1484,1487-1491,1494,1496-1508,1513,1515-1518,1520,1523-1524,1526-1529,1533,1535-1536,1538-1540,1542,1544-1548,1553,1555-1556,1558,1560-1561,1563-1565,1567,1569-1573,1577,1579-1581,1584-1586,1589,1591,1594,1596,1599,1601-1602,1604-1610,1612-1619,1622,1624,1627,1629-1630,1632-1633,1635-1639,1641,1643,1645-1646,1649-1653,1656-1657,1660,1662-1663,1665,1668,1670,1673,1675-1676,1678,1681-1682,1684-1689,1693-1698,1700-1704,1706-1714
+src/Commands/GetFileChangeForAI.cs
+  s_e9ae10e4fe9392::t_cbe526df25ee0e 9,15-19,24
+  s_e6c367c90a61e5::t_17e9c8ecdcd824 20-23,25-27
+src/Views/StructuredDiffView.axaml
+  s_72e4c6f88263d1::t_5e4c844156b61f 356-363,365-371,373-384,386-387,389-426,428-439
+  s_72e4c6f88263d1::t_da84cd711202dc 385
+  s_72e4c6f88263d1::t_fea14d529c7c6f 209-211,215-217,222,250-276,278,323-327,330-333,335-343,345-351,353-354,388,440-443,445-455,462,464,467
+  s_72e4c6f88263d1::t_ff2f7f86f4057b 75-80,212,214,277,279-322,355,444,458,480
+  s_72e4c6f88263d1::t_581a727bfd7598 14-15,20,24,28-35,39-41,43-59,64-69,72-73,81-208
+  s_72e4c6f88263d1::t_49733aa0921a84 213
+  s_72e4c6f88263d1::t_99acbf17bdfb13 328-329,334,344,364
+  s_e6c367c90a61e5::t_e1bb5b351edbf6 456-457,459-461,463,465-466,468-479,483-489,491-492
+src/AI/Agent.cs
+  s_e9ae10e4fe9392::t_758ec1bfaf52c1 38,49-51,53,65,68,75,77,102-103,112,134-162,164,173,175,177,180-181,183,187,195,198,202,208,216,220,229,232,237
+  s_e9ae10e4fe9392::t_1942cf87b3a220 104-105
+  s_e6c367c90a61e5::t_9a42a143e6a10a 163,165-172,174,176,178-179,182,184-186,188-194,196-197,199-201,203-207,209-215,217-219,221-228,230-231,233-236,238-242
+src/Resources/PrefabDiffTool/prefab_textconv.py
+  s_72e4c6f88263d1::t_a735ae632cc7be 1-3265
+src/Views/AIAssistant.axaml
+  s_e9ae10e4fe9392::t_ea633cba45adfb 7,13,16-52,82,85-104,106-119,134-158
+  s_e9ae10e4fe9392::t_429884decd2600 120-126,160-181
+  s_e9ae10e4fe9392::t_5fd774b7a2f7e4 105,127-133,159
+  s_e6c367c90a61e5::t_059871f2b86988 182-187,189,218-226
+docs/custom-diff-renderer.md
+  s_72e4c6f88263d1::t_43fdef8777fb51 2,4,6,8,15,17,19,34,36-40,42,44,46,48,50-62,66-71,73-74,77-78,80,82-83,87-88,90
+  s_72e4c6f88263d1::t_20f754920852d3 63-65
+  s_72e4c6f88263d1::t_638b930fa83320 1,3,5,7,9-14,16,18,20-33,35,41,43,45,47,49,72,75-76,79,81,84-86,89,91-95
+build/scripts/package.win.ps1
+  s_72e4c6f88263d1::t_2458f6da34bd06 1-18,25-34,36-68,77
+  s_72e4c6f88263d1::t_7167d191d4a52a 19-24
+  s_72e4c6f88263d1::t_e65463b72f0d66 35,69-76
+src/ViewModels/AIAssistant.cs
+  s_e9ae10e4fe9392::t_2aa7ed3906cd3a 186-198,265-286,288,297,308,310,312,354-355,368,379
+  s_e9ae10e4fe9392::t_19aab5e6dc4ddb 5-6,42,71-73,78-79,103-107,116,153-154,170
+  s_e9ae10e4fe9392::t_9acd6b88a40111 1-2,100-101
+  s_e9ae10e4fe9392::t_83dd7b7e320828 220-235,246-247,252-264,289,292,313,316,329,333,342,351-353,369,377,391-392,397-398
+  s_e9ae10e4fe9392::t_650b30715af326 38-41
+  s_e9ae10e4fe9392::t_f82981e9183fa3 43-56,66-70,76-77,102,150
+  s_e6c367c90a61e5::t_d45089e71e8bf0 91-92,123,287,290-291,293-296,298-307,309,311,314-315,317-328,331-332,334-341,343-350,356-367,370-376,378,380-390,393-396,399
+src/Views/Preferences.axaml.cs
+  s_72e4c6f88263d1::t_05f4687b72d118 3
+  s_e6c367c90a61e5::t_96b7aa71edd048 577-591
+src/ViewModels/StructuredDiffContext.cs
+  s_72e4c6f88263d1::t_907d2cf20e8db2 16-23,99
+  s_72e4c6f88263d1::t_38a1fbd1aa49ea 26,94,96
+  s_e6c367c90a61e5::t_429126dcba745f 24-25,95,97-98
+build/scripts/publish-local.win.ps1
+  s_72e4c6f88263d1::t_e59ca4967581d0 36-54
+  s_e9ae10e4fe9392::t_aada3821961717 1-33,58-99
+  s_72e4c6f88263d1::t_da5ef3440fa3d2 34-35,55-57
+src/AI/ChatTools.cs
+  s_e9ae10e4fe9392::t_e3540a9d7302e0 1-2
+  s_e9ae10e4fe9392::t_a91afadfe2badc 155,194
+  s_e9ae10e4fe9392::t_b7bbf92642a5c2 31-37,53-54,62-63,65-67,73-154,174,177,179,184-185,188,190,192,199,202,204,209-210
+  s_e9ae10e4fe9392::t_fdf38025b57b17 30
+  s_e6c367c90a61e5::t_b701802f5e3f50 156-173,175-176,178,180-183,186-187,189,191,193,195-198,200-201,203,205-208
+.github/workflows/package.yml
+  s_e6c367c90a61e5::t_bffbc10db7e966 19-22,33
+.gitignore
+  s_e6c367c90a61e5::t_3dc1ef43ebe559 30-31,39-40,54
+AGENTS.md
+  s_e6c367c90a61e5::t_7b97ec93365a9d 199-202
+src/AI/Service.cs
+  s_e9ae10e4fe9392::t_7f482bd8831750 25,27-45
+src/Commands/RenderCustomDiff.cs
+  s_e6c367c90a61e5::t_24832055088b8e 4,7,187-212,465-498
+src/Models/StructuredDiff.cs
+  s_e6c367c90a61e5::t_734807c851a812 181-187,240,293-294
+src/Resources/Locales/de_DE.axaml
+  s_72e4c6f88263d1::t_b504517c94a2b6 635
+src/Resources/Locales/el_GR.axaml
+  s_72e4c6f88263d1::t_96e6b605a73ec6 691
+src/Resources/Locales/en_US.axaml
+  s_72e4c6f88263d1::t_4f025df3b76055 22,28-30,709
+src/Resources/Locales/es_ES.axaml
+  s_72e4c6f88263d1::t_cdc20eca230e67 691
+src/Resources/Locales/fr_FR.axaml
+  s_72e4c6f88263d1::t_923f37fcede08e 685
+src/Resources/Locales/he_IL.axaml
+  s_72e4c6f88263d1::t_776bb3b03bb898 685
+src/Resources/Locales/id_ID.axaml
+  s_72e4c6f88263d1::t_916aaaf6955104 570
+src/Resources/Locales/it_IT.axaml
+  s_72e4c6f88263d1::t_a886f19ca61e12 632
+src/Resources/Locales/ja_JP.axaml
+  s_72e4c6f88263d1::t_f271e72eee2935 637
+src/Resources/Locales/ko_KR.axaml
+  s_72e4c6f88263d1::t_39f7853ae378da 688
+src/Resources/Locales/pt_BR.axaml
+  s_72e4c6f88263d1::t_2484eaa08311a8 454
+src/Resources/Locales/ru_RU.axaml
+  s_72e4c6f88263d1::t_709cac32f65ab7 695
+src/Resources/Locales/ta_IN.axaml
+  s_72e4c6f88263d1::t_9f6b39954592f6 451
+src/Resources/Locales/uk_UA.axaml
+  s_72e4c6f88263d1::t_f1e7b2a1556b43 455
+src/Resources/Locales/zh_CN.axaml
+  s_72e4c6f88263d1::t_56d4214eee5f35 26,32-34,713
+src/Resources/Locales/zh_TW.axaml
+  s_72e4c6f88263d1::t_c4b5cd59e70a4e 705
+src/Resources/PrefabDiffTool/prefab_diff.py
+  s_72e4c6f88263d1::t_9a57e0daa0978b 1-849
+src/Resources/PrefabDiffTool/prefab_diff_template.html
+  s_72e4c6f88263d1::t_66a50e8c076863 1-1059
+src/Resources/PrefabDiffTool/prefab_html_renderer.py
+  s_72e4c6f88263d1::t_ed6b571ab65c73 1-181
+src/SourceGit.csproj
+  s_ade85c348aaaac::t_3f89617ddb25bb 68-78
+src/ViewModels/CommitDetail.cs
+  s_e6c367c90a61e5::t_fd492f5a1230d8 230-234
+src/ViewModels/Histories.cs
+  s_e6c367c90a61e5::t_ebab4423ef20b9 534,540-543
+src/ViewModels/Preferences.cs
+  s_e6c367c90a61e5::t_3bd73421b8d06b 974
+src/Views/AIAssistant.axaml.cs
+  s_e6c367c90a61e5::t_624231e3c1fc51 50-51,173-207,215
+src/Views/ChangeCollectionView.axaml.cs
+  s_e6c367c90a61e5::t_90e2f55d21d6c2 382-383
+src/Views/CommitDetail.axaml.cs
+  s_2f4fe2f589e7b7::t_08326249efd670 111,157,377,525-578,656-657
+src/Views/CommitMessageToolBox.axaml
+  s_e6c367c90a61e5::t_6e572912e87977 50,55-58
+src/Views/Histories.axaml.cs
+  s_e6c367c90a61e5::t_51404589f36701 1115-1116,1535-1600
+src/Views/Preferences.axaml
+  s_e6c367c90a61e5::t_4f717edf1f2a8a 818-831,884-885
+src/Views/WorkingCopy.axaml.cs
+  s_e6c367c90a61e5::t_daa6714f25460d 119-121,131-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "63103bf556c0d3a043398516d6f199c6d59b361f",
+  "prompts": {},
+  "sessions": {
+    "s_2f4fe2f589e7b7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c443f42cffe1FpT5nB4BmDIaN",
+        "model": "unknown"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    },
+    "s_72e4c6f88263d1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f40e2-b646-7712-8399-66bc3c730f78",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    },
+    "s_ade85c348aaaac": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f407a-2d05-7fc3-8ad1-b2f49b12e392",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    },
+    "s_e6c367c90a61e5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3a8d-e2be-7be1-a931-d9c7f9c8a5bc",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    },
+    "s_e9ae10e4fe9392": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f17ba-1b7f-7a81-a293-e753b7dfead8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    }
+  }
+}
