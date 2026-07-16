@@ -1,0 +1,43 @@
+src/ViewModels/MergeConflictEditor.cs
+  s_eb21c6ce361f86::t_da491f18a6b52b 83,86,91-123,129,131-132,157-168,191-193,271,284,286-287,291,293-294,297,300,302,309,312,315,323,325,328-329,332,335,338,340,342-343,346,350
+  s_e6c367c90a61e5::t_452c887187409a 82,84-85,87-90,270,272-283,285,288-290,292,295-296,298-299,301,303-308,310-311,313-314,316-322,324,326-327,330-331,333-334,336-337,339,341,344-345,347-349,351,617-620
+src/Models/StructuredDiffBuilder.cs
+  s_eb21c6ce361f86::t_a23b34c83f8e5a 93-100,106,109,555,567,599,601,610
+  s_e6c367c90a61e5::t_a50da87760a560 101-105,107-108,110-112,509-511,554,556-566,568-598,600,602-609,611-613
+src/ViewModels/Conflict.cs
+  s_e6c367c90a61e5::t_97f82690f3158b 155,163
+src/ViewModels/StructuredDiffContext.cs
+  s_e6c367c90a61e5::t_4f1e1bc160ce30 63-69
+src/Views/Conflict.axaml.cs
+  s_e6c367c90a61e5::t_f4e77968e30e5a 56,60
+src/Views/MergeConflictEditor.axaml
+  s_e6c367c90a61e5::t_0f8722351f479e 55,64,87,309-337
+src/Views/MergeConflictEditor.axaml.cs
+  s_e6c367c90a61e5::t_eca676d45ced17 658
+src/Views/WorkingCopy.axaml.cs
+  s_e6c367c90a61e5::t_fe084f51ef84ed 429-430
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "7ebe09990dc0bd45360cacecfbf0c1178412d309",
+  "prompts": {},
+  "sessions": {
+    "s_e6c367c90a61e5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3a8d-e2be-7be1-a931-d9c7f9c8a5bc",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    },
+    "s_eb21c6ce361f86": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5a7b-7390-7270-aef5-e3b46fd948aa",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "yangrui <yangrui@playorcas.com>"
+    }
+  }
+}
