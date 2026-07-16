@@ -152,7 +152,7 @@ namespace SourceGit.ViewModels
             await _wc.UseMineAsync([_change]);
         }
 
-        public MergeConflictEditor CreateOpenMergeEditorRequest()
+        public async Task<MergeConflictEditor> CreateOpenMergeEditorRequestAsync()
         {
             if (!CanMerge)
                 return null;
@@ -160,7 +160,7 @@ namespace SourceGit.ViewModels
             var head = _head.SHA == "HEAD"
                 ? new Commands.QuerySingleCommit(_repo.FullPath, "HEAD").GetResult() ?? _head
                 : _head;
-            return new MergeConflictEditor(_repo, head, _change.Path);
+            return await MergeConflictEditor.CreateAsync(_repo, head, _change.Path);
         }
 
         public async Task MergeExternalAsync()

@@ -426,7 +426,8 @@ namespace SourceGit.Views
                         mergeBuiltin.Click += async (_, e) =>
                         {
                             var head = await new Commands.QuerySingleCommit(repo.FullPath, "HEAD").GetResultAsync();
-                            this.ShowWindow(new ViewModels.MergeConflictEditor(repo, head, change.Path));
+                            var request = await ViewModels.MergeConflictEditor.CreateAsync(repo, head, change.Path);
+                            this.ShowWindow(request);
                             e.Handled = true;
                         };
 

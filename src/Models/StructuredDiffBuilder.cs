@@ -90,6 +90,26 @@ namespace SourceGit.Models
             return null;
         }
 
+        public static async Task<StructuredDiff> BuildSpreadsheetAsync(byte[] oldBytes, byte[] newBytes)
+        {
+            if (oldBytes == null || newBytes == null)
+                return null;
+
+            try
+            {
+                var oldTablesTask = Task.Run(() => ReadXlsxTables(oldBytes));
+                var newTablesTask = Task.Run(() => ReadXlsxTables(newBytes));
+                await Task.WhenAll(oldTablesTask, newTablesTask).ConfigureAwait(false);
+                return BuildGridDiff(StructuredDiffKind.Spreadsheet, "MINE -> THEIRS", oldTablesTask.Result, newTablesTask.Result);
+            }
+            catch
+            {
+                // Conflict resolution must remain available even when a workbook uses
+                // unsupported Excel features; callers can fall back to whole-file actions.
+                return null;
+            }
+        }
+
         private static async Task<byte[]> ReadOldSideAsync(string repo, DiffOption option, string oldPath)
         {
             if (string.IsNullOrEmpty(oldPath) || oldPath == "/dev/null")
@@ -486,6 +506,9 @@ namespace SourceGit.Models
                 return;
 
             var headerRow = table.Rows[0];
+            if (TryNormalizeEnumTable(table, headerRow))
+                return;
+
             var keyIndex = FindConfigIdColumn(headerRow);
             if (keyIndex < 0)
                 return;
@@ -526,6 +549,66 @@ namespace SourceGit.Models
             table.Headers = headers;
             table.Rows = dataRows;
             table.Keys = keys;
+        }
+
+        private static bool TryNormalizeEnumTable(TableSource table, List<string> headerRow)
+        {
+            var enumNameIndex = IndexOfHeader(headerRow, "#EnumName");
+            var valueNameIndex = IndexOfHeader(headerRow, "#EnumValueName");
+            var valueIndex = IndexOfHeader(headerRow, "#EnumValue");
+            if (enumNameIndex < 0 || valueNameIndex < 0 || valueIndex < 0)
+                return false;
+
+            var headers = BuildSpreadsheetHeaders(table.Rows, 1);
+            var dataRows = new List<List<string>>();
+            var keys = new List<string>();
+            var inheritedEnumName = string.Empty;
+            for (var i = 1; i < table.Rows.Count; i++)
+            {
+                var sourceRow = table.Rows[i];
+                if (IsEmptySheetRow(sourceRow))
+                    continue;
+
+                var explicitEnumName = GetCell(sourceRow, enumNameIndex).Trim();
+                if (explicitEnumName.Length > 0)
+                    inheritedEnumName = explicitEnumName;
+
+                var valueName = GetCell(sourceRow, valueNameIndex).Trim();
+                var value = GetCell(sourceRow, valueIndex).Trim();
+                if (inheritedEnumName.Length == 0 || (valueName.Length == 0 && value.Length == 0))
+                    continue;
+
+                var row = new List<string>(headers.Count);
+                for (var c = 0; c < headers.Count; c++)
+                    row.Add(c < sourceRow.Count ? sourceRow[c] : string.Empty);
+
+                // Enum group names are only written on the first member row. Expanding the
+                // inherited value keeps display and record identity stable when members move.
+                row[enumNameIndex] = inheritedEnumName;
+                dataRows.Add(row);
+                keys.Add(inheritedEnumName + "\u001F" + (valueName.Length > 0 ? valueName : value));
+            }
+
+            table.Headers = headers;
+            table.Rows = dataRows;
+            table.Keys = keys;
+            return true;
+        }
+
+        private static int IndexOfHeader(List<string> headers, string expected)
+        {
+            for (var i = 0; i < headers.Count; i++)
+            {
+                if (headers[i].Trim().Equals(expected, StringComparison.OrdinalIgnoreCase))
+                    return i;
+            }
+
+            return -1;
+        }
+
+        private static string GetCell(List<string> row, int index)
+        {
+            return index >= 0 && index < row.Count ? row[index] : string.Empty;
         }
 
         private static int GetSpreadsheetDataStartRow(List<List<string>> rows, int keyIndex)

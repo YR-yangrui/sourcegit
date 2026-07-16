@@ -60,6 +60,13 @@ namespace SourceGit.ViewModels
         public StructuredDiffContext(Models.StructuredDiff diff, Models.DiffOption option = null, Models.TextDiff rawTextDiff = null)
         {
             Diff = diff;
+            if (diff.Kind == Models.StructuredDiffKind.Spreadsheet)
+            {
+                _showOnlyChangedRows = true;
+                foreach (var sheet in diff.Sheets)
+                    sheet.SetShowOnlyChangedRows(true);
+            }
+
             if (diff.Kind == Models.StructuredDiffKind.PrefabHierarchy && option != null)
             {
                 _option = option;

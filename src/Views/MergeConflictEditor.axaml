@@ -52,6 +52,7 @@
                   ToolTip.Tip="{DynamicResource Text.MergeConflictEditor.PrevConflict}"
                   Click="OnGotoPrevConflict"
                   HotKey="{OnPlatform Ctrl+Up, macOS=⌘+Up}"
+                  IsVisible="{Binding IsTextConflict}"
                   IsEnabled="{Binding UnsolvedCount, Converter={x:Static c:IntConverters.IsGreaterThanZero}, Mode=OneWay}">
             <Path Width="12" Height="12" Margin="0,6,0,0" Data="{StaticResource Icons.Up}"/>
           </Button>
@@ -60,6 +61,7 @@
                   ToolTip.Tip="{DynamicResource Text.MergeConflictEditor.NextConflict}"
                   Click="OnGotoNextConflict"
                   HotKey="{OnPlatform Ctrl+Down, macOS=⌘+Down}"
+                  IsVisible="{Binding IsTextConflict}"
                   IsEnabled="{Binding UnsolvedCount, Converter={x:Static c:IntConverters.IsGreaterThanZero}, Mode=OneWay}">
             <Path Width="12" Height="12" Margin="0,6,0,0" Data="{StaticResource Icons.Down}"/>
           </Button>
@@ -82,7 +84,7 @@
     </Border>
 
     <!-- Main Content -->
-    <Grid Grid.Row="2" RowDefinitions="*,*" ColumnDefinitions="*,20">
+    <Grid Grid.Row="2" RowDefinitions="*,*" ColumnDefinitions="*,20" IsVisible="{Binding IsTextConflict}">
       <!-- Mine and Theirs Panels (Side-by-Side) -->
       <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="*,*" Margin="4,4,4,2">
         <!-- Mine (Ours) Panel -->
@@ -303,6 +305,35 @@
         <v:MergeConflictMinimap DisplayRange="{Binding #ResultPresenter.DisplayRange, Mode=OneWay}"
                                 UnsolvedCount="{Binding UnsolvedCount, Mode=OneWay}"/>
       </Border>
+    </Grid>
+
+    <!-- Excel conflicts are binary, so compare the exact index stage 2/3 workbooks and
+         resolve by preserving one complete workbook without reconstructing its OOXML package. -->
+    <Grid Grid.Row="2" RowDefinitions="Auto,*" IsVisible="{Binding IsSpreadsheetConflict}">
+      <Border Grid.Row="0"
+              Padding="12,8"
+              Background="{DynamicResource Brush.Popup}"
+              BorderThickness="0,0,0,1"
+              BorderBrush="{DynamicResource Brush.Border2}">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+          <Button Grid.Column="0"
+                  Classes="flat primary"
+                  Content="{DynamicResource Text.MergeConflictEditor.UseMine}"
+                  Command="{Binding Resolve}"
+                  CommandParameter="{x:Static m:ConflictResolution.UseOurs}"/>
+          <Button Grid.Column="1"
+                  Classes="flat primary"
+                  Margin="8,0,0,0"
+                  Content="{DynamicResource Text.MergeConflictEditor.UseTheirs}"
+                  Command="{Binding Resolve}"
+                  CommandParameter="{x:Static m:ConflictResolution.UseTheirs}"/>
+          <TextBlock Grid.Column="3"
+                     VerticalAlignment="Center"
+                     Foreground="{DynamicResource Brush.FG2}"
+                     Text="{Binding SpreadsheetResolutionText}"/>
+        </Grid>
+      </Border>
+      <v:StructuredDiffView Grid.Row="1" DataContext="{Binding SpreadsheetDiff}"/>
     </Grid>
 
     <!-- Error -->

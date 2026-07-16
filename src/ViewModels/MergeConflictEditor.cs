@@ -79,13 +79,57 @@ namespace SourceGit.ViewModels
             get => _conflictRegions;
         }
 
-        public MergeConflictEditor(Repository repo, Models.Commit head, string filePath)
+        public bool IsSpreadsheetConflict
+        {
+            get;
+            private set;
+        }
+
+        public bool IsTextConflict => !IsSpreadsheetConflict;
+
+        public StructuredDiffContext SpreadsheetDiff
+        {
+            get => _spreadsheetDiff;
+            private set => SetProperty(ref _spreadsheetDiff, value);
+        }
+
+        public bool HasUnsavedResolution => IsSpreadsheetConflict
+            ? _spreadsheetResolution != Models.ConflictResolution.None
+            : _unsolvedCount != _conflictRegions.Count;
+
+        public string SpreadsheetResolutionText
+        {
+            get
+            {
+                return _spreadsheetResolution switch
+                {
+                    Models.ConflictResolution.UseOurs => App.Text("MergeConflictEditor.UseMine"),
+                    Models.ConflictResolution.UseTheirs => App.Text("MergeConflictEditor.UseTheirs"),
+                    _ => string.Empty,
+                };
+            }
+        }
+
+        public static async Task<MergeConflictEditor> CreateAsync(Repository repo, Models.Commit head, string filePath)
+        {
+            var editor = new MergeConflictEditor(repo, head, filePath);
+            if (IsSpreadsheetPath(filePath))
+                await editor.LoadSpreadsheetConflictAsync();
+            else
+                editor.LoadTextConflict();
+            return editor;
+        }
+
+        private MergeConflictEditor(Repository repo, Models.Commit head, string filePath)
         {
             _repo = repo;
             _filePath = filePath;
 
             (Mine, Theirs) = repo.InProgressContext?.GetConflictSides(head) ?? (head, (object)"Stash or Patch");
+        }
 
+        private void LoadTextConflict()
+        {
             var workingCopyPath = Path.Combine(_repo.FullPath, _filePath);
             var workingCopyContent = string.Empty;
             if (File.Exists(workingCopyPath))
@@ -110,6 +154,18 @@ namespace SourceGit.ViewModels
 
         public void Resolve(object param)
         {
+            if (IsSpreadsheetConflict)
+            {
+                if (param is Models.ConflictResolution.UseOurs or Models.ConflictResolution.UseTheirs)
+                {
+                    _spreadsheetResolution = (Models.ConflictResolution)param;
+                    UnsolvedCount = 0;
+                    OnPropertyChanged(nameof(SpreadsheetResolutionText));
+                    OnPropertyChanged(nameof(HasUnsavedResolution));
+                }
+                return;
+            }
+
             if (_selectedChunk == null)
                 return;
 
@@ -132,6 +188,9 @@ namespace SourceGit.ViewModels
 
         public async Task<bool> SaveAndStageAsync()
         {
+            if (IsSpreadsheetConflict)
+                return await SaveSpreadsheetAndStageAsync();
+
             if (_conflictRegions.Count == 0)
                 return true;
 
@@ -206,6 +265,88 @@ namespace SourceGit.ViewModels
                 Error = $"Failed to save and stage: {ex.Message}";
                 return false;
             }
+        }
+
+        private async Task LoadSpreadsheetConflictAsync()
+        {
+            IsSpreadsheetConflict = true;
+            UnsolvedCount = 1;
+
+            // Binary conflicts do not contain conflict markers in the worktree. Git keeps
+            // the exact MINE/THEIRS workbooks in index stages 2 and 3, so read those directly.
+            var oursTask = Commands.QueryFileContent.RunSpecAsBytesAsync(_repo.FullPath, $":2:{_filePath}");
+            var theirsTask = Commands.QueryFileContent.RunSpecAsBytesAsync(_repo.FullPath, $":3:{_filePath}");
+            await Task.WhenAll(oursTask, theirsTask);
+            _spreadsheetOurs = oursTask.Result;
+            _spreadsheetTheirs = theirsTask.Result;
+
+            if (_spreadsheetOurs == null || _spreadsheetTheirs == null)
+            {
+                Error = "Unable to read both Excel conflict versions from the Git index.";
+                return;
+            }
+
+            var diff = await Models.StructuredDiffBuilder.BuildSpreadsheetAsync(_spreadsheetOurs, _spreadsheetTheirs);
+            if (diff == null)
+            {
+                Error = "Unable to display this Excel workbook. You can still resolve it with MINE or THEIRS.";
+                return;
+            }
+
+            SpreadsheetDiff = new StructuredDiffContext(diff);
+        }
+
+        private async Task<bool> SaveSpreadsheetAndStageAsync()
+        {
+            var content = _spreadsheetResolution switch
+            {
+                Models.ConflictResolution.UseOurs => _spreadsheetOurs,
+                Models.ConflictResolution.UseTheirs => _spreadsheetTheirs,
+                _ => null,
+            };
+
+            if (content == null)
+            {
+                Error = "Choose MINE or THEIRS before saving the Excel conflict.";
+                return false;
+            }
+
+            try
+            {
+                // Preserve the selected workbook byte-for-byte. Rebuilding an OOXML package
+                // here could silently discard formulas, styles, macros, or unsupported parts.
+                var fullPath = Path.Combine(_repo.FullPath, _filePath);
+                await File.WriteAllBytesAsync(fullPath, content);
+                await StageFileAsync();
+                _repo.MarkWorkingCopyDirtyManually();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Error = $"Failed to save and stage: {ex.Message}";
+                return false;
+            }
+        }
+
+        private async Task StageFileAsync()
+        {
+            var pathSpecFile = Path.GetTempFileName();
+            try
+            {
+                await File.WriteAllTextAsync(pathSpecFile, _filePath);
+                await new Commands.Add(_repo.FullPath, pathSpecFile).ExecAsync();
+            }
+            finally
+            {
+                File.Delete(pathSpecFile);
+            }
+        }
+
+        private static bool IsSpreadsheetPath(string path)
+        {
+            var ext = Path.GetExtension(path);
+            return ext.Equals(".xlsx", StringComparison.OrdinalIgnoreCase) ||
+                   ext.Equals(".xlsm", StringComparison.OrdinalIgnoreCase);
         }
 
         public void ClearErrorMessage()
@@ -473,5 +614,9 @@ namespace SourceGit.ViewModels
         private Vector _scrollOffset = Vector.Zero;
         private Models.ConflictSelectedChunk _selectedChunk;
         private string _error = string.Empty;
+        private StructuredDiffContext _spreadsheetDiff = null;
+        private Models.ConflictResolution _spreadsheetResolution = Models.ConflictResolution.None;
+        private byte[] _spreadsheetOurs = null;
+        private byte[] _spreadsheetTheirs = null;
     }
 }

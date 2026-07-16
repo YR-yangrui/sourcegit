@@ -655,7 +655,7 @@ namespace SourceGit.Views
             if (DataContext is not ViewModels.MergeConflictEditor vm)
                 return;
 
-            if (_forceClose || vm.UnsolvedCount == vm.ConflictRegions.Count)
+            if (_forceClose || !vm.HasUnsavedResolution)
             {
                 vm.PropertyChanged -= OnViewModelPropertyChanged;
                 return;
