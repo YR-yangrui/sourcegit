@@ -94,9 +94,9 @@ namespace SourceGit.ViewModels
                 await _repo.AutoUpdateSubmodulesAsync(log);
 
                 if (needPopStash)
-                    await new Commands.Stash(_repo.FullPath)
+                    succ = await new Commands.Stash(_repo.FullPath)
                         .Use(log)
-                        .PopAsync("stash@{0}");
+                        .PopAsync("stash@{0}", _repo.UIStates.RestoreIndexWhenReapplyingStash);
 
                 _repo.RefreshAfterCheckoutBranch(_branch);
             }

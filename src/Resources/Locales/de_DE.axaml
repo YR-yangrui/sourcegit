@@ -406,8 +406,8 @@ $1, $2, … Werte der Eingabe-Steuerelemente</x:String>
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">Stashe {0} Dateien…</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">Unstagen</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">{0} Dateien unstagen</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Meine verwenden</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Deren verwenden</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Lokale Branch-Änderungen übernehmen</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Änderungen des Remote-Branches übernehmen</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">Dateiverlauf</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">ÄNDERUNG</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">INHALT</x:String>
@@ -954,7 +954,7 @@ $1, $2, … Werte der Eingabe-Steuerelemente</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories" xml:space="preserve">Verlauf löschen</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories.Confirm" xml:space="preserve">Soll wirklich der Verlauf aller Commit-Nachrichten gelöscht werden? Dies kann nicht rückgängig gemacht werden.</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">COMMIT</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">COMMIT &amp; PUSH</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">PULL, COMMIT &amp; PUSH</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">Vorlage / Historie</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">Klick-Ereignis auslösen</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitToEdit" xml:space="preserve">Commit (Bearbeitung)</x:String>
@@ -978,8 +978,11 @@ $1, $2, … Werte der Eingabe-Steuerelemente</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">UNSTAGEN</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">ALLES UNSTAGEN</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">UNGESTAGED</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">CATEGORY</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">CREATE CATEGORY</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">STAGEN</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">ALLES STAGEN</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">UNCATEGORIZED</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">ALS UNVERÄNDERT BETRACHTETE ANZEIGEN</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">Vorlage: ${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">ARBEITSUMGEBUNG: </x:String>

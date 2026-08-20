@@ -282,8 +282,8 @@
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">Stash {0} arquivos...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">Desfazer Preparação</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">Desfazer Preparação de {0} arquivos</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Usar Meu</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Usar Deles</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Aplicar alterações da ramificação local</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Aplicar alterações da ramificação remota</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">Histórico de Arquivos</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">MUDANÇA</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">CONTEUDO</x:String>
@@ -676,7 +676,7 @@
   <x:String x:Key="Text.WorkingCopy.Amend" xml:space="preserve">Corrigir</x:String>
   <x:String x:Key="Text.WorkingCopy.CanStageTip" xml:space="preserve">Você pode stagear este arquivo agora.</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">COMMIT</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">COMMITAR E ENVIAR</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">PUXAR, COMMITAR E ENVIAR</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">Modelo/Históricos</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">Acionar evento de clique</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitWithAutoStage" xml:space="preserve">Preparar todas as mudanças e commitar</x:String>
@@ -689,8 +689,11 @@
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">UNSTAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">UNSTAGE TODOS</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">UNSTAGED</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">CATEGORY</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">CREATE CATEGORY</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">STAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">STAGE TODOS</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">UNCATEGORIZED</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">VER SUPOR NÃO ALTERADO</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">Template: ${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">Workspaces: </x:String>

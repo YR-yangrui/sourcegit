@@ -456,8 +456,8 @@
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">贮藏(stash)选中的 {0} 个文件...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">从暂存中移除</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">从暂存中移除 {0} 个文件</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">使用 MINE</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">使用 THEIRS</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">应用本地分支改动</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">应用远端分支改动</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">文件历史</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">文件变更</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">文件内容</x:String>
@@ -1047,7 +1047,7 @@
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories" xml:space="preserve">清空历史提交信息</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories.Confirm" xml:space="preserve">您确定要清空所有的历史提交信息记录吗（执行操作后无法撤回）？</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">提交</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">提交并推送</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">拉取、提交并推送</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">历史输入/模板</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">触发点击事件</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitToEdit" xml:space="preserve">提交（修改原始提交）</x:String>
@@ -1071,8 +1071,11 @@
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">从暂存区移除选中</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">从暂存区移除所有</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">未暂存</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">分类</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">新建分类</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">暂存选中</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">暂存所有</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">未分类</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">查看忽略变更文件</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">模板：${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">工作区：</x:String>

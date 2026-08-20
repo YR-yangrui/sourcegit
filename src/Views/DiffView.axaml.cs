@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -13,6 +16,32 @@ namespace SourceGit.Views
         public DiffView()
         {
             InitializeComponent();
+        }
+
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToVisualTree(e);
+
+            if (this.FindAncestorOfType<LauncherPage>()?.DataContext is ViewModels.LauncherPage page)
+            {
+                _launcherPage = page;
+                _launcherPage.PropertyChanged += OnLauncherPagePropertyChanged;
+                _launcherPage.Notifications.CollectionChanged += OnLauncherPageNotificationsChanged;
+            }
+
+            UpdateNativeWebViewVisibility();
+        }
+
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            if (_launcherPage != null)
+            {
+                _launcherPage.PropertyChanged -= OnLauncherPagePropertyChanged;
+                _launcherPage.Notifications.CollectionChanged -= OnLauncherPageNotificationsChanged;
+                _launcherPage = null;
+            }
+
+            base.OnDetachedFromVisualTree(e);
         }
 
         public void ToggleHotkeyBindings(bool enabled)
@@ -44,6 +73,30 @@ namespace SourceGit.Views
                 vm.CheckSettings();
 
             ToggleHotkeyBindings(IsEffectivelyVisible);
+        }
+
+        private void OnNativeWebViewLoaded(object sender, RoutedEventArgs e)
+        {
+            UpdateNativeWebViewVisibility();
+        }
+
+        private void OnLauncherPagePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ViewModels.LauncherPage.Popup))
+                UpdateNativeWebViewVisibility();
+        }
+
+        private void OnLauncherPageNotificationsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateNativeWebViewVisibility();
+        }
+
+        private void UpdateNativeWebViewVisibility()
+        {
+            var isVisible = _launcherPage == null || (_launcherPage.Popup == null && _launcherPage.Notifications.Count == 0);
+            // Native WebViews are always above Avalonia content; hide them while the in-window popup or error layer is active.
+            foreach (var webView in this.GetVisualDescendants().OfType<NativeWebView>())
+                webView.IsVisible = isVisible;
         }
 
         private void OnGotoFirstChange(object _, RoutedEventArgs e)
@@ -136,5 +189,7 @@ namespace SourceGit.Views
                 this.ShowWindow(vm);
             }
         }
+
+        private ViewModels.LauncherPage _launcherPage = null;
     }
 }

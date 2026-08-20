@@ -45,8 +45,11 @@ namespace SourceGit.ViewModels
 
         public Models.DealWithLocalChanges DealWithLocalChanges
         {
-            get;
-            set;
+            get => _repo.UIStates.DealWithLocalChangesOnPull ??
+                (Preferences.Instance.UseStashAndReapplyByDefault ?
+                    Models.DealWithLocalChanges.StashAndReapply :
+                    Models.DealWithLocalChanges.DoNothing);
+            set => _repo.UIStates.DealWithLocalChangesOnPull = value;
         }
 
         public bool UseRebase
@@ -59,10 +62,6 @@ namespace SourceGit.ViewModels
         {
             _repo = repo;
             Current = repo.CurrentBranch;
-
-            DealWithLocalChanges = Preferences.Instance.UseStashAndReapplyByDefault ?
-                Models.DealWithLocalChanges.StashAndReapply :
-                Models.DealWithLocalChanges.DoNothing;
 
             if (specifiedRemoteBranch != null)
             {
@@ -163,7 +162,14 @@ namespace SourceGit.ViewModels
                     await _repo.AutoUpdateSubmodulesAsync(log);
 
                     if (needPopStash)
-                        await new Commands.Stash(_repo.FullPath).Use(log).PopAsync("stash@{0}");
+                    {
+                        // A conflicted reapply leaves useful conflict entries in the worktree and keeps the stash.
+                        // Treat it as unfinished so combined pull/commit/push cannot commit those conflicts.
+                        rs = await new Commands.Stash(_repo.FullPath)
+                            .Use(log)
+                            .PopAsync("stash@{0}", _repo.UIStates.RestoreIndexWhenReapplyingStash);
+                        _repo.MarkWorkingCopyDirtyManually();
+                    }
                 }
 
                 log.Complete();

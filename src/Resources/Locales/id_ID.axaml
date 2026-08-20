@@ -376,8 +376,8 @@
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">Stash {0} berkas...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">Unstage</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">Unstage {0} berkas</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Gunakan Milik Saya</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Gunakan Milik Mereka</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Terapkan Perubahan Cabang Lokal</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Terapkan Perubahan Cabang Remote</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">Riwayat Berkas</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">PERUBAHAN</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">KONTEN</x:String>
@@ -878,7 +878,7 @@
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories" xml:space="preserve">Bersihkan Riwayat</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories.Confirm" xml:space="preserve">Yakin ingin membersihkan semua riwayat pesan commit? Aksi ini tidak dapat dibatalkan.</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">COMMIT</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">COMMIT &amp; PUSH</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">PULL, COMMIT &amp; PUSH</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">Template/Riwayat</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">Picu event klik</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitToEdit" xml:space="preserve">Commit (Sunting)</x:String>
@@ -900,8 +900,11 @@
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">UNSTAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">UNSTAGE SEMUA</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">UNSTAGED</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">CATEGORY</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">CREATE CATEGORY</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">STAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">STAGE SEMUA</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">UNCATEGORIZED</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">LIHAT ASSUME UNCHANGED</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">Template: ${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">WORKSPACE: </x:String>

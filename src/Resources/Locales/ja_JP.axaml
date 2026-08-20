@@ -406,8 +406,8 @@
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">{0} 個のファイルをスタッシュ...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">ステージから降ろす</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">{0} 個のファイルをステージから降ろす</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">自分の変更を使用</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">相手の変更を使用</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">ローカル ブランチの変更を適用</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">リモート ブランチの変更を適用</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">ファイルの履歴</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">変更</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">ファイルの内容</x:String>
@@ -957,7 +957,7 @@
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories" xml:space="preserve">履歴を消去</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories.Confirm" xml:space="preserve">コミットメッセージの履歴をすべて消去しますか？この操作は元に戻せません。</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">コミット</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">コミットしてプッシュ</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">プルしてコミット＆プッシュ</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">テンプレート/履歴</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">クリックイベントを発動</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitToEdit" xml:space="preserve">コミット (編集)</x:String>
@@ -981,8 +981,11 @@
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">ステージから降ろす</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">すべてステージから降ろす</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">未ステージのファイル</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">カテゴリ</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">カテゴリを作成</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">ステージに上げる</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">すべてステージに上げる</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">未分類</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">未変更と見なしたファイルを表示</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">テンプレート: ${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">ワークスペース: </x:String>

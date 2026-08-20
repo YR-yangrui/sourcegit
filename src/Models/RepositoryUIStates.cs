@@ -117,6 +117,18 @@ namespace SourceGit.Models
             set;
         } = true;
 
+        public DealWithLocalChanges? DealWithLocalChangesOnPull
+        {
+            get;
+            set;
+        } = null;
+
+        public bool RestoreIndexWhenReapplyingStash
+        {
+            get;
+            set;
+        } = false;
+
         public bool CheckSubmodulesOnPush
         {
             get;
@@ -232,6 +244,12 @@ namespace SourceGit.Models
         } = string.Empty;
 
         public AvaloniaList<HistoryFilter> HistoryFilters
+        {
+            get;
+            set;
+        } = [];
+
+        public AvaloniaList<UnstagedChangeCategory> UnstagedChangeCategories
         {
             get;
             set;

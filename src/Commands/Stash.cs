@@ -82,9 +82,10 @@ namespace SourceGit.Commands
             return await ExecAsync().ConfigureAwait(false);
         }
 
-        public async Task<bool> PopAsync(string name)
+        public async Task<bool> PopAsync(string name, bool restoreIndex)
         {
-            Args = $"stash pop -q --index {name.Quoted()}";
+            var opts = restoreIndex ? "--index " : string.Empty;
+            Args = $"stash pop -q {opts}{name.Quoted()}";
             return await ExecAsync().ConfigureAwait(false);
         }
 

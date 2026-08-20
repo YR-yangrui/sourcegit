@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Avalonia;
@@ -6,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input.Platform;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 
 namespace SourceGit.Views
 {
@@ -98,7 +101,7 @@ namespace SourceGit.Views
             if (data is ChromelessWindow window)
             {
                 DisposeDataContextOnClosed(window);
-                return window.ShowDialog(owner);
+                return ShowDialogWithNativeWebViewsHiddenAsync(window, owner);
             }
 
             window = CreateFromViewModels(data) as ChromelessWindow;
@@ -106,10 +109,32 @@ namespace SourceGit.Views
             {
                 window.DataContext = data;
                 DisposeDataContextOnClosed(window);
-                return window.ShowDialog(owner);
+                return ShowDialogWithNativeWebViewsHiddenAsync(window, owner);
             }
 
             return null;
+        }
+
+        internal static async Task ShowDialogWithNativeWebViewsHiddenAsync(Window dialog, Window owner)
+        {
+            using var nativeViews = HideNativeWebViews(owner);
+            await dialog.ShowDialog(owner);
+        }
+
+        private static IDisposable HideNativeWebViews(Window owner)
+        {
+            var hidden = new List<NativeWebView>();
+            // Native views bypass Avalonia's z-order, so suspend only the currently visible ones for modal UI.
+            foreach (var webView in owner.GetVisualDescendants().OfType<NativeWebView>())
+            {
+                if (webView.IsVisible)
+                {
+                    webView.IsVisible = false;
+                    hidden.Add(webView);
+                }
+            }
+
+            return new NativeWebViewVisibilityScope(hidden);
         }
 
         private static void DisposeDataContextOnClosed(Window window)
@@ -118,6 +143,23 @@ namespace SourceGit.Views
                 return;
 
             window.Closed += (_, _) => disposable.Dispose();
+        }
+
+        private sealed class NativeWebViewVisibilityScope : IDisposable
+        {
+            public NativeWebViewVisibilityScope(List<NativeWebView> hidden)
+            {
+                _hidden = hidden;
+            }
+
+            public void Dispose()
+            {
+                // Restore only the instances hidden by this scope so nested dialogs cannot reveal a parent dialog's WebView.
+                foreach (var webView in _hidden)
+                    webView.IsVisible = true;
+            }
+
+            private readonly List<NativeWebView> _hidden;
         }
     }
 }

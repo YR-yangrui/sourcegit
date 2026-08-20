@@ -102,7 +102,7 @@ namespace SourceGit.ViewModels
             if (mode == DealWithChangesAfterStashing.KeepAll && succ)
                 succ = await new Commands.Stash(_repo.FullPath)
                     .Use(log)
-                    .ApplyAsync("stash@{0}", true);
+                    .ApplyAsync("stash@{0}", _repo.UIStates.RestoreIndexWhenReapplyingStash);
 
             log.Complete();
             _repo.MarkWorkingCopyDirtyManually();

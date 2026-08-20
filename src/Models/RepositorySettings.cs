@@ -78,6 +78,12 @@ namespace SourceGit.Models
             set;
         } = [];
 
+        public AvaloniaList<UnstagedChangeCategory> UnstagedChangeCategories
+        {
+            get;
+            set;
+        } = [];
+
         public static RepositorySettings Get(string gitCommonDir)
         {
             var fileInfo = new FileInfo(Path.Combine(gitCommonDir, "sourcegit.settings"));
@@ -102,12 +108,10 @@ namespace SourceGit.Models
                 }
             }
 
-            // Serialize setting again to make sure there are no unnecessary whitespaces.
-            Task.Run(() =>
-            {
-                var formatted = JsonSerializer.Serialize(setting, JsonCodeGen.Default.RepositorySettings);
-                setting._orgHash = HashContent(formatted);
-            });
+            // Establish the save baseline before exposing the instance; a background hash can race with early edits
+            // and incorrectly treat unsaved user data as the original persisted content.
+            var formatted = JsonSerializer.Serialize(setting, JsonCodeGen.Default.RepositorySettings);
+            setting._orgHash = HashContent(formatted);
 
             setting._file = fullpath;
             _cache.Add(fullpath, setting);

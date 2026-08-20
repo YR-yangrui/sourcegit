@@ -405,8 +405,8 @@ ${pure_files:N} Come ${files:N}, ma senza cartelle</x:String>
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">Stasha {0} file...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">Rimuovi da Stage</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">Rimuovi da Stage {0} file</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Usa Il Mio</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Usa Il Loro</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Applica modifiche del ramo locale</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Applica modifiche del ramo remoto</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">Cronologia File</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">MODIFICA</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">CONTENUTO</x:String>
@@ -949,7 +949,7 @@ ${pure_files:N} Come ${files:N}, ma senza cartelle</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories" xml:space="preserve">Cancella Cronologia</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories.Confirm" xml:space="preserve">Sei sicuro di voler cancellare tutta la cronologia dei messaggi di commit? Questa azione non può essere annullata.</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">COMMIT</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">COMMIT E INVIA</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">PULL, COMMIT E INVIA</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">Template/Storico</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">Attiva evento click</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitToEdit" xml:space="preserve">Commit (Modifica)</x:String>
@@ -973,8 +973,11 @@ ${pure_files:N} Come ${files:N}, ma senza cartelle</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">RIMUOVI DA STAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">RIMUOVI TUTTO DA STAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">NON IN STAGE</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">CATEGORY</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">CREATE CATEGORY</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">FAI LO STAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">FAI LO STAGE DI TUTTO</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">UNCATEGORIZED</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">VISUALIZZA COME NON MODIFICATO</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">Template: ${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">WORKSPACE:</x:String>

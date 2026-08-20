@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -79,6 +80,42 @@ namespace SourceGit.Views
             if (repoView is { DataContext: ViewModels.Repository repo })
                 await this.ShowDialogAsync(new ViewModels.AssumeUnchangedManager(repo));
 
+            e.Handled = true;
+        }
+
+        private void OnUnstagedCategoryTabsPointerWheelChanged(object sender, PointerWheelEventArgs e)
+        {
+            if (sender is not ScrollViewer scrollViewer)
+                return;
+
+            var delta = Math.Abs(e.Delta.X) > double.Epsilon ? e.Delta.X : e.Delta.Y;
+            var maxOffset = Math.Max(0, scrollViewer.Extent.Width - scrollViewer.Viewport.Width);
+            var nextOffset = Math.Clamp(scrollViewer.Offset.X - delta * 48, 0, maxOffset);
+            if (Math.Abs(nextOffset - scrollViewer.Offset.X) > double.Epsilon)
+            {
+                // Translate the regular mouse wheel into horizontal navigation for overflowing category tabs.
+                scrollViewer.Offset = new Vector(nextOffset, scrollViewer.Offset.Y);
+                e.Handled = true;
+            }
+        }
+
+        private void OnUnstagedCategorySelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is ViewModels.WorkingCopy vm &&
+                e.AddedItems.Count == 1 &&
+                e.AddedItems[0] is Models.UnstagedChangeCategory category)
+                vm.SelectUnstagedCategory(category);
+        }
+
+        private void OnUnstagedCategoryTabPointerPressed(object sender, PointerPressedEventArgs e)
+        {
+            if (sender is not Control { DataContext: Models.UnstagedChangeCategory category } ||
+                category.IsUncategorized ||
+                !e.GetCurrentPoint(this).Properties.IsMiddleButtonPressed ||
+                DataContext is not ViewModels.WorkingCopy vm)
+                return;
+
+            vm.DeleteUnstagedCategory(category);
             e.Handled = true;
         }
 
@@ -360,6 +397,8 @@ namespace SourceGit.Views
 
             var hasSelectedFolder = !string.IsNullOrEmpty(selectedSingleFolder);
             var menu = new ContextMenu();
+            AddUnstagedCategoryMenuItems(menu, vm, selectedUnstaged);
+            menu.Items.Add(new MenuItem() { Header = "-" });
             if (selectedUnstaged.Count == 1 && !hasSelectedFolder)
             {
                 var change = selectedUnstaged[0];
@@ -398,6 +437,7 @@ namespace SourceGit.Views
                 if (change.IsConflicted)
                 {
                     var useTheirs = new MenuItem();
+                    useTheirs.Header = App.Text("FileCM.UseTheirs");
                     useTheirs.Icon = this.CreateMenuIcon("Icons.Incoming");
                     useTheirs.Click += async (_, e) =>
                     {
@@ -406,15 +446,13 @@ namespace SourceGit.Views
                     };
 
                     var useMine = new MenuItem();
+                    useMine.Header = App.Text("FileCM.UseMine");
                     useMine.Icon = this.CreateMenuIcon("Icons.Local");
                     useMine.Click += async (_, e) =>
                     {
                         await vm.UseMineAsync(selectedUnstaged);
                         e.Handled = true;
                     };
-
-                    SetResolveUsingMenuHeaders(vm, useTheirs, useMine);
-
                     menu.Items.Add(useTheirs);
                     menu.Items.Add(useMine);
 
@@ -808,6 +846,7 @@ namespace SourceGit.Views
                 if (conflicted.Count > 0)
                 {
                     var useTheirs = new MenuItem();
+                    useTheirs.Header = App.Text("FileCM.UseTheirs");
                     useTheirs.Icon = this.CreateMenuIcon("Icons.Incoming");
                     useTheirs.Click += async (_, e) =>
                     {
@@ -816,15 +855,13 @@ namespace SourceGit.Views
                     };
 
                     var useMine = new MenuItem();
+                    useMine.Header = App.Text("FileCM.UseMine");
                     useMine.Icon = this.CreateMenuIcon("Icons.Local");
                     useMine.Click += async (_, e) =>
                     {
                         await vm.UseMineAsync(conflicted);
                         e.Handled = true;
                     };
-
-                    SetResolveUsingMenuHeaders(vm, useTheirs, useMine);
-
                     menu.Items.Add(useTheirs);
                     menu.Items.Add(useMine);
 
@@ -957,6 +994,45 @@ namespace SourceGit.Views
             }
 
             return menu;
+        }
+
+        private void AddUnstagedCategoryMenuItems(
+            ContextMenu menu,
+            ViewModels.WorkingCopy vm,
+            List<Models.Change> changes)
+        {
+            var repo = vm.Repository;
+            var categoryMenu = new MenuItem();
+            categoryMenu.Header = App.Text("WorkingCopy.Unstaged.Category");
+            categoryMenu.Icon = this.CreateMenuIcon("Icons.Changes");
+
+            var create = new MenuItem();
+            create.Header = App.Text("WorkingCopy.Unstaged.CreateCategory");
+            create.Click += (_, e) =>
+            {
+                if (repo.CanCreatePopup())
+                    repo.ShowPopup(new ViewModels.CreateUnstagedChangeCategory(repo, vm, changes));
+
+                e.Handled = true;
+            };
+            categoryMenu.Items.Add(create);
+            categoryMenu.Items.Add(new MenuItem() { Header = "-" });
+
+            // The virtual uncategorized entry is included so a file can be moved out of any custom category.
+            foreach (var category in vm.UnstagedCategories)
+            {
+                var targetName = category.Name;
+                var target = new MenuItem();
+                target.Header = category.DisplayName;
+                target.Click += (_, e) =>
+                {
+                    vm.MoveUnstagedChangesToCategory(changes, targetName);
+                    e.Handled = true;
+                };
+                categoryMenu.Items.Add(target);
+            }
+
+            menu.Items.Add(categoryMenu);
         }
 
         public ContextMenu CreateContextMenuForStagedChanges(
@@ -1383,34 +1459,6 @@ namespace SourceGit.Views
 
             menu.Items.Add(reset);
             return true;
-        }
-
-        private void SetResolveUsingMenuHeaders(ViewModels.WorkingCopy vm, MenuItem useTheirs, MenuItem useMine)
-        {
-            var repo = vm.Repository;
-            switch (vm.InProgressContext)
-            {
-                case ViewModels.CherryPickInProgress cherryPick:
-                    useTheirs.Header = App.Text("FileCM.ResolveUsing", cherryPick.HeadName);
-                    useMine.Header = App.Text("FileCM.ResolveUsing", repo.CurrentBranch.Name);
-                    break;
-                case ViewModels.RebaseInProgress rebase:
-                    useTheirs.Header = App.Text("FileCM.ResolveUsing", rebase.HeadName);
-                    useMine.Header = App.Text("FileCM.ResolveUsing", rebase.BaseName);
-                    break;
-                case ViewModels.RevertInProgress revert:
-                    useTheirs.Header = App.Text("FileCM.ResolveUsing", $"{revert.Head.SHA.AsSpan(0, 10)} (revert)");
-                    useMine.Header = App.Text("FileCM.ResolveUsing", repo.CurrentBranch.Name);
-                    break;
-                case ViewModels.MergeInProgress merge:
-                    useTheirs.Header = App.Text("FileCM.ResolveUsing", merge.SourceName);
-                    useMine.Header = App.Text("FileCM.ResolveUsing", repo.CurrentBranch.Name);
-                    break;
-                default:
-                    useTheirs.Header = App.Text("FileCM.UseTheirs");
-                    useMine.Header = App.Text("FileCM.UseMine");
-                    break;
-            }
         }
 
         private void TryAddOpenFileToContextMenu(ContextMenu menu, string fullpath)

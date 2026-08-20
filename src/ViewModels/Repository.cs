@@ -514,6 +514,18 @@ namespace SourceGit.ViewModels
             _settings = Models.RepositorySettings.Get(_gitCommonDir);
             Commands.GitRuntimeConfig.Register(FullPath, GitDir, _gitCommonDir, _settings);
             _uiStates = Models.RepositoryUIStates.Load(GitDir);
+
+            if (!isWorktree &&
+                _uiStates.UnstagedChangeCategories.Count == 0 &&
+                _settings.UnstagedChangeCategories is { Count: > 0 } legacyCategories)
+            {
+                // Older builds stored categories in the shared common-dir settings. Move them only to the main
+                // worktree so linked worktrees start with independent category state instead of cloning it.
+                _uiStates.UnstagedChangeCategories.AddRange(legacyCategories);
+                _uiStates.Save();
+                legacyCategories.Clear();
+                _settings.Save();
+            }
         }
 
         public void Open(int autoFetchIndex = 0, int autoFetchCount = 1)
@@ -888,6 +900,34 @@ namespace SourceGit.ViewModels
                 ShowPopup(new Fetch(this));
         }
 
+        public async Task<bool> PullBeforeCommitAndPushAsync()
+        {
+            if (IsBare || !CanCreatePopup())
+                return false;
+
+            if (_remotes.Count == 0)
+            {
+                SendNotification("No remotes added to this repository!!!", true);
+                return false;
+            }
+
+            if (_currentBranch == null)
+            {
+                SendNotification("Can NOT find current branch!!!", true);
+                return false;
+            }
+
+            var pull = new Pull(this, null);
+            if (!pull.Check())
+            {
+                ShowPopup(pull);
+                return false;
+            }
+
+            // Reuse pull's target selection, local-change policy, and rebase preference before committing.
+            return await pull.Sure();
+        }
+
         public async Task PullAsync(bool autoStart)
         {
             if (IsBare || !CanCreatePopup())
@@ -996,9 +1036,6 @@ namespace SourceGit.ViewModels
                 if (folderEndIdx > 10)
                     _uiStates.ExpandedBranchNodesInSideBar.Add(created.FullName.Substring(0, folderEndIdx));
 
-                if (_historyFilterMode == Models.FilterMode.Included)
-                    SetBranchFilterMode(created, Models.FilterMode.Included, false, false);
-
                 CurrentBranch = created;
             }
 
@@ -1012,7 +1049,17 @@ namespace SourceGit.ViewModels
             var builder = BuildBranchTree(locals, [], false);
             LocalBranchTrees = builder.Locals;
 
-            RefreshCommits();
+            if (checkout)
+            {
+                // A checked-out branch becomes an active history scope immediately; run this after rebuilding the
+                // tree so newly created branches already have a node whose filter icon can be updated.
+                SetBranchFilterMode(created, Models.FilterMode.Included, false, true);
+            }
+            else
+            {
+                RefreshCommits();
+            }
+
             RefreshWorkingCopyChanges();
             RefreshWorktrees();
         }
@@ -1034,8 +1081,6 @@ namespace SourceGit.ViewModels
 
             checkouted.IsCurrent = true;
             checkouted.WorktreePath = FullPath;
-            if (_historyFilterMode == Models.FilterMode.Included)
-                SetBranchFilterMode(checkouted, Models.FilterMode.Included, false, false);
 
             List<Models.Branch> locals = [];
             foreach (var b in _branches)
@@ -1048,7 +1093,8 @@ namespace SourceGit.ViewModels
             LocalBranchTrees = builder.Locals;
             CurrentBranch = checkouted;
 
-            RefreshCommits();
+            // Always include the branch that the user switched to, regardless of the previous filter mode.
+            SetBranchFilterMode(checkouted, Models.FilterMode.Included, false, true);
             RefreshWorkingCopyChanges();
             RefreshWorktrees();
         }

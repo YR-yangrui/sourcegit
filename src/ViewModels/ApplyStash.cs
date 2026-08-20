@@ -12,9 +12,9 @@ namespace SourceGit.ViewModels
 
         public bool RestoreIndex
         {
-            get;
-            set;
-        } = true;
+            get => _repo.UIStates.RestoreIndexWhenReapplyingStash;
+            set => _repo.UIStates.RestoreIndexWhenReapplyingStash = value;
+        }
 
         public bool DropAfterApply
         {
@@ -40,10 +40,12 @@ namespace SourceGit.ViewModels
                 .Use(log)
                 .ApplyAsync(Stash.Name, RestoreIndex);
 
+            // Applying may return a non-zero exit code after writing conflict entries. Refresh in both cases so
+            // users can resolve those files, while only dropping a stash that was applied without conflicts.
+            _repo.MarkWorkingCopyDirtyManually();
+
             if (succ)
             {
-                _repo.MarkWorkingCopyDirtyManually();
-
                 if (DropAfterApply)
                 {
                     await new Commands.Stash(_repo.FullPath)

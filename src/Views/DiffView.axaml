@@ -276,7 +276,7 @@
           <!-- HTML Diff -->
           <DataTemplate DataType="m:HtmlDiff">
             <Border Background="{DynamicResource Brush.Contents}">
-              <NativeWebView Source="{Binding Source}"/>
+              <NativeWebView Source="{Binding Source}" Loaded="OnNativeWebViewLoaded"/>
             </Border>
           </DataTemplate>
 

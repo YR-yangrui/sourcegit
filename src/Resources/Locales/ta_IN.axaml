@@ -268,8 +268,8 @@
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">{0} கோப்புகள் பதுக்கிவை...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">நிலைநீக்கு</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">நிலைநீக்கு {0} கோப்புகள்</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">என்னுடையதைப் பயன்படுத்து</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">அவர்களுடையதைப் பயன்படுத்து</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">உள்ளூர் கிளை மாற்றங்களைப் பயன்படுத்து</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">தொலை கிளை மாற்றங்களைப் பயன்படுத்து</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">கோப்பு வரலாறு</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">மாற்றம்</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">உள்ளடக்கம்</x:String>
@@ -692,7 +692,7 @@
   <x:String x:Key="Text.WorkingCopy.Amend" xml:space="preserve">பின்னொட்டு</x:String>
   <x:String x:Key="Text.WorkingCopy.CanStageTip" xml:space="preserve">இந்த கோப்பை இப்போது நீங்கள் நிலைப்படுத்தலாம்.</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">உறுதிமொழி</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">உறுதிமொழி &amp; தள்ளு</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">இழுத்து, உறுதிமொழி செய்து தள்ளு</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">வளர்புரு/வரலாறுகள்</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">சொடுக்கு நிகழ்வைத் தூண்டு</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitToEdit" xml:space="preserve">உறுதிமொழி (திருத்து)</x:String>
@@ -708,8 +708,11 @@
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">நிலைநீக்கு</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">அனைத்தும் நிலைநீக்கு</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">நிலைநீக்கு</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">CATEGORY</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">CREATE CATEGORY</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">நிலைபடுத்து</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">அனைத்தும் நிலைபடுத்து</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">UNCATEGORIZED</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">மாறாதது எனநினைப்பதை பார்</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">வளர்புரு: ${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">பணியிடம்:</x:String>

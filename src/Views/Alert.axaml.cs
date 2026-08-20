@@ -18,7 +18,7 @@ namespace SourceGit.Views
             Title = title;
             TxtTitle.Text = title;
             Message.Text = message;
-            await ShowDialog(owner);
+            await ControlExtensions.ShowDialogWithNativeWebViewsHiddenAsync(this, owner);
         }
 
         private void OnOk(object sender, RoutedEventArgs e)

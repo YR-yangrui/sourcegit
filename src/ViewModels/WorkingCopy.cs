@@ -141,7 +141,7 @@ namespace SourceGit.ViewModels
                     if (_isLoadingData)
                         return;
 
-                    VisibleUnstaged = GetVisibleChanges(_unstaged);
+                    VisibleUnstaged = GetVisibleUnstagedChanges();
                     VisibleStaged = GetVisibleChanges(_staged);
                     SelectedUnstaged = [];
                 }
@@ -158,6 +158,18 @@ namespace SourceGit.ViewModels
         {
             get => _visibleUnstaged;
             private set => SetProperty(ref _visibleUnstaged, value);
+        }
+
+        public List<Models.UnstagedChangeCategory> UnstagedCategories
+        {
+            get => _unstagedCategories;
+            private set => SetProperty(ref _unstagedCategories, value);
+        }
+
+        public Models.UnstagedChangeCategory SelectedUnstagedCategory
+        {
+            get => _selectedUnstagedCategory;
+            private set => SetProperty(ref _selectedUnstagedCategory, value);
         }
 
         public List<Models.Change> Staged
@@ -235,6 +247,8 @@ namespace SourceGit.ViewModels
         public WorkingCopy(Repository repo)
         {
             _repo = repo;
+            _selectedUnstagedCategory = new Models.UnstagedChangeCategory();
+            _unstagedCategories = [_selectedUnstagedCategory];
         }
 
         public void Close()
@@ -272,7 +286,8 @@ namespace SourceGit.ViewModels
 
         public void SetData(List<Models.Change> changes)
         {
-            if (!IsChanged(_cached, changes))
+            // The first snapshot also initializes persisted categories, even when both Git status lists are empty.
+            if (_hasInitializedUnstagedCategories && !IsChanged(_cached, changes))
             {
                 HasUnsolvedConflicts = _cached.Find(x => x.IsConflicted) != null;
                 UpdateInProgressState();
@@ -321,6 +336,31 @@ namespace SourceGit.ViewModels
                 canSwitchDirectly = false;
             }
 
+            var categories = ReconcileUnstagedCategories(unstaged);
+            var selectedCategoryName = _selectedUnstagedCategory?.Name ?? string.Empty;
+            var selectedCategory = FindUnstagedCategory(categories, selectedCategoryName);
+            visibleUnstaged = GetVisibleChanges(GetChangesInUnstagedCategory(unstaged, selectedCategory));
+
+            // On first opening a repository, avoid showing an empty virtual category while all changes belong to saved categories.
+            if (!_hasInitializedUnstagedCategories &&
+                noFilter &&
+                selectedCategory.IsUncategorized &&
+                visibleUnstaged.Count == 0 &&
+                unstaged.Count > 0 &&
+                categories.Count > 1)
+            {
+                selectedCategory = categories[1];
+                visibleUnstaged = GetVisibleChanges(GetChangesInUnstagedCategory(unstaged, selectedCategory));
+            }
+
+            selectedUnstaged.Clear();
+            // Restore selection only within the active category so actions cannot leak into another category.
+            foreach (var c in visibleUnstaged)
+            {
+                if (lastSelectedUnstaged.Contains(c.Path))
+                    selectedUnstaged.Add(c);
+            }
+
             var staged = GetStagedChanges(changes);
             var visibleStaged = GetVisibleChanges(staged);
             var selectedStaged = new List<Models.Change>();
@@ -364,13 +404,16 @@ namespace SourceGit.ViewModels
             _cached = changes;
             HasUnsolvedConflicts = hasConflict;
             CanSwitchBranchDirectly = canSwitchDirectly;
-            VisibleUnstaged = visibleUnstaged;
             VisibleStaged = visibleStaged;
             Unstaged = unstaged;
+            UnstagedCategories = categories;
+            SelectedUnstagedCategory = selectedCategory;
+            VisibleUnstaged = visibleUnstaged;
             Staged = staged;
             SelectedUnstaged = selectedUnstaged;
             SelectedStaged = selectedStaged;
             _isLoadingData = false;
+            _hasInitializedUnstagedCategories = true;
 
             UpdateInProgressState();
             EnsureMergeConflictHistoryCache();
@@ -414,6 +457,8 @@ namespace SourceGit.ViewModels
             await new Commands.Add(_repo.FullPath, pathSpecFile).Use(log).ExecAsync();
             File.Delete(pathSpecFile);
             log.Complete();
+
+            RemoveUnstagedChangeAssignments(canStaged);
 
             _repo.MarkWorkingCopyDirtyManually();
             IsStaging = false;
@@ -474,6 +519,51 @@ namespace SourceGit.ViewModels
         public void ClearFilter()
         {
             Filter = string.Empty;
+        }
+
+        public void CreateUnstagedChangeCategory(string name, List<Models.Change> changes)
+        {
+            MoveUnstagedChangesToCategory(changes, name, true);
+        }
+
+        public void MoveUnstagedChangesToCategory(List<Models.Change> changes, string name)
+        {
+            MoveUnstagedChangesToCategory(changes, name, false);
+        }
+
+        public void SelectUnstagedCategory(Models.UnstagedChangeCategory category)
+        {
+            if (category == null || ReferenceEquals(category, _selectedUnstagedCategory))
+                return;
+
+            // Tab selection only changes the active projection. Rebuilding the category collection here would replace
+            // the ListBox ItemsSource while Avalonia is still processing its selection event.
+            ApplyUnstagedCategorySelection(category);
+        }
+
+        public void DeleteUnstagedCategory(Models.UnstagedChangeCategory category)
+        {
+            if (category?.IsUncategorized != false)
+                return;
+
+            var categories = _repo.UIStates.UnstagedChangeCategories;
+            Models.UnstagedChangeCategory target = null;
+            // Resolve by name because refreshed Tabs may no longer share the persisted object reference.
+            foreach (var item in categories)
+            {
+                if (item.Name.Equals(category.Name, StringComparison.Ordinal))
+                {
+                    target = item;
+                    break;
+                }
+            }
+
+            if (target == null)
+                return;
+
+            categories.Remove(target);
+            _repo.UIStates.Save();
+            RefreshUnstagedCategories(ReferenceEquals(category, _selectedUnstagedCategory) ? string.Empty : null);
         }
 
         public async Task UseTheirsAsync(List<Models.Change> changes)
@@ -854,7 +944,6 @@ namespace SourceGit.ViewModels
                 }
             }
 
-            using var lockWatcher = _repo.LockWatcher();
             IsCommitting = true;
             try
             {
@@ -863,12 +952,16 @@ namespace SourceGit.ViewModels
                 if (autoStage && _unstaged.Count > 0)
                     await StageChangesAsync(_unstaged, null);
 
-                var log = _repo.CreateLog("Commit");
-                var succ = await new Commands.Commit(_repo.FullPath, _commitMessage, EnableSignOff, NoVerifyOnCommit, _useAmend, _resetAuthor)
-                        .Use(log)
-                        .RunAsync();
+                bool succ;
+                using (var lockWatcher = _repo.LockWatcher())
+                {
+                    var log = _repo.CreateLog("Commit");
+                    succ = await new Commands.Commit(_repo.FullPath, _commitMessage, EnableSignOff, NoVerifyOnCommit, _useAmend, _resetAuthor)
+                            .Use(log)
+                            .RunAsync();
 
-                log.Complete();
+                    log.Complete();
+                }
 
                 if (succ)
                 {
@@ -877,6 +970,11 @@ namespace SourceGit.ViewModels
 
                     if (autoPush && _repo.Remotes.Count > 0)
                     {
+                        // Commit must consume the current index before pull can auto-stash the remaining worktree.
+                        // A failed/conflicted pull keeps the local commit but must stop the subsequent push.
+                        if (!await _repo.PullBeforeCommitAndPushAsync())
+                            return;
+
                         Models.Branch pushBranch = null;
                         if (_repo.CurrentBranch == null)
                         {
@@ -895,6 +993,256 @@ namespace SourceGit.ViewModels
             {
                 IsCommitting = false;
             }
+        }
+
+        private void MoveUnstagedChangesToCategory(List<Models.Change> changes, string name, bool selectCategory)
+        {
+            if (changes == null || changes.Count == 0)
+                return;
+
+            name = name?.Trim() ?? string.Empty;
+            var paths = new HashSet<string>(StringComparer.Ordinal);
+            // De-duplicate selected paths because folder selections may include an already selected child.
+            foreach (var change in changes)
+                paths.Add(change.Path);
+
+            var categories = _repo.UIStates.UnstagedChangeCategories ??= [];
+            Models.UnstagedChangeCategory target = null;
+            if (!string.IsNullOrEmpty(name))
+            {
+                // Preserve an existing category when moving more files into it.
+                foreach (var category in categories)
+                {
+                    if (category.Name.Equals(name, StringComparison.Ordinal))
+                    {
+                        target = category;
+                        break;
+                    }
+                }
+
+                if (target == null)
+                {
+                    target = new Models.UnstagedChangeCategory { Name = name };
+                    categories.Add(target);
+                }
+            }
+
+            // A path belongs to at most one category; remove its previous assignment before adding the new one.
+            for (var categoryIndex = categories.Count - 1; categoryIndex >= 0; categoryIndex--)
+            {
+                var category = categories[categoryIndex];
+                category.Paths ??= [];
+
+                // Walk backwards so removals keep the persisted list stable and do not skip duplicate paths.
+                for (var pathIndex = category.Paths.Count - 1; pathIndex >= 0; pathIndex--)
+                {
+                    if (paths.Contains(category.Paths[pathIndex]))
+                        category.Paths.RemoveAt(pathIndex);
+                }
+
+                if (category.Paths.Count == 0 && category != target)
+                    categories.RemoveAt(categoryIndex);
+            }
+
+            if (target != null)
+            {
+                // The category stores only file paths, keeping it independent from transient Git status objects.
+                foreach (var path in paths)
+                {
+                    if (!target.Paths.Contains(path))
+                        target.Paths.Add(path);
+                }
+            }
+
+            _repo.UIStates.Save();
+            RefreshUnstagedCategories(selectCategory ? name : null);
+        }
+
+        private void RefreshUnstagedCategories(string selectedCategoryName = null)
+        {
+            var categories = ReconcileUnstagedCategories(_unstaged);
+            var selectedName = selectedCategoryName ?? _selectedUnstagedCategory?.Name ?? string.Empty;
+            var selectedCategory = FindUnstagedCategory(categories, selectedName);
+            UnstagedCategories = categories;
+            ApplyUnstagedCategorySelection(selectedCategory);
+        }
+
+        private void ApplyUnstagedCategorySelection(Models.UnstagedChangeCategory selectedCategory)
+        {
+            var visible = GetVisibleChanges(GetChangesInUnstagedCategory(_unstaged, selectedCategory));
+            var selectedPaths = new HashSet<string>(StringComparer.Ordinal);
+            var lastSelectedPath = string.Empty;
+            if (_selectedUnstaged is { Count: > 0 })
+            {
+                lastSelectedPath = _selectedUnstaged[0].Path;
+
+                // Keep the selection when a category is refreshed without a Git status reload.
+                foreach (var change in _selectedUnstaged)
+                    selectedPaths.Add(change.Path);
+            }
+
+            var selected = new List<Models.Change>();
+            // Rebind selected paths to the current status objects used by the change collection control.
+            foreach (var change in visible)
+            {
+                if (selectedPaths.Contains(change.Path))
+                    selected.Add(change);
+            }
+
+            if (selected.Count == 0 && !string.IsNullOrEmpty(lastSelectedPath))
+            {
+                var next = FindNextVisibleChange(visible, lastSelectedPath);
+                if (next != null)
+                    selected.Add(next);
+            }
+
+            _isLoadingData = true;
+            SelectedUnstagedCategory = selectedCategory;
+            VisibleUnstaged = visible;
+            SelectedUnstaged = selected;
+            _isLoadingData = false;
+            UpdateDetail();
+        }
+
+        private List<Models.UnstagedChangeCategory> ReconcileUnstagedCategories(List<Models.Change> changes)
+        {
+            var categories = _repo.UIStates.UnstagedChangeCategories ??= [];
+            var assignedPaths = new HashSet<string>(StringComparer.Ordinal);
+            var changed = false;
+
+            // Refreshes may publish a transient empty snapshot while repositories switch, so only normalize persisted
+            // data here. Explicit file actions remove assignments after the operation actually succeeds.
+            for (var categoryIndex = categories.Count - 1; categoryIndex >= 0; categoryIndex--)
+            {
+                var category = categories[categoryIndex];
+                if (category == null || string.IsNullOrWhiteSpace(category.Name))
+                {
+                    categories.RemoveAt(categoryIndex);
+                    changed = true;
+                    continue;
+                }
+
+                category.Name = category.Name.Trim();
+                category.Paths ??= [];
+
+                // Keep the first surviving assignment for a path to recover safely from old or manually edited settings.
+                for (var pathIndex = category.Paths.Count - 1; pathIndex >= 0; pathIndex--)
+                {
+                    var path = category.Paths[pathIndex];
+                    if (string.IsNullOrWhiteSpace(path) || !assignedPaths.Add(path))
+                    {
+                        category.Paths.RemoveAt(pathIndex);
+                        changed = true;
+                    }
+                }
+            }
+
+            if (changed)
+                _repo.UIStates.Save();
+
+            var result = new List<Models.UnstagedChangeCategory> { new() };
+            // The uncategorized view is virtual and is deliberately never persisted or auto-removed.
+            foreach (var category in categories)
+                result.Add(category);
+
+            return result;
+        }
+
+        private static Models.UnstagedChangeCategory FindUnstagedCategory(
+            List<Models.UnstagedChangeCategory> categories,
+            string name)
+        {
+            // A vanished active category falls back to the virtual uncategorized category.
+            foreach (var category in categories)
+            {
+                if (category.Name.Equals(name, StringComparison.Ordinal))
+                    return category;
+            }
+
+            return categories[0];
+        }
+
+        private List<Models.Change> GetVisibleUnstagedChanges()
+        {
+            return GetVisibleChanges(GetChangesInUnstagedCategory(_unstaged, _selectedUnstagedCategory));
+        }
+
+        private List<Models.Change> GetChangesInUnstagedCategory(
+            List<Models.Change> changes,
+            Models.UnstagedChangeCategory category)
+        {
+            if (category?.IsUncategorized != false)
+            {
+                var categorizedPaths = new HashSet<string>(StringComparer.Ordinal);
+                var categories = _repo.UIStates.UnstagedChangeCategories ??= [];
+                // Build the union of persisted assignments so every otherwise-unassigned change stays visible by default.
+                foreach (var item in categories)
+                {
+                    if (item?.Paths == null)
+                        continue;
+
+                    foreach (var path in item.Paths)
+                        categorizedPaths.Add(path);
+                }
+
+                var uncategorized = new List<Models.Change>();
+                // Keep newly created Git changes accessible even before the settings reconciliation completes.
+                foreach (var change in changes)
+                {
+                    if (!categorizedPaths.Contains(change.Path))
+                        uncategorized.Add(change);
+                }
+
+                return uncategorized;
+            }
+
+            var pathsInCategory = new HashSet<string>(category.Paths, StringComparer.Ordinal);
+            var categorized = new List<Models.Change>();
+            // Match paths back to current Git status objects so all existing file actions continue to work unchanged.
+            foreach (var change in changes)
+            {
+                if (pathsInCategory.Contains(change.Path))
+                    categorized.Add(change);
+            }
+
+            return categorized;
+        }
+
+        private void RemoveUnstagedChangeAssignments(List<Models.Change> changes)
+        {
+            var categories = _repo.UIStates.UnstagedChangeCategories ??= [];
+            var paths = new HashSet<string>(StringComparer.Ordinal);
+            // Stage operations can contain a folder expansion, so retain only unique paths for persisted cleanup.
+            foreach (var change in changes)
+                paths.Add(change.Path);
+
+            var changed = false;
+            // Remove staged paths and now-empty categories immediately, before the watcher publishes its next refresh.
+            for (var categoryIndex = categories.Count - 1; categoryIndex >= 0; categoryIndex--)
+            {
+                var category = categories[categoryIndex];
+                if (category?.Paths == null)
+                    continue;
+
+                // Work backwards to remove every duplicate path in a legacy category without skipping entries.
+                for (var pathIndex = category.Paths.Count - 1; pathIndex >= 0; pathIndex--)
+                {
+                    if (paths.Contains(category.Paths[pathIndex]))
+                    {
+                        category.Paths.RemoveAt(pathIndex);
+                        changed = true;
+                    }
+                }
+
+                if (category.Paths.Count == 0)
+                {
+                    categories.RemoveAt(categoryIndex);
+                    changed = true;
+                }
+            }
+
+            if (changed)
+                _repo.UIStates.Save();
         }
 
         private List<Models.Change> GetVisibleChanges(List<Models.Change> changes)
@@ -1331,6 +1679,7 @@ namespace SourceGit.ViewModels
 
         private Repository _repo = null;
         private bool _isLoadingData = false;
+        private bool _hasInitializedUnstagedCategories = false;
         private bool _isStaging = false;
         private bool _isUnstaging = false;
         private bool _isCommitting = false;
@@ -1340,6 +1689,8 @@ namespace SourceGit.ViewModels
         private List<Models.Change> _cached = [];
         private List<Models.Change> _unstaged = [];
         private List<Models.Change> _visibleUnstaged = [];
+        private List<Models.UnstagedChangeCategory> _unstagedCategories = [];
+        private Models.UnstagedChangeCategory _selectedUnstagedCategory = null;
         private List<Models.Change> _staged = [];
         private List<Models.Change> _visibleStaged = [];
         private List<Models.Change> _selectedUnstaged = [];

@@ -433,8 +433,8 @@
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">Stash של {0} קבצים...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">Unstage</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">Unstage של {0} קבצים</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">שימוש בשלי</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">שימוש בשלהם</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">החל שינויים מהענף המקומי</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">החל שינויים מהענף המרוחק</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">היסטוריית קובץ</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">שנה</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">תוכן</x:String>
@@ -1013,7 +1013,7 @@
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories" xml:space="preserve">נקה היסטוריה</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories.Confirm" xml:space="preserve">האם לנקות את כל היסטוריית הודעות ה־commit? לא ניתן לבטל פעולה זו.</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">COMMIT</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">COMMIT ו־PUSH</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">PULL, COMMIT ו־PUSH</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">תבנית/היסטוריה</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">הפעל אירוע לחיצה</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitToEdit" xml:space="preserve">Commit (ערוך)</x:String>
@@ -1037,8 +1037,11 @@
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">UNSTAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">UNSTAGE לכול</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">UNSTAGED</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">CATEGORY</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">CREATE CATEGORY</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">STAGE</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">STAGE לכול</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">UNCATEGORIZED</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">הצג ASSUME UNCHANGED</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">תבנית: ${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">סביבת עבודה: </x:String>

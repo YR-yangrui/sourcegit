@@ -435,8 +435,8 @@
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">Stash {0} αρχείων...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">Αφαίρεση από το ευρετήριο</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">Αφαίρεση {0} αρχείων από το ευρετήριο</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Χρήση δικού μου</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Χρήση δικού τους</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">Εφαρμογή τοπικών αλλαγών κλάδου</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">Εφαρμογή αλλαγών απομακρυσμένου κλάδου</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">Ιστορικό αρχείου</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">ΑΛΛΑΓΗ</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">ΠΕΡΙΕΧΟΜΕΝΟ</x:String>
@@ -1024,7 +1024,7 @@
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories" xml:space="preserve">Εκκαθάριση ιστορικού</x:String>
   <x:String x:Key="Text.WorkingCopy.ClearCommitHistories.Confirm" xml:space="preserve">Είστε σίγουροι ότι θέλετε να εκκαθαρίσετε όλο το ιστορικό μηνυμάτων commit; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">COMMIT</x:String>
-  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">COMMIT &amp; PUSH</x:String>
+  <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">PULL, COMMIT &amp; PUSH</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitMessageHelper" xml:space="preserve">Πρότυπο/Ιστορικό</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">Ενεργοποίηση συμβάντος κλικ</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitToEdit" xml:space="preserve">Commit (Επεξεργασία)</x:String>
@@ -1048,8 +1048,11 @@
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">ΑΦΑΙΡΕΣΗ</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.UnstageAll" xml:space="preserve">ΑΦΑΙΡΕΣΗ ΟΛΩΝ</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged" xml:space="preserve">ΕΚΤΟΣ ΕΥΡΕΤΗΡΙΟΥ</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Category" xml:space="preserve">CATEGORY</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.CreateCategory" xml:space="preserve">CREATE CATEGORY</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.Stage" xml:space="preserve">ΠΡΟΣΘΗΚΗ</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.StageAll" xml:space="preserve">ΠΡΟΣΘΗΚΗ ΟΛΩΝ</x:String>
+  <x:String x:Key="Text.WorkingCopy.Unstaged.Uncategorized" xml:space="preserve">UNCATEGORIZED</x:String>
   <x:String x:Key="Text.WorkingCopy.Unstaged.ViewAssumeUnchanged" xml:space="preserve">ΠΡΟΒΟΛΗ ΑΡΧΕΙΩΝ ΠΟΥ ΘΕΩΡΟΥΝΤΑΙ ΑΜΕΤΑΒΛΗΤΑ</x:String>
   <x:String x:Key="Text.WorkingCopy.UseCommitTemplate" xml:space="preserve">Πρότυπο: ${0}$</x:String>
   <x:String x:Key="Text.Workspace" xml:space="preserve">ΧΩΡΟΣ ΕΡΓΑΣΙΑΣ: </x:String>
