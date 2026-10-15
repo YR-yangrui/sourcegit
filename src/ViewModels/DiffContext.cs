@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -219,6 +219,11 @@ namespace SourceGit.ViewModels
 
                     SetContent(ctx.SwitchMode());
                 }
+                else if (ctx is CombinedTextDiff combined && combined.MergeInlineChanges != pref.MergeInlineTextChanges)
+                {
+                    // Rebuild only the presentation from the existing diff; toggling never reruns Git.
+                    SetContent(new CombinedTextDiff(ctx.Option, ctx.Data, ctx, ctx.SupportsChunkActions));
+                }
             }
             else if (Content is Models.NoOrEOLChange)
             {
@@ -290,7 +295,7 @@ namespace SourceGit.ViewModels
 
                         try
                         {
-                            var metadataCommand = new Commands.Diff(_repo, _option, 0, ignoreWhitespace, ignoreCRAtEOL)
+                            var metadataCommand = new Commands.Diff(_repo, _option, 0, ignoreWhitespace, ignoreCRAtEOL, useTextConversion: false)
                             {
                                 CancellationToken = cancellationToken,
                                 CanAbortProcessOnCancel = true,

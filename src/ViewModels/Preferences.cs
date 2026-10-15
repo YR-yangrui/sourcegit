@@ -293,6 +293,21 @@ namespace SourceGit.ViewModels
             set => SetProperty(ref _useSideBySideDiff, value);
         }
 
+        // Null preserves the existing Excel/bytes defaults until the user chooses a shared table setting.
+        public bool? StructuredDiffShowOnlyChangedRows { get; set; } = null;
+        public bool StructuredDiffHideUnchangedColumns { get; set; } = false;
+        public bool StructuredDiffMergeChanges { get; set; } = false;
+
+        public bool MergeInlineTextChanges
+        {
+            get => _mergeInlineTextChanges;
+            set
+            {
+                if (SetProperty(ref _mergeInlineTextChanges, value))
+                    Save();
+            }
+        }
+
         public bool EnableCustomDiffRenderers
         {
             get => _enableCustomDiffRenderers;
@@ -968,6 +983,7 @@ namespace SourceGit.ViewModels
         private bool _useTwoColumnsLayoutInHistories = false;
         private bool _displayTimeAsPeriodInHistories = false;
         private bool _useSideBySideDiff = false;
+        private bool _mergeInlineTextChanges = false;
         private bool _enableCustomDiffRenderers = false;
         private bool _ignoreWhitespaceChangesInDiff = false;
         private bool _ignoreCRAtEOLInDiff = true;

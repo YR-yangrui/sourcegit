@@ -256,7 +256,15 @@ namespace SourceGit.Commands
 
             if (File.Exists(fullPath))
             {
-                await using var src = File.OpenRead(fullPath);
+                // The renderer only consumes this temporary snapshot. Allow worktree actions to
+                // replace or delete the source while a large file is still being copied.
+                await using var src = new FileStream(
+                    fullPath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.ReadWrite | FileShare.Delete,
+                    81920,
+                    FileOptions.Asynchronous | FileOptions.SequentialScan);
                 await using var dst = File.Create(saveTo);
                 await src.CopyToAsync(dst, cancellationToken).ConfigureAwait(false);
             }

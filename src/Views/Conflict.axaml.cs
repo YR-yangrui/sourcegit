@@ -71,5 +71,12 @@ namespace SourceGit.Views
 
             e.Handled = true;
         }
+
+        private async void OnResolveWithAI(object _, RoutedEventArgs e)
+        {
+            if (DataContext is ViewModels.Conflict vm)
+                await vm.ResolveWithAIAsync();
+            e.Handled = true;
+        }
     }
 }

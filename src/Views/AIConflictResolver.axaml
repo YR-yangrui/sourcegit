@@ -1,0 +1,46 @@
+<v:ChromelessWindow xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:v="using:SourceGit.Views"
+                    xmlns:vm="using:SourceGit.ViewModels"
+                    xmlns:ai="using:SourceGit.AI"
+                    x:Class="SourceGit.Views.AIConflictResolver"
+                    x:DataType="vm:AIConflictResolver"
+                    x:Name="ThisControl"
+                    Icon="/App.ico"
+                    Title="{DynamicResource Text.AIConflict.Title}"
+                    Width="1100" Height="720" MinWidth="760" MinHeight="480"
+                    WindowStartupLocation="CenterOwner">
+  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+    <Grid Height="28" IsVisible="{Binding !#ThisControl.UseSystemWindowFrame}">
+      <Border Background="{DynamicResource Brush.TitleBar}" PointerPressed="BeginMoveWindow" DoubleTapped="MaximizeOrRestoreWindow"/>
+      <TextBlock Text="{DynamicResource Text.AIConflict.Title}" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False"/>
+      <v:CaptionButtons HorizontalAlignment="Right" IsVisible="{OnPlatform True, macOS=False}"/>
+    </Grid>
+    <StackPanel Grid.Row="1" Margin="12" Spacing="8" IsEnabled="{Binding !IsRunning}">
+      <ComboBox ItemsSource="{Binding Services}" SelectedItem="{Binding SelectedService, Mode=TwoWay}" HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="ai:Service"><TextBlock Text="{Binding Name}"/></DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <CheckBox Content="{DynamicResource Text.AIConflict.AutoApply}" IsChecked="{Binding AutoApply, Mode=TwoWay}"/>
+    </StackPanel>
+    <StackPanel Grid.Row="2" Margin="12,0,12,8" Spacing="4">
+      <TextBlock Text="{Binding Status}" TextWrapping="Wrap"/>
+      <TextBlock Text="{Binding Preview.Path}" Classes="bold"/>
+      <TextBlock Text="{Binding Preview.Summary}" TextWrapping="Wrap"/>
+    </StackPanel>
+    <Grid Grid.Row="3" Margin="12,0" ColumnDefinitions="*,8,*" RowDefinitions="Auto,*">
+      <TextBlock Text="{DynamicResource Text.AIConflict.Original}" Margin="0,0,0,6"/>
+      <TextBlock Grid.Column="2" Text="{DynamicResource Text.AIConflict.Result}" Margin="0,0,0,6"/>
+      <TextBox Grid.Row="1" Text="{Binding Preview.Original, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+               ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+      <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Preview.Result, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+               ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+    </Grid>
+    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12" Spacing="8">
+      <Button Content="{DynamicResource Text.AIConflict.Generate}" Click="OnGenerate" IsEnabled="{Binding CanStart}"/>
+      <Button Content="{DynamicResource Text.AIConflict.Apply}" Click="OnApply" IsEnabled="{Binding CanApply}" Classes="flat primary"/>
+      <Button Content="{DynamicResource Text.AIConflict.Stop}" Click="OnStop"/>
+    </StackPanel>
+  </Grid>
+</v:ChromelessWindow>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -138,13 +139,31 @@ namespace SourceGit.ViewModels
             {
                 if (SetProperty(ref _filter, value))
                 {
+                    try
+                    {
+                        _filterRegex = string.IsNullOrEmpty(value) ? null : new Regex(value, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Keep the list usable while the user is still typing an incomplete expression.
+                        _filterRegex = null;
+                    }
+
                     if (_isLoadingData)
                         return;
 
-                    VisibleUnstaged = GetVisibleUnstagedChanges();
-                    VisibleStaged = GetVisibleChanges(_staged);
-                    SelectedUnstaged = [];
+                    RefreshFilteredChanges();
                 }
+            }
+        }
+
+        public bool FilterByFilenameOnly
+        {
+            get => _filterByFilenameOnly;
+            set
+            {
+                if (SetProperty(ref _filterByFilenameOnly, value) && !_isLoadingData)
+                    RefreshFilteredChanges();
             }
         }
 
@@ -308,8 +327,7 @@ namespace SourceGit.ViewModels
             var unstaged = new List<Models.Change>();
             var visibleUnstaged = new List<Models.Change>();
             var selectedUnstaged = new List<Models.Change>();
-            var filter = Models.FileSearch.Parse(_filter);
-            var noFilter = filter.IsEmpty;
+            var noFilter = _filterRegex == null;
             var hasConflict = false;
             var canSwitchDirectly = true;
             foreach (var c in changes)
@@ -319,7 +337,7 @@ namespace SourceGit.ViewModels
                     unstaged.Add(c);
                     hasConflict |= c.IsConflicted;
 
-                    if (noFilter || Models.FileSearch.Matches(c.Path, filter))
+                    if (noFilter || IsPathMatched(c.Path))
                     {
                         visibleUnstaged.Add(c);
                         if (lastSelectedUnstaged.Contains(c.Path))
@@ -1247,19 +1265,31 @@ namespace SourceGit.ViewModels
 
         private List<Models.Change> GetVisibleChanges(List<Models.Change> changes)
         {
-            var filter = Models.FileSearch.Parse(_filter);
-            if (filter.IsEmpty)
+            if (_filterRegex == null)
                 return changes;
 
             var visible = new List<Models.Change>();
 
             foreach (var c in changes)
             {
-                if (Models.FileSearch.Matches(c.Path, filter))
+                if (IsPathMatched(c.Path))
                     visible.Add(c);
             }
 
             return visible;
+        }
+
+        private bool IsPathMatched(string path)
+        {
+            var target = _filterByFilenameOnly ? Path.GetFileName(path) : path;
+            return _filterRegex == null || _filterRegex.IsMatch(target);
+        }
+
+        private void RefreshFilteredChanges()
+        {
+            VisibleUnstaged = GetVisibleUnstagedChanges();
+            VisibleStaged = GetVisibleChanges(_staged);
+            SelectedUnstaged = [];
         }
 
         private async Task<List<Models.Change>> GetCanStageChangesAsync(List<Models.Change> changes)
@@ -1696,6 +1726,8 @@ namespace SourceGit.ViewModels
         private List<Models.Change> _selectedUnstaged = [];
         private List<Models.Change> _selectedStaged = [];
         private string _filter = string.Empty;
+        private Regex _filterRegex = null;
+        private bool _filterByFilenameOnly = false;
         private string _commitMessage = string.Empty;
 
         private bool _hasUnsolvedConflicts = false;

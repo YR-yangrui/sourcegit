@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -142,7 +142,20 @@ namespace SourceGit.Models
             {
                 var fullPath = Path.Combine(repo, option.Path);
                 if (File.Exists(fullPath))
-                    return await File.ReadAllBytesAsync(fullPath).ConfigureAwait(false);
+                {
+                    // Parsing uses a detached snapshot; worktree operations must remain free to
+                    // replace or delete the source while a large file is still being copied.
+                    await using var stream = new FileStream(
+                        fullPath,
+                        FileMode.Open,
+                        FileAccess.Read,
+                        FileShare.ReadWrite | FileShare.Delete,
+                        81920,
+                        FileOptions.Asynchronous | FileOptions.SequentialScan);
+                    using var snapshot = new MemoryStream();
+                    await stream.CopyToAsync(snapshot).ConfigureAwait(false);
+                    return snapshot.ToArray();
+                }
                 return null;
             }
 
@@ -176,6 +189,13 @@ namespace SourceGit.Models
 
         private static string BuildGitObjectSpec(string revision, string path)
         {
+            if (revision.Length >= 2 && revision[0] == '"' && revision[^1] == '"')
+                revision = revision.Substring(1, revision.Length - 2).Replace("\\\"", "\"", StringComparison.Ordinal);
+
+            // Conflict diffs carry complete index-stage specs so Git can compare stage 2 with stage 3.
+            if (revision.Length > 3 && revision[0] == ':' && revision[2] == ':')
+                return revision;
+
             var colon = revision.IndexOf(':');
             if (colon > 0)
             {
@@ -211,10 +231,30 @@ namespace SourceGit.Models
             {
                 var oldTable = FindTable(oldTables, name);
                 var newTable = FindTable(newTables, name);
-                if (IsRecordTable(oldTable) || IsRecordTable(newTable))
-                    diff.Sheets.Add(CompareRecordTable(name, oldTable, newTable));
-                else
-                    diff.Sheets.Add(CompareGridTable(name, oldTable, newTable));
+                var sheet = IsRecordTable(oldTable) || IsRecordTable(newTable)
+                    ? CompareRecordTable(name, oldTable, newTable)
+                    : CompareGridTable(name, oldTable, newTable);
+                // Sheet existence must be tracked separately: added/deleted empty sheets have no changed cells.
+                sheet.Change = oldTable == null ? StructuredDiffChangeKind.Added :
+                    newTable == null ? StructuredDiffChangeKind.Deleted : StructuredDiffChangeKind.None;
+                if (sheet.Change == StructuredDiffChangeKind.None)
+                {
+                    // Include header-only field changes as well as changed data cells.
+                    foreach (var row in sheet.Rows)
+                    {
+                        foreach (var cell in row.Cells)
+                        {
+                            if (cell.Change != StructuredDiffChangeKind.None)
+                            {
+                                sheet.Change = StructuredDiffChangeKind.Modified;
+                                break;
+                            }
+                        }
+                        if (sheet.HasChanges)
+                            break;
+                    }
+                }
+                diff.Sheets.Add(sheet);
             }
 
             return diff;
@@ -360,10 +400,23 @@ namespace SourceGit.Models
             AddKeys(rowKeys, oldTable);
 
             var headerRow = new StructuredDiffRow();
+            // Field presence is a change even when all values are empty or there are no records.
             foreach (var header in headers)
-                headerRow.Cells.Add(HeaderCell(header));
+            {
+                var oldFieldExists = oldTable?.Headers.Contains(header) == true;
+                var newFieldExists = newTable?.Headers.Contains(header) == true;
+                headerRow.Cells.Add(new StructuredDiffCell()
+                {
+                    IsHeader = true,
+                    OldText = oldFieldExists ? header : string.Empty,
+                    NewText = newFieldExists ? header : string.Empty,
+                    Change = !oldFieldExists ? StructuredDiffChangeKind.Added :
+                        !newFieldExists ? StructuredDiffChangeKind.Deleted : StructuredDiffChangeKind.None,
+                });
+            }
             sheet.Rows.Add(headerRow);
 
+            // Align records by their stable key before comparing fields.
             for (var i = 0; i < rowKeys.Count; i++)
             {
                 var key = rowKeys[i];
@@ -378,7 +431,8 @@ namespace SourceGit.Models
                 {
                     var oldValue = oldExists ? GetRecordValue(oldTable, oldIndex, header) : string.Empty;
                     var newValue = newExists ? GetRecordValue(newTable, newIndex, header) : string.Empty;
-                    var change = GetCellChange(oldExists, newExists, oldValue, newValue);
+                    var change = GetCellChange(oldExists && oldTable.Headers.Contains(header),
+                        newExists && newTable.Headers.Contains(header), oldValue, newValue);
                     CountCell(sheet, change);
                     row.Cells.Add(new StructuredDiffCell() { OldText = oldValue, NewText = newValue, Change = change });
                 }
@@ -1332,7 +1386,19 @@ namespace SourceGit.Models
 
         private static string JsonValue(JsonElement element)
         {
-            return element.ValueKind == JsonValueKind.String ? element.GetString() ?? string.Empty : element.GetRawText();
+            if (element.ValueKind == JsonValueKind.String)
+                return element.GetString() ?? string.Empty;
+            if (element.ValueKind is not (JsonValueKind.Array or JsonValueKind.Object))
+                return element.GetRawText();
+
+            // flatc emits indented JSON. Compact structural whitespace while preserving spaces inside strings.
+            using var stream = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions
+            {
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            }))
+                element.WriteTo(writer);
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
 
         private static string GetConfigRowKey(TableSource table, List<string> row, int rowNumber)

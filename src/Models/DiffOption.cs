@@ -187,6 +187,26 @@ namespace SourceGit.Models
             return new DiffOption(baseRevision, targetRevision, change, DiffOptionContext.Stash, isUntracked ? "stash-untracked" : "stash");
         }
 
+        public static DiffOption ForConflict(Change change)
+        {
+            return new DiffOption(change);
+        }
+
+        private DiffOption(Change change)
+        {
+            _context = DiffOptionContext.WorkingCopy;
+            _path = change.Path;
+            _orgPath = change.OriginalPath;
+
+            // Unresolved content lives in index stages 2/3; the worktree may already have
+            // partially edited conflict markers and is not a reliable representation of either side.
+            _revisions.Add($":2:{change.Path}".Quoted());
+            _revisions.Add($":3:{change.Path}".Quoted());
+            _oldContent = DiffContentSource.FromRevision(":2", change.Path);
+            _newContent = DiffContentSource.FromRevision(":3", change.Path);
+            _ignorePaths = true;
+        }
+
         private DiffOption(string baseRevision, string targetRevision, Change change, DiffOptionContext context, string customDiffMode)
         {
             _context = context;

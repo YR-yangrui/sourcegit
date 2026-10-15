@@ -193,6 +193,12 @@
               <Path Width="11" Height="11" Stretch="Uniform" Data="{StaticResource Icons.HiddenSymbol}" Margin="0,1,0,0"/>
             </ToggleButton>
 
+            <CheckBox Content="合并行内改动" Margin="8,0"
+                      IsChecked="{Binding Source={x:Static vm:Preferences.Instance}, Path=MergeInlineTextChanges, Mode=TwoWay}"
+                      IsVisible="{Binding IsTextDiff}"
+                      IsEnabled="{Binding Source={x:Static vm:Preferences.Instance}, Path=UseSideBySideDiff, Converter={x:Static BoolConverters.Not}}"
+                      PropertyChanged="OnToggleButtonPropertyChanged"/>
+
             <ToggleButton Classes="line_path"
                           x:Name="ToggleBtnUseSideBySide"
                           Width="28" Height="18"

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -200,7 +201,7 @@ namespace SourceGit.Views
                         if (info.Type == Models.TextDiffLineType.Added)
                         {
                             indicator = new FormattedText(
-                                "+",
+                                info.IsMerged ? "~" : "+",
                                 CultureInfo.CurrentCulture,
                                 FlowDirection.LeftToRight,
                                 typeface,
@@ -282,7 +283,7 @@ namespace SourceGit.Views
                     var startY = line.GetTextLineVisualYPosition(line.TextLines[0], VisualYPosition.LineTop) - textView.VerticalOffset;
                     var endY = line.GetTextLineVisualYPosition(line.TextLines[^1], VisualYPosition.LineBottom) - textView.VerticalOffset;
 
-                    var bg = GetBrushByLineType(info.Type);
+                    var bg = info.IsMerged ? Brushes.Transparent : GetBrushByLineType(info.Type);
                     if (bg != null)
                     {
                         drawingContext.DrawRectangle(bg, null, new Rect(0, startY, width, endY - startY));
@@ -313,7 +314,7 @@ namespace SourceGit.Views
                                     var x = line.GetTextLineVisualXPosition(tl, start) - textView.HorizontalOffset;
                                     var w = line.GetTextLineVisualXPosition(tl, end) - textView.HorizontalOffset - x;
                                     var rect = new Rect(x, y, w, h);
-                                    drawingContext.DrawRectangle(highlightBG, null, rect);
+                                    drawingContext.DrawRectangle(highlight.IsReplacement ? _replacementBrush : highlightBG, null, rect);
 
                                     if (highlight.End >= processingIdxEnd)
                                         break;
@@ -354,6 +355,7 @@ namespace SourceGit.Views
                 };
             }
 
+            private static readonly IBrush _replacementBrush = new SolidColorBrush(Color.Parse("#60D8A400"));
             private readonly ThemedTextDiffPresenter _presenter;
         }
 
@@ -733,8 +735,61 @@ namespace SourceGit.Views
             e.Handled = true;
         }
 
+        private StackPanel BuildMergedLineTooltip(Models.TextDiffLine line)
+        {
+            var panel = new StackPanel { Tag = line };
+            panel.Children.Add(BuildTooltipLine("old: ", line.MergedOldContent, line.MergedOldHighlights, Brushes.Red));
+            panel.Children.Add(BuildTooltipLine("new: ", line.Content, line.Highlights, Brushes.Green));
+            return panel;
+        }
+
+        private TextBlock BuildTooltipLine(string label, string content, List<Models.TextRange> highlights, IBrush color)
+        {
+            var text = new TextBlock { FontFamily = FontFamily, FontSize = FontSize };
+            text.Inlines!.Add(new Run(label));
+            var position = 0;
+            // Color only narrowed edit spans; unchanged prefixes, suffixes and punctuation retain the theme foreground.
+            foreach (var range in highlights)
+            {
+                if (range.Start > position)
+                    text.Inlines.Add(new Run(content[position..range.Start]));
+                text.Inlines.Add(new Run(content[range.Start..(range.End + 1)]) { Foreground = color });
+                position = range.End + 1;
+            }
+            if (position < content.Length)
+                text.Inlines.Add(new Run(content[position..]));
+            return text;
+        }
+
         private void OnTextViewPointerChanged(object sender, PointerEventArgs e)
         {
+            // Tooltips also work for history diffs where chunk actions are unavailable.
+            if (sender is TextView hoverView && hoverView.VisualLinesValid)
+            {
+                Models.TextDiffLine tooltipLine = null;
+                var y = e.GetPosition(hoverView).Y + hoverView.VerticalOffset;
+                var lines = GetLines();
+                // Only inspect realized rows; hidden merged-away lines have no visual coordinates.
+                foreach (var visual in hoverView.VisualLines)
+                {
+                    if (visual.IsDisposed || visual.FirstDocumentLine == null || visual.FirstDocumentLine.IsDeleted)
+                        continue;
+                    var index = visual.FirstDocumentLine.LineNumber - 1;
+                    if (y >= visual.VisualTop && y < visual.VisualTop + visual.Height && index < lines.Count)
+                    {
+                        var line = lines[index];
+                        if (line.IsMerged)
+                            tooltipLine = line;
+                        break;
+                    }
+                }
+                // Keep the same tooltip instance while moving within a row, so hover timing does not restart.
+                if (tooltipLine == null)
+                    ToolTip.SetTip(hoverView, null);
+                else if (ToolTip.GetTip(hoverView) is not StackPanel current || !ReferenceEquals(current.Tag, tooltipLine))
+                    ToolTip.SetTip(hoverView, BuildMergedLineTooltip(tooltipLine));
+            }
+
             if (DataContext is not ViewModels.TextDiffContext { SupportsChunkActions: true, Option: { IsLocalChange: true } })
                 return;
 
@@ -834,7 +889,7 @@ namespace SourceGit.Views
         private List<Models.TextDiffLine> GetLines()
         {
             if (DataContext is ViewModels.CombinedTextDiff combined)
-                return combined.Data.Lines;
+                return combined.Lines;
 
             if (DataContext is ViewModels.TwoSideTextDiff twoSides)
                 return IsOld ? twoSides.Old : twoSides.New;
@@ -1095,7 +1150,7 @@ namespace SourceGit.Views
                 twoSides.GetCombinedRangeForSingleSide(ref startIdx, ref endIdx, IsOld);
             }
 
-            var patch = new Models.PatchGenerator(option, diff, startIdx, endIdx, isCombined, IsOld);
+            var patch = ctx.CreatePatch(startIdx, endIdx, isCombined, IsOld);
             if (!patch.IsValid)
             {
                 Models.Notification.Send(null, "You should select at lease one changed line!", true);
@@ -1154,9 +1209,9 @@ namespace SourceGit.Views
         {
             base.OnDataContextChanged(e);
 
-            if (DataContext is ViewModels.CombinedTextDiff { Data: { } diff })
+            if (DataContext is ViewModels.CombinedTextDiff { Lines: { } lines })
             {
-                LoadDocumentAsync(DataContext, diff.Lines);
+                LoadDocumentAsync(DataContext, lines);
             }
             else
             {
@@ -1166,7 +1221,7 @@ namespace SourceGit.Views
 
         protected override void UpdateSelectedChunk(double y)
         {
-            if (DataContext is not ViewModels.CombinedTextDiff { Data: { } diff } combined)
+            if (DataContext is not ViewModels.CombinedTextDiff { Lines: { } lines } combined)
                 return;
 
             var view = TextArea.TextView;
@@ -1176,8 +1231,8 @@ namespace SourceGit.Views
             var selection = TextArea.Selection;
             if (!selection.IsEmpty)
             {
-                var startIdx = Math.Min(selection.StartPosition.Line - 1, diff.Lines.Count - 1);
-                var endIdx = Math.Min(selection.EndPosition.Line - 1, diff.Lines.Count - 1);
+                var startIdx = Math.Min(selection.StartPosition.Line - 1, lines.Count - 1);
+                var endIdx = Math.Min(selection.EndPosition.Line - 1, lines.Count - 1);
 
                 if (startIdx > endIdx)
                     (startIdx, endIdx) = (endIdx, startIdx);
@@ -1185,7 +1240,7 @@ namespace SourceGit.Views
                 var hasChanges = false;
                 for (var i = startIdx; i <= endIdx; i++)
                 {
-                    var line = diff.Lines[i];
+                    var line = lines[i];
                     if (line.Type == Models.TextDiffLineType.Added || line.Type == Models.TextDiffLineType.Deleted)
                     {
                         hasChanges = true;
@@ -1228,7 +1283,7 @@ namespace SourceGit.Views
                         continue;
 
                     var index = line.FirstDocumentLine.LineNumber;
-                    if (index > diff.Lines.Count)
+                    if (index > lines.Count)
                         break;
 
                     var endY = line.GetTextLineVisualYPosition(line.TextLines[^1], VisualYPosition.LineBottom);
@@ -1245,7 +1300,7 @@ namespace SourceGit.Views
                     return;
                 }
 
-                var (startIdx, endIdx) = combined.FindRangeByIndex(diff.Lines, lineIdx);
+                var (startIdx, endIdx) = combined.FindRangeByIndex(lines, lineIdx);
                 if (startIdx == -1)
                 {
                     TrySetChunk(null);
@@ -1527,9 +1582,8 @@ namespace SourceGit.Views
             }
             else if (DataContext is ViewModels.CombinedTextDiff combined)
             {
-                var data = combined.Data;
-                total = data.Lines.Count;
-                RenderSingleSide(context, data.Lines, 0, Bounds.Width);
+                total = combined.Lines.Count;
+                RenderSingleSide(context, combined.Lines, 0, Bounds.Width);
             }
 
             var range = DisplayRange;
@@ -1569,8 +1623,7 @@ namespace SourceGit.Views
             }
             else if (DataContext is ViewModels.CombinedTextDiff combined)
             {
-                var data = combined.Data;
-                total = data.Lines.Count;
+                total = combined.Lines.Count;
             }
             else
             {
@@ -1689,7 +1742,7 @@ namespace SourceGit.Views
             if (!option.IsLocalChange || !option.IsUnstaged)
                 return;
 
-            var patch = new Models.PatchGenerator(option, diff, chunk.StartIdx, chunk.EndIdx, chunk.Combined, chunk.IsOldSide);
+            var patch = vm.CreatePatch(chunk.StartIdx, chunk.EndIdx, chunk.Combined, chunk.IsOldSide);
             if (!patch.IsValid)
                 return;
 
@@ -1715,7 +1768,7 @@ namespace SourceGit.Views
             if (!option.IsLocalChange || option.IsUnstaged)
                 return;
 
-            var patch = new Models.PatchGenerator(option, diff, chunk.StartIdx, chunk.EndIdx, chunk.Combined, chunk.IsOldSide);
+            var patch = vm.CreatePatch(chunk.StartIdx, chunk.EndIdx, chunk.Combined, chunk.IsOldSide);
             if (!patch.IsValid)
                 return;
 
@@ -1741,7 +1794,7 @@ namespace SourceGit.Views
             if (!option.IsLocalChange || !option.IsUnstaged)
                 return;
 
-            var patch = new Models.PatchGenerator(option, diff, chunk.StartIdx, chunk.EndIdx, chunk.Combined, chunk.IsOldSide);
+            var patch = vm.CreatePatch(chunk.StartIdx, chunk.EndIdx, chunk.Combined, chunk.IsOldSide);
             if (!patch.IsValid)
                 return;
 

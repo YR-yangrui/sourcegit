@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SourceGit.ViewModels
@@ -8,10 +8,91 @@ namespace SourceGit.ViewModels
         public Models.StructuredDiff Diff { get; }
         public TextDiffContext RawPrefabDiff { get; private set; }
 
+        public List<Models.StructuredDiffSheet> VisibleSheets { get; private set; } = [];
+        public Models.StructuredDiffSheet SelectedSheet
+        {
+            get => _selectedSheet;
+            set => SetProperty(ref _selectedSheet, value);
+        }
+
+        private void RefreshVisibleSheets()
+        {
+            var selected = SelectedSheet;
+            var sheets = new List<Models.StructuredDiffSheet>();
+            // Excel filters tabs as well as rows; retain empty added/deleted sheets by their explicit status.
+            foreach (var sheet in Diff.Sheets)
+            {
+                if (Diff.Kind != Models.StructuredDiffKind.Spreadsheet || !ShowOnlyChangedRows || sheet.HasChanges)
+                    sheets.Add(sheet);
+            }
+            VisibleSheets = sheets;
+            OnPropertyChanged(nameof(VisibleSheets));
+            // Keep the active sheet when possible, otherwise select the first remaining tab.
+            SelectedSheet = selected != null && sheets.Contains(selected) ? selected :
+                sheets.Count > 0 ? sheets[0] : null;
+        }
+
         public bool IsTable => Diff.Kind is Models.StructuredDiffKind.Spreadsheet or Models.StructuredDiffKind.ConfigBytes;
         public bool IsHierarchy => Diff.Kind == Models.StructuredDiffKind.PrefabHierarchy;
         public bool HasRawPrefabDiff => RawPrefabDiff != null;
         public string TableFilterButtonText => _showOnlyChangedRows ? "显示全部" : "只显示本地改动";
+        public bool ShowOnlyChangedRows
+        {
+            get => _showOnlyChangedRows;
+            set
+            {
+                if (!SetProperty(ref _showOnlyChangedRows, value))
+                    return;
+
+                // Apply the toolbar choice to every sheet, including inactive tabs.
+                foreach (var sheet in Diff.Sheets)
+                    sheet.SetShowOnlyChangedRows(value);
+                OnPropertyChanged(nameof(TableFilterButtonText));
+                RefreshVisibleSheets();
+                SaveTablePreferences();
+            }
+        }
+
+        public bool HideUnchangedColumns
+        {
+            get => _hideUnchangedColumns;
+            set
+            {
+                if (!SetProperty(ref _hideUnchangedColumns, value))
+                    return;
+
+                // Remember the choice while showing all rows; sheets gate its actual effect.
+                foreach (var sheet in Diff.Sheets)
+                    sheet.SetHideUnchangedColumns(value);
+                SaveTablePreferences();
+            }
+        }
+
+        public bool MergeChanges
+        {
+            get => _mergeChanges;
+            set
+            {
+                if (!SetProperty(ref _mergeChanges, value))
+                    return;
+
+                // Apply the presentation mode to active and inactive sheets alike.
+                foreach (var sheet in Diff.Sheets)
+                    sheet.MergeChanges = value;
+                SaveTablePreferences();
+            }
+        }
+
+        private void SaveTablePreferences()
+        {
+            // Persist toolbar choices together so future files and sessions share the same defaults.
+            var preferences = Preferences.Instance;
+            preferences.StructuredDiffShowOnlyChangedRows = _showOnlyChangedRows;
+            preferences.StructuredDiffHideUnchangedColumns = _hideUnchangedColumns;
+            preferences.StructuredDiffMergeChanges = _mergeChanges;
+            preferences.Save();
+        }
+
         public string PrefabFilterButtonText => _showOnlyChangedPrefabNodes ? "显示全部" : "只显示Diff";
         public bool ShowOnlyChangedPrefabNodes
         {
@@ -60,11 +141,21 @@ namespace SourceGit.ViewModels
         public StructuredDiffContext(Models.StructuredDiff diff, Models.DiffOption option = null, Models.TextDiff rawTextDiff = null)
         {
             Diff = diff;
-            if (diff.Kind == Models.StructuredDiffKind.Spreadsheet)
+            if (IsTable)
             {
-                _showOnlyChangedRows = true;
+                var preferences = Preferences.Instance;
+                // Initialize fields directly: opening a diff must not overwrite the saved choices.
+                _showOnlyChangedRows = preferences.StructuredDiffShowOnlyChangedRows ??
+                    (diff.Kind == Models.StructuredDiffKind.Spreadsheet);
+                _hideUnchangedColumns = preferences.StructuredDiffHideUnchangedColumns;
+                _mergeChanges = preferences.StructuredDiffMergeChanges;
+                // Apply the saved settings to all sheets before the first tab is displayed.
                 foreach (var sheet in diff.Sheets)
-                    sheet.SetShowOnlyChangedRows(true);
+                {
+                    sheet.SetShowOnlyChangedRows(_showOnlyChangedRows);
+                    sheet.SetHideUnchangedColumns(_hideUnchangedColumns);
+                    sheet.MergeChanges = _mergeChanges;
+                }
             }
 
             if (diff.Kind == Models.StructuredDiffKind.PrefabHierarchy && option != null)
@@ -73,6 +164,7 @@ namespace SourceGit.ViewModels
                 RefreshPrefabTextDiffs();
             }
 
+            RefreshVisibleSheets();
             _selectedNode = FindFirstChangedNode(diff) ?? (diff.Rows.Count > 0 ? diff.Rows[0] : null);
         }
 
@@ -89,10 +181,7 @@ namespace SourceGit.ViewModels
 
         public void ToggleTableFilter()
         {
-            _showOnlyChangedRows = !_showOnlyChangedRows;
-            foreach (var sheet in Diff.Sheets)
-                sheet.SetShowOnlyChangedRows(_showOnlyChangedRows);
-            OnPropertyChanged(nameof(TableFilterButtonText));
+            ShowOnlyChangedRows = !ShowOnlyChangedRows;
         }
 
         public void TogglePrefabFilter()
@@ -222,6 +311,9 @@ namespace SourceGit.ViewModels
         private Models.StructuredDiffNode _selectedNode = null;
         private Models.DiffOption _option = null;
         private bool _showOnlyChangedRows = false;
+        private bool _hideUnchangedColumns = false;
+        private bool _mergeChanges = false;
+        private Models.StructuredDiffSheet _selectedSheet = null;
         private bool _showOnlyChangedPrefabNodes = true;
         private PrefabViewMode _prefabViewMode = PrefabViewMode.Hierarchy;
 

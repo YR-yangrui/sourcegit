@@ -141,7 +141,7 @@
               <DataTemplate DataType="m:Notification">
                 <Border Margin="6" HorizontalAlignment="Stretch" VerticalAlignment="Top" Effect="drop-shadow(0 0 8 #8F000000)">
                   <Border Padding="8" CornerRadius="6" Background="{DynamicResource Brush.Popup}">
-                    <Grid RowDefinitions="26,Auto">
+                    <Grid RowDefinitions="26,Auto,Auto">
                       <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto" Margin="8,0">
                         <Path Grid.Column="0" Width="14" Height="14" Data="{StaticResource Icons.Error}" Fill="Red" IsVisible="{Binding IsError}"/>
                         <Path Grid.Column="0" Width="14" Height="14" Data="{StaticResource Icons.Info}" Fill="Green" IsVisible="{Binding !IsError}"/>
@@ -162,6 +162,13 @@
                                                     WordWrap="True"
                                                     HorizontalScrollBarVisibility="Disabled"
                                                     VerticalScrollBarVisibility="Auto"/>
+                      <StackPanel Grid.Row="2" Margin="8,0,8,8" Spacing="8" IsVisible="{Binding CanRemoveIndexLock}">
+                        <TextBlock Text="{DynamicResource Text.Repository.Notifications.RemoveIndexLock.Hint}" TextWrapping="Wrap"/>
+                        <Button HorizontalAlignment="Right"
+                                Padding="12,4"
+                                Content="{DynamicResource Text.Repository.Notifications.RemoveIndexLock}"
+                                Click="OnRemoveIndexLock"/>
+                      </StackPanel>
                     </Grid>
                   </Border>
                 </Border>

@@ -7,13 +7,16 @@ namespace SourceGit.Commands
 {
     public class Diff : Command
     {
-        public Diff(string repo, Models.DiffOption opt, int unified, bool ignoreWhitespace, bool ignoreCRAtEOL)
+        public Diff(string repo, Models.DiffOption opt, int unified, bool ignoreWhitespace, bool ignoreCRAtEOL, bool useTextConversion = true)
         {
             WorkingDirectory = repo;
             Context = repo;
 
             var builder = new StringBuilder(256);
             builder.Append("diff --no-color --no-ext-diff --full-index --patch ");
+            // --no-ext-diff does not disable textconv. Renderer metadata must not launch another converter first.
+            if (!useTextConversion)
+                builder.Append("--no-textconv ");
             if (ignoreWhitespace)
                 builder.Append("--ignore-space-change ");
             if (ignoreCRAtEOL)

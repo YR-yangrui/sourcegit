@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -10,6 +10,20 @@
              x:Class="SourceGit.Views.StructuredDiffView"
              x:DataType="vm:StructuredDiffContext">
   <UserControl.Styles>
+    <Style Selector="Border.sheet_tab">
+      <Setter Property="Padding" Value="8,4"/>
+      <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+    <Style Selector="Border.sheet_tab.added">
+      <Setter Property="Background" Value="#2633AA44"/>
+    </Style>
+    <Style Selector="Border.sheet_tab.deleted">
+      <Setter Property="Background" Value="#26CC3333"/>
+    </Style>
+    <Style Selector="Border.sheet_tab.modified">
+      <Setter Property="Background" Value="#30D8A400"/>
+    </Style>
+
     <Style Selector="Border.state">
       <Setter Property="Width" Value="3"/>
       <Setter Property="CornerRadius" Value="0"/>
@@ -225,18 +239,21 @@
                  Foreground="{DynamicResource Brush.FG2}"
                  FontSize="12"
                  Text="{Binding Diff.Summary}"/>
-      <Button Grid.Column="1"
-              Classes="flat"
-              Margin="8,4"
-              Content="{Binding TableFilterButtonText}"
-              IsVisible="{Binding IsTable}"
-              Click="OnToggleTableFilter"/>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Margin="8,4">
+        <CheckBox Content="只显示本地改动" IsChecked="{Binding ShowOnlyChangedRows, Mode=TwoWay}"/>
+        <CheckBox Content="隐藏未改动的列" IsChecked="{Binding HideUnchangedColumns, Mode=TwoWay}"
+                  IsEnabled="{Binding ShowOnlyChangedRows}"/>
+        <CheckBox Content="合并改动" IsChecked="{Binding MergeChanges, Mode=TwoWay}"/>
+      </StackPanel>
     </Grid>
 
-    <TabControl Grid.Row="1" ItemsSource="{Binding Diff.Sheets}" IsVisible="{Binding IsTable}">
+    <TabControl Grid.Row="1" ItemsSource="{Binding VisibleSheets}" SelectedItem="{Binding SelectedSheet, Mode=TwoWay}" IsVisible="{Binding IsTable}">
       <TabControl.ItemTemplate>
         <DataTemplate DataType="m:StructuredDiffSheet">
-          <TextBlock Text="{Binding Header}"/>
+          <Border Classes="sheet_tab" Classes.added="{Binding IsAdded}"
+                  Classes.deleted="{Binding IsDeleted}" Classes.modified="{Binding IsModified}">
+            <TextBlock Text="{Binding Header}"/>
+          </Border>
         </DataTemplate>
       </TabControl.ItemTemplate>
 

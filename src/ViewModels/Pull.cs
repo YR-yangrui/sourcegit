@@ -55,13 +55,33 @@ namespace SourceGit.ViewModels
         public bool UseRebase
         {
             get => _repo.UIStates.PreferRebaseInsteadOfMerge;
-            set => _repo.UIStates.PreferRebaseInsteadOfMerge = value;
+            set
+            {
+                _repo.UIStates.PreferRebaseInsteadOfMerge = value;
+                OnPropertyChanged();
+            }
         }
+
+        public bool UseAI
+        {
+            get => _useAI;
+            set
+            {
+                if (SetProperty(ref _useAI, value) && value)
+                    UseRebase = true;
+            }
+        }
+
+        public bool AutoApplyAI { get; set; }
+        public List<AI.Service> AIServices { get; }
+        public AI.Service SelectedAIService { get; set; }
 
         public Pull(Repository repo, Models.Branch specifiedRemoteBranch)
         {
             _repo = repo;
             Current = repo.CurrentBranch;
+            AIServices = repo.GetPreferredOpenAIServices();
+            SelectedAIService = AIServices.Count > 0 ? AIServices[0] : null;
 
             if (specifiedRemoteBranch != null)
             {
@@ -110,6 +130,13 @@ namespace SourceGit.ViewModels
 
         public override async Task<bool> Sure()
         {
+            if (UseAI && (SelectedAIService == null ||
+                AI.ConflictResolution.IsRebasing(_repo.GitDir) || _repo.InProgressContext != null))
+            {
+                _repo.SendNotification(App.Text(SelectedAIService == null ? "AIConflict.NoService" : "AIConflict.OperationInProgress"), true);
+                return false;
+            }
+
             _repo.BeginRemoteSync();
             try
             {
@@ -151,11 +178,26 @@ namespace SourceGit.ViewModels
                     }
                 }
 
-                bool rs = await new Commands.Pull(
+                var pullCommand = new Commands.Pull(
                     _repo.FullPath,
                     _selectedRemote.Name,
                     !string.IsNullOrEmpty(Current.Upstream) && Current.Upstream.Equals(_selectedBranch.FullName) ? string.Empty : _selectedBranch.Name,
-                    UseRebase).Use(log).RunAsync();
+                    UseAI || UseRebase).Use(log);
+                // Expected rebase conflicts open the resolver; unrelated pull failures still surface.
+                pullCommand.RaiseError = !UseAI;
+                bool rs = await pullCommand.RunAsync();
+                if (!rs && UseAI)
+                {
+                    if (AI.ConflictResolution.IsRebasing(_repo.GitDir))
+                    {
+                        rs = await App.ResolveAIConflictsAsync(new AIConflictResolver(
+                            _repo, service: SelectedAIService, autoApply: AutoApplyAI, continueRebase: true));
+                    }
+                    else
+                    {
+                        _repo.SendNotification(App.Text("AIConflict.PullFailed"), true);
+                    }
+                }
                 if (rs)
                 {
                     _repo.MarkFetched();
@@ -173,6 +215,9 @@ namespace SourceGit.ViewModels
                 }
 
                 log.Complete();
+
+                if (!rs && UseAI && needPopStash)
+                    _repo.SendNotification(App.Text("AIConflict.StashKept"), false);
 
                 if (_repo.SelectedViewIndex == 0)
                 {
@@ -233,6 +278,7 @@ namespace SourceGit.ViewModels
         }
 
         private readonly Repository _repo = null;
+        private bool _useAI;
         private Models.Remote _selectedRemote = null;
         private List<Models.Branch> _remoteBranches = null;
         private Models.Branch _selectedBranch = null;

@@ -658,19 +658,25 @@ namespace SourceGit.ViewModels
 
         public async Task OpenRevisionFileAsync(string file, Models.ExternalTool tool, string revisionBlobSHA = null)
         {
+            await OpenRevisionFileAtRevisionAsync(file, _commit.SHA, tool, revisionBlobSHA);
+        }
+
+        public async Task OpenRevisionFileAtRevisionAsync(string file, string revision, Models.ExternalTool tool, string revisionBlobSHA = null)
+        {
             var fullPath = Native.OS.GetAbsPath(_repo.FullPath, file);
             var openPath = await Commands.SaveRevisionFile
-                .GetWorktreePathIfRevisionMatchesDiskAsync(_repo.FullPath, _commit.SHA, file, revisionBlobSHA)
+                .GetWorktreePathIfRevisionMatchesDiskAsync(_repo.FullPath, revision, file, revisionBlobSHA)
                 .ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(openPath))
             {
                 var fileName = Path.GetFileNameWithoutExtension(fullPath) ?? "";
                 var fileExt = Path.GetExtension(fullPath) ?? "";
-                openPath = Path.Combine(Path.GetTempPath(), $"{fileName}~{_commit.SHA.AsSpan(0, 10)}{fileExt}");
+                var revisionLabel = revision.AsSpan(0, Math.Min(10, revision.Length));
+                openPath = Path.Combine(Path.GetTempPath(), $"{fileName}~{revisionLabel}{fileExt}");
 
                 await Commands.SaveRevisionFile
-                    .RunAsync(_repo.FullPath, _commit.SHA, file, openPath)
+                    .RunAsync(_repo.FullPath, revision, file, openPath)
                     .ConfigureAwait(false);
             }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -119,6 +119,11 @@ namespace SourceGit.ViewModels
             return modifiedLineCount > 0 ? (startIdx, endIdx) : (-1, -1);
         }
 
+        public virtual Models.PatchGenerator CreatePatch(int start, int end, bool combined, bool oldSide)
+        {
+            return new Models.PatchGenerator(_option, _data, start, end, combined, oldSide);
+        }
+
         public virtual bool IsSideBySide()
         {
             return false;
@@ -167,19 +172,32 @@ namespace SourceGit.ViewModels
 
     public class CombinedTextDiff : TextDiffContext
     {
+        public List<Models.TextDiffLine> Lines => _projection.Lines;
+        public bool MergeInlineChanges { get; }
+
         public CombinedTextDiff(Models.DiffOption option, Models.TextDiff diff, TextDiffContext previous = null, bool supportsChunkActions = true)
         {
             _option = option;
             _data = diff;
             _supportsChunkActions = supportsChunkActions;
+            MergeInlineChanges = Preferences.Instance.MergeInlineTextChanges;
+            _projection = new Models.TextDiffProjection(diff, MergeInlineChanges);
+            TryKeepPrevState(previous, Lines);
+        }
 
-            TryKeepPrevState(previous, _data.Lines);
+        public override Models.PatchGenerator CreatePatch(int start, int end, bool combined, bool oldSide)
+        {
+            // Each display range expands to complete original edit pairs, never to neighboring changes.
+            return new Models.PatchGenerator(_option, _projection.PatchData,
+                _projection.Ranges[start].Start, _projection.Ranges[end].End, true, false);
         }
 
         public override TextDiffContext SwitchMode()
         {
             return new TwoSideTextDiff(_option, _data, this, _supportsChunkActions);
         }
+
+        private readonly Models.TextDiffProjection _projection;
     }
 
     public class TwoSideTextDiff : TextDiffContext

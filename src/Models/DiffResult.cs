@@ -15,6 +15,7 @@ namespace SourceGit.Models
 
     public class TextRange(int p, int n)
     {
+        public bool IsReplacement { get; set; } = false;
         public int Start { get; set; } = p;
         public int End { get; set; } = p + n - 1;
     }
@@ -27,6 +28,9 @@ namespace SourceGit.Models
         public int OldLineNumber { get; set; } = 0;
         public int NewLineNumber { get; set; } = 0;
         public List<TextRange> Highlights { get; set; } = new List<TextRange>();
+        public string MergedOldContent { get; set; } = null;
+        public List<TextRange> MergedOldHighlights { get; set; } = [];
+        public bool IsMerged => MergedOldContent != null;
         public bool NoNewLineEndOfFile { get; set; } = false;
 
         public string OldLine => OldLineNumber == 0 ? string.Empty : OldLineNumber.ToString();

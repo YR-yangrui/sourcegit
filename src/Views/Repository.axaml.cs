@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 
 using Avalonia;
@@ -21,6 +22,19 @@ namespace SourceGit.Views
         protected override void OnLoaded(RoutedEventArgs e)
         {
             base.OnLoaded(e);
+            // The shared list can change from another repository tab, so every visible sidebar tracks it.
+            Models.UniversalStashStore.Instance.Items.CollectionChanged += OnUniversalStashesChanged;
+            UpdateLeftSidebarLayout();
+        }
+
+        protected override void OnUnloaded(RoutedEventArgs e)
+        {
+            Models.UniversalStashStore.Instance.Items.CollectionChanged -= OnUniversalStashesChanged;
+            base.OnUnloaded(e);
+        }
+
+        private void OnUniversalStashesChanged(object _, NotifyCollectionChangedEventArgs e)
+        {
             UpdateLeftSidebarLayout();
         }
 
@@ -208,6 +222,15 @@ namespace SourceGit.Views
                     ev.Handled = true;
                 };
 
+                var makeUniversal = new MenuItem();
+                makeUniversal.Header = App.Text("StashCM.MakeUniversal");
+                makeUniversal.Icon = this.CreateMenuIcon("Icons.Stashes.Add");
+                makeUniversal.Click += async (_, ev) =>
+                {
+                    await vm.MakeUniversalAsync(stash);
+                    ev.Handled = true;
+                };
+
                 var copy = new MenuItem();
                 copy.Header = App.Text("StashCM.CopyMessage");
                 copy.Icon = this.CreateMenuIcon("Icons.Copy");
@@ -223,6 +246,7 @@ namespace SourceGit.Views
                 menu.Items.Add(branch);
                 menu.Items.Add(drop);
                 menu.Items.Add(new MenuItem { Header = "-" });
+                menu.Items.Add(makeUniversal);
                 menu.Items.Add(patch);
                 menu.Items.Add(new MenuItem { Header = "-" });
                 menu.Items.Add(copy);
@@ -230,6 +254,64 @@ namespace SourceGit.Views
             }
 
             e.Handled = true;
+        }
+
+        private void OnUniversalStashContextRequested(object sender, ContextRequestedEventArgs e)
+        {
+            if (DataContext is ViewModels.Repository { StashesPage: { } vm } &&
+                sender is Border { DataContext: Models.UniversalStash stash } border)
+            {
+                var apply = new MenuItem();
+                apply.Header = App.Text("StashCM.Apply");
+                apply.Icon = this.CreateMenuIcon("Icons.CheckCircled");
+                apply.Click += (_, ev) =>
+                {
+                    vm.ApplyUniversal(stash);
+                    ev.Handled = true;
+                };
+
+                var remove = new MenuItem();
+                remove.Header = App.Text("StashCM.Drop");
+                remove.Icon = this.CreateMenuIcon("Icons.Clear");
+                remove.Click += (_, ev) =>
+                {
+                    vm.RemoveUniversal(stash);
+                    ev.Handled = true;
+                };
+
+                var copy = new MenuItem();
+                copy.Header = App.Text("StashCM.CopyMessage");
+                copy.Icon = this.CreateMenuIcon("Icons.Copy");
+                copy.Click += async (_, ev) =>
+                {
+                    await this.CopyTextAsync(stash.Message);
+                    ev.Handled = true;
+                };
+
+                var menu = new ContextMenu();
+                menu.Items.Add(apply);
+                menu.Items.Add(remove);
+                menu.Items.Add(new MenuItem { Header = "-" });
+                menu.Items.Add(copy);
+                menu.Open(border);
+            }
+
+            e.Handled = true;
+        }
+
+        private void OnUniversalStashDoubleTapped(object sender, TappedEventArgs e)
+        {
+            if (DataContext is ViewModels.Repository { StashesPage: { } vm } &&
+                sender is Border { DataContext: Models.UniversalStash stash })
+                vm.ApplyUniversal(stash);
+
+            e.Handled = true;
+        }
+
+        private void OnUniversalStashListPropertyChanged(object _, AvaloniaPropertyChangedEventArgs e)
+        {
+            if (e.Property == ItemsControl.ItemsSourceProperty || e.Property == IsVisibleProperty)
+                UpdateLeftSidebarLayout();
         }
 
         private void OnStashDoubleTapped(object sender, TappedEventArgs e)
@@ -365,7 +447,7 @@ namespace SourceGit.Views
             if (!IsLoaded)
                 return;
 
-            var leftHeight = LeftSidebarGroups.Bounds.Height - 28.0 * 6 - 4;
+            var leftHeight = LeftSidebarGroups.Bounds.Height - 28.0 * 7 - 4;
             if (leftHeight <= 0)
                 return;
 
@@ -373,10 +455,11 @@ namespace SourceGit.Views
             var remoteBranchRows = vm.IsRemoteGroupExpanded ? RemoteBranchTree.Rows.Count : 0;
             var desiredBranches = (localBranchRows + remoteBranchRows) * 24.0;
             var desiredStash = !vm.IsBare && vm.IsStashGroupExpanded ? 24.0 * vm.StashesPage.VisibleStashes.Count : 0;
+            var desiredUniversalStash = !vm.IsBare && vm.IsUniversalStashGroupExpanded ? 24.0 * vm.StashesPage.UniversalStashes.Count : 0;
             var desiredTag = vm.IsTagGroupExpanded ? 24.0 * TagsList.Rows : 0;
             var desiredSubmodule = vm.IsSubmoduleGroupExpanded ? 24.0 * SubmoduleList.Rows : 0;
             var desiredWorktree = vm.IsWorktreeGroupExpanded ? 24.0 * vm.Worktrees.Count : 0;
-            var desiredOthers = desiredStash + desiredTag + desiredSubmodule + desiredWorktree;
+            var desiredOthers = desiredStash + desiredUniversalStash + desiredTag + desiredSubmodule + desiredWorktree;
             var hasOverflow = (desiredBranches + desiredOthers > leftHeight);
 
             if (vm.IsWorktreeGroupExpanded)
@@ -384,7 +467,7 @@ namespace SourceGit.Views
                 var height = desiredWorktree;
                 if (hasOverflow)
                 {
-                    var test = leftHeight - desiredBranches - desiredTag - desiredSubmodule;
+                    var test = leftHeight - desiredBranches - desiredTag - desiredSubmodule - desiredUniversalStash - desiredStash;
                     if (test < 0)
                         height = Math.Min(120, height);
                     else
@@ -393,7 +476,7 @@ namespace SourceGit.Views
 
                 leftHeight -= height;
                 WorktreeList.Height = height;
-                hasOverflow = (desiredBranches + desiredTag + desiredSubmodule) > leftHeight;
+                hasOverflow = (desiredBranches + desiredTag + desiredSubmodule + desiredUniversalStash + desiredStash) > leftHeight;
             }
 
             if (vm.IsSubmoduleGroupExpanded)
@@ -401,7 +484,7 @@ namespace SourceGit.Views
                 var height = desiredSubmodule;
                 if (hasOverflow)
                 {
-                    var test = leftHeight - desiredBranches - desiredTag;
+                    var test = leftHeight - desiredBranches - desiredTag - desiredUniversalStash - desiredStash;
                     if (test < 0)
                         height = Math.Min(120, height);
                     else
@@ -410,7 +493,7 @@ namespace SourceGit.Views
 
                 leftHeight -= height;
                 SubmoduleList.Height = height;
-                hasOverflow = (desiredBranches + desiredTag) > leftHeight;
+                hasOverflow = (desiredBranches + desiredTag + desiredUniversalStash + desiredStash) > leftHeight;
             }
 
             if (vm.IsTagGroupExpanded)
@@ -418,7 +501,7 @@ namespace SourceGit.Views
                 var height = desiredTag;
                 if (hasOverflow)
                 {
-                    var test = leftHeight - desiredBranches;
+                    var test = leftHeight - desiredBranches - desiredUniversalStash - desiredStash;
                     if (test < 0)
                         height = Math.Min(120, height);
                     else
@@ -427,6 +510,23 @@ namespace SourceGit.Views
 
                 leftHeight -= height;
                 TagsList.Height = height;
+                hasOverflow = desiredBranches + desiredUniversalStash + desiredStash > leftHeight;
+            }
+
+            if (vm.IsUniversalStashGroupExpanded)
+            {
+                var height = desiredUniversalStash;
+                if (hasOverflow)
+                {
+                    var test = leftHeight - desiredBranches - desiredStash;
+                    if (test < 0)
+                        height = Math.Min(120, height);
+                    else
+                        height = Math.Max(120, test);
+                }
+
+                leftHeight -= height;
+                UniversalStashList.Height = height;
                 hasOverflow = desiredBranches + desiredStash > leftHeight;
             }
 

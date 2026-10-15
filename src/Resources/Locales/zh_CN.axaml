@@ -111,6 +111,7 @@
   <x:String x:Key="Text.BranchTree.Worktree" xml:space="preserve">工作树</x:String>
   <x:String x:Key="Text.Cancel" xml:space="preserve">取    消</x:String>
   <x:String x:Key="Text.ChangeCM.CheckoutFirstParentRevision" xml:space="preserve">重置文件到上一版本</x:String>
+  <x:String x:Key="Text.ChangeCM.OpenFirstParentRevision" xml:space="preserve">打开改动前的文件版本</x:String>
   <x:String x:Key="Text.ChangeCM.CheckoutThisRevision" xml:space="preserve">重置文件到该版本</x:String>
   <x:String x:Key="Text.ChangeCM.GenerateCommitMessage" xml:space="preserve">生成提交信息</x:String>
   <x:String x:Key="Text.ChangeCM.Merge" xml:space="preserve">解决冲突（内部工具）</x:String>
@@ -456,8 +457,10 @@
   <x:String x:Key="Text.FileCM.StashMulti" xml:space="preserve">贮藏(stash)选中的 {0} 个文件...</x:String>
   <x:String x:Key="Text.FileCM.Unstage" xml:space="preserve">从暂存中移除</x:String>
   <x:String x:Key="Text.FileCM.UnstageMulti" xml:space="preserve">从暂存中移除 {0} 个文件</x:String>
-  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">应用本地分支改动</x:String>
-  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">应用远端分支改动</x:String>
+  <x:String x:Key="Text.FileCM.UseCurrentBranch" xml:space="preserve">应用当前分支内容：{0}</x:String>
+  <x:String x:Key="Text.FileCM.UseStashOrPatch" xml:space="preserve">应用贮藏/补丁中的修改</x:String>
+  <x:String x:Key="Text.FileCM.UseMine" xml:space="preserve">应用本地分支/提交：{0}</x:String>
+  <x:String x:Key="Text.FileCM.UseTheirs" xml:space="preserve">应用远端分支/提交：{0}</x:String>
   <x:String x:Key="Text.FileHistory" xml:space="preserve">文件历史</x:String>
   <x:String x:Key="Text.FileHistory.FileChange" xml:space="preserve">文件变更</x:String>
   <x:String x:Key="Text.FileHistory.FileContent" xml:space="preserve">文件内容</x:String>
@@ -960,6 +963,11 @@
   <x:String x:Key="Text.StashCM.CopyMessage" xml:space="preserve">复制描述信息</x:String>
   <x:String x:Key="Text.StashCM.Drop" xml:space="preserve">删除(drop)</x:String>
   <x:String x:Key="Text.StashCM.SaveAsPatch" xml:space="preserve">另存为补丁...</x:String>
+  <x:String x:Key="Text.StashCM.MakeUniversal" xml:space="preserve">设为通用贮藏</x:String>
+  <x:String x:Key="Text.UniversalStashes" xml:space="preserve">通用贮藏</x:String>
+  <x:String x:Key="Text.UniversalStash.Added" xml:space="preserve">已添加到通用贮藏</x:String>
+  <x:String x:Key="Text.UniversalStash.AddFailed" xml:space="preserve">添加通用贮藏失败：{0}</x:String>
+  <x:String x:Key="Text.UniversalStash.RemoveFailed" xml:space="preserve">删除通用贮藏失败：{0}</x:String>
   <x:String x:Key="Text.StashDropConfirm" xml:space="preserve">丢弃贮藏确认</x:String>
   <x:String x:Key="Text.StashDropConfirm.Label" xml:space="preserve">丢弃贮藏 ：</x:String>
   <x:String x:Key="Text.Stashes" xml:space="preserve">贮藏列表</x:String>
@@ -1090,4 +1098,35 @@
   <x:String x:Key="Text.Worktree.Remove" xml:space="preserve">移除工作树</x:String>
   <x:String x:Key="Text.Worktree.Unlock" xml:space="preserve">解除工作树锁定</x:String>
   <x:String x:Key="Text.Yes" xml:space="preserve">好的</x:String>
+  <x:String x:Key="Text.AIConflict.Title">AI 解决冲突</x:String>
+  <x:String x:Key="Text.AIConflict.Pull">AI Rebase 拉取到最新</x:String>
+  <x:String x:Key="Text.AIConflict.AutoApply">自动采用并继续（跳过预览）</x:String>
+  <x:String x:Key="Text.AIConflict.NoService">请先在偏好设置中配置 AI 服务。</x:String>
+  <x:String x:Key="Text.AIConflict.Ready">生成解决方案后预览并采用。</x:String>
+  <x:String x:Key="Text.AIConflict.Original">解决前的工作区文件</x:String>
+  <x:String x:Key="Text.AIConflict.Result">AI 合并结果</x:String>
+  <x:String x:Key="Text.AIConflict.Generate">生成解决方案</x:String>
+  <x:String x:Key="Text.AIConflict.Apply">采用、暂存并继续</x:String>
+  <x:String x:Key="Text.AIConflict.Stop">停止 / 关闭</x:String>
+  <x:String x:Key="Text.AIConflict.Generating">正在生成解决方案：{0}</x:String>
+  <x:String x:Key="Text.AIConflict.Applying">正在采用并暂存：{0}</x:String>
+  <x:String x:Key="Text.AIConflict.Review">请预览合并结果，采用后暂存此文件并继续。</x:String>
+  <x:String x:Key="Text.AIConflict.Continuing">正在继续 Rebase…</x:String>
+  <x:String x:Key="Text.AIConflict.Done">AI 冲突处理已完成。</x:String>
+  <x:String x:Key="Text.AIConflict.Cancelled">已停止。已采用的文件与当前 Git 操作状态均已保留。</x:String>
+  <x:String x:Key="Text.AIConflict.Unsupported">此冲突需要手动处理：AI 仅支持两侧均存在、含完整冲突标记的普通文本文件。</x:String>
+  <x:String x:Key="Text.AIConflict.Changed">文件或 Git 冲突版本已变化，请重新生成解决方案；未覆盖现有修改。</x:String>
+  <x:String x:Key="Text.AIConflict.TooLarge">此文件超出 AI 上下文大小限制，请手动处理。</x:String>
+  <x:String x:Key="Text.AIConflict.Uncertain">AI 无法确定此冲突的解决方式，请手动处理。</x:String>
+  <x:String x:Key="Text.AIConflict.InvalidResult">AI 返回的解决方案格式不正确，未修改文件。</x:String>
+  <x:String x:Key="Text.AIConflict.StageFailed">合并结果已保存，但暂存失败。请查看命令日志并手动暂存。</x:String>
+  <x:String x:Key="Text.AIConflict.NoConflicts">已没有对应的未合并文件。如需继续 Git 操作，请使用原有继续入口。</x:String>
+  <x:String x:Key="Text.AIConflict.ContinueFailed">Rebase 停止且没有可处理的冲突。请查看命令日志；未跳过任何提交。</x:String>
+  <x:String x:Key="Text.AIConflict.OperationInProgress">请先完成或中止当前 Git 操作，再开始 AI Rebase。</x:String>
+  <x:String x:Key="Text.AIConflict.PullFailed">拉取失败，请查看 Pull 命令日志了解原因。</x:String>
+  <x:String x:Key="Text.AIConflict.StashKept">本地修改仍保存在 PULL_AUTO_STASH 中。完成或中止 Rebase 后请恢复贮藏。</x:String>
+  <x:String x:Key="Text.Repository.Notifications.RemoveIndexLock" xml:space="preserve">移除锁文件</x:String>
+  <x:String x:Key="Text.Repository.Notifications.RemoveIndexLock.Hint" xml:space="preserve">移除前，请确认此仓库中的其他 Git 操作已结束。</x:String>
+  <x:String x:Key="Text.Repository.Notifications.RemoveIndexLock.Success" xml:space="preserve">锁文件已移除，请重试刚才的 Git 操作。</x:String>
+  <x:String x:Key="Text.Repository.Notifications.RemoveIndexLock.Failed" xml:space="preserve">无法移除锁文件：</x:String>
 </ResourceDictionary>

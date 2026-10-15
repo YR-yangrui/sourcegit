@@ -73,6 +73,7 @@ namespace SourceGit
     [JsonSerializable(typeof(Models.RepositoryUIStates))]
     [JsonSerializable(typeof(List<Models.ConventionalCommitType>))]
     [JsonSerializable(typeof(List<Models.LFSLock>))]
+    [JsonSerializable(typeof(List<Models.UniversalStash>))]
     [JsonSerializable(typeof(List<Models.VisualStudioInstance>))]
     [JsonSerializable(typeof(ViewModels.Preferences))]
     [JsonSerializable(typeof(ViewModels.RepositoryNodeMinimalInfo))]

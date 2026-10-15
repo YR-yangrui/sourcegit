@@ -436,8 +436,9 @@ namespace SourceGit.Views
 
                 if (change.IsConflicted)
                 {
+                    var conflictSides = GetConflictSideHeaders(repo, vm);
                     var useTheirs = new MenuItem();
-                    useTheirs.Header = App.Text("FileCM.UseTheirs");
+                    useTheirs.Header = conflictSides.Theirs;
                     useTheirs.Icon = this.CreateMenuIcon("Icons.Incoming");
                     useTheirs.Click += async (_, e) =>
                     {
@@ -446,7 +447,7 @@ namespace SourceGit.Views
                     };
 
                     var useMine = new MenuItem();
-                    useMine.Header = App.Text("FileCM.UseMine");
+                    useMine.Header = conflictSides.Mine;
                     useMine.Icon = this.CreateMenuIcon("Icons.Local");
                     useMine.Click += async (_, e) =>
                     {
@@ -845,8 +846,9 @@ namespace SourceGit.Views
 
                 if (conflicted.Count > 0)
                 {
+                    var conflictSides = GetConflictSideHeaders(repo, vm);
                     var useTheirs = new MenuItem();
-                    useTheirs.Header = App.Text("FileCM.UseTheirs");
+                    useTheirs.Header = conflictSides.Theirs;
                     useTheirs.Icon = this.CreateMenuIcon("Icons.Incoming");
                     useTheirs.Click += async (_, e) =>
                     {
@@ -855,7 +857,7 @@ namespace SourceGit.Views
                     };
 
                     var useMine = new MenuItem();
-                    useMine.Header = App.Text("FileCM.UseMine");
+                    useMine.Header = conflictSides.Mine;
                     useMine.Icon = this.CreateMenuIcon("Icons.Local");
                     useMine.Click += async (_, e) =>
                     {
@@ -1459,6 +1461,29 @@ namespace SourceGit.Views
 
             menu.Items.Add(reset);
             return true;
+        }
+
+        private static (string Mine, string Theirs) GetConflictSideHeaders(
+            ViewModels.Repository repo,
+            ViewModels.WorkingCopy vm)
+        {
+            if (vm.InProgressContext != null)
+            {
+                var names = vm.InProgressContext.GetExternalMergeFileSideNames();
+                // Rebase replays local commits into stage 3; stage 2 is the target baseline.
+                var theirsAreLocalChanges = vm.InProgressContext is ViewModels.RebaseInProgress;
+                return (
+                    App.Text(theirsAreLocalChanges ? "FileCM.UseTheirs" : "FileCM.UseMine",
+                        string.IsNullOrEmpty(names.Mine) ? "HEAD" : names.Mine),
+                    App.Text(theirsAreLocalChanges ? "FileCM.UseMine" : "FileCM.UseTheirs",
+                        string.IsNullOrEmpty(names.Theirs) ? "THEIRS" : names.Theirs));
+            }
+
+            // Stash/patch conflicts have no operation marker. Describe the stage contents
+            // directly: the current branch is stage 2, and the applied payload is stage 3.
+            return (
+                App.Text("FileCM.UseCurrentBranch", repo.CurrentBranch?.FriendlyName ?? "HEAD"),
+                App.Text("FileCM.UseStashOrPatch"));
         }
 
         private void TryAddOpenFileToContextMenu(ContextMenu menu, string fullpath)

@@ -1,3 +1,6 @@
+﻿using System;
+using System.IO;
+
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -84,6 +87,31 @@ namespace SourceGit.Views
         private void OnToolBarPointerPressed(object sender, PointerPressedEventArgs e)
         {
             this.FindAncestorOfType<ChromelessWindow>()?.BeginMoveWindow(sender, e);
+        }
+
+        private void OnRemoveIndexLock(object sender, RoutedEventArgs e)
+        {
+            e.Handled = true;
+            if (sender is not Button { DataContext: Models.Notification notice } ||
+                DataContext is not ViewModels.LauncherPage page)
+                return;
+
+            var path = notice.IndexLockPath;
+            if (string.IsNullOrEmpty(path))
+                return;
+
+            try
+            {
+                // Only remove on an explicit click. Do not retry Git automatically because
+                // the failed operation may have already performed partial work.
+                File.Delete(path);
+                page.Notifications.Remove(notice);
+                Models.Notification.Send(notice.Group, App.Text("Repository.Notifications.RemoveIndexLock.Success"));
+            }
+            catch (Exception ex)
+            {
+                Models.Notification.Send(notice.Group, App.Text("Repository.Notifications.RemoveIndexLock.Failed") + "\n" + ex.Message, true);
+            }
         }
     }
 }

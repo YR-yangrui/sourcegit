@@ -81,6 +81,16 @@ namespace SourceGit
         #endregion
 
         #region Utility Functions
+        public static async Task<bool> ResolveAIConflictsAsync(ViewModels.AIConflictResolver resolver)
+        {
+            if (Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: { } owner })
+            {
+                var dialog = new Views.AIConflictResolver { DataContext = resolver };
+                return await dialog.ShowDialog<bool>(owner);
+            }
+            return false;
+        }
+
         public static async Task<bool> AskConfirmAsync(string message, Models.ConfirmButtonType buttonType = Models.ConfirmButtonType.OkCancel)
         {
             if (Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: { } owner })

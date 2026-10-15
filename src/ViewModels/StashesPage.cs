@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -143,6 +144,8 @@ namespace SourceGit.ViewModels
 
         public DiffContentHost DiffHost { get; } = new();
 
+        public ObservableCollection<Models.UniversalStash> UniversalStashes => Models.UniversalStashStore.Instance.Items;
+
         public StashesPage(Repository repo)
         {
             _repo = repo;
@@ -193,11 +196,62 @@ namespace SourceGit.ViewModels
 
         public async Task SaveStashAsPatchAsync(Models.Stash stash, string saveTo)
         {
+            var succ = await GenerateStashPatchAsync(stash, saveTo);
+            if (succ)
+                _repo.SendNotification(App.Text("SaveAsPatchSuccess"));
+        }
+
+        public async Task MakeUniversalAsync(Models.Stash stash)
+        {
+            var tempFile = Path.GetTempFileName();
+            var succ = await GenerateStashPatchAsync(stash, tempFile);
+            if (!succ)
+            {
+                File.Delete(tempFile);
+                return;
+            }
+
+            var item = new Models.UniversalStash
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Message = stash.Message,
+                Time = stash.Time,
+                SourceRepository = _repo.FullPath,
+            };
+
+            if (Models.UniversalStashStore.Instance.Add(item, tempFile, out var error))
+                _repo.SendNotification(App.Text("UniversalStash.Added"));
+            else
+                _repo.SendNotification(App.Text("UniversalStash.AddFailed", error), true);
+        }
+
+        public void ApplyUniversal(Models.UniversalStash stash)
+        {
+            if (!_repo.CanCreatePopup())
+                return;
+
+            var patchFile = Models.UniversalStashStore.Instance.GetPatchFile(stash);
+            _repo.ShowPopup(new Apply(_repo)
+            {
+                PatchFile = patchFile,
+                ThreeWayMerge = true,
+            });
+        }
+
+        public void RemoveUniversal(Models.UniversalStash stash)
+        {
+            if (!Models.UniversalStashStore.Instance.Remove(stash, out var error))
+                _repo.SendNotification(App.Text("UniversalStash.RemoveFailed", error), true);
+        }
+
+        private async Task<bool> GenerateStashPatchAsync(Models.Stash stash, string saveTo)
+        {
             var opts = new List<Models.DiffOption>();
             var changes = await new Commands.CompareRevisions(_repo.FullPath, $"{stash.SHA}^", stash.SHA)
                 .ReadAsync()
                 .ConfigureAwait(false);
 
+            // Build one patch stream from every tracked stash change.
             foreach (var c in changes)
                 opts.Add(Models.DiffOption.ForStash(stash.Parents[0], stash.SHA, c, false));
 
@@ -207,15 +261,14 @@ namespace SourceGit.ViewModels
                     .ReadAsync()
                     .ConfigureAwait(false);
 
+                // Git stores untracked stash files in the optional third parent.
                 foreach (var c in untracked)
                     opts.Add(Models.DiffOption.ForStash(stash.UntrackedParent, stash.Parents[2], c, true));
 
                 changes.AddRange(untracked);
             }
 
-            var succ = await Commands.SaveChangesAsPatch.ProcessStashChangesAsync(_repo.FullPath, opts, saveTo);
-            if (succ)
-                _repo.SendNotification(App.Text("SaveAsPatchSuccess"));
+            return await Commands.SaveChangesAsPatch.ProcessStashChangesAsync(_repo.FullPath, opts, saveTo);
         }
 
         public void OpenChangeWithExternalDiffTool(Models.Change change)

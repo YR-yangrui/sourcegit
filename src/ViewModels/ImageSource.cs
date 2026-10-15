@@ -40,8 +40,27 @@ namespace SourceGit.ViewModels
 
         public static async Task<ImageSource> FromFileAsync(string fullpath, Models.ImageDecoder decoder)
         {
-            await using var stream = File.OpenRead(fullpath);
-            return await Task.Run(() => LoadFromStream(stream, decoder)).ConfigureAwait(false);
+            byte[] data;
+            // Decoders can be slow and may retain their input stream. Snapshot first so worktree
+            // operations never wait for image parsing before replacing or deleting the source.
+            await using (var stream = new FileStream(
+                fullpath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete,
+                81920,
+                FileOptions.Asynchronous | FileOptions.SequentialScan))
+            {
+                using var snapshot = new MemoryStream();
+                await stream.CopyToAsync(snapshot).ConfigureAwait(false);
+                data = snapshot.ToArray();
+            }
+
+            return await Task.Run(() =>
+            {
+                using var snapshot = new MemoryStream(data, false);
+                return LoadFromStream(snapshot, decoder);
+            }).ConfigureAwait(false);
         }
 
         public static async Task<ImageSource> FromRevisionAsync(string repo, string revision, string file, Models.ImageDecoder decoder)

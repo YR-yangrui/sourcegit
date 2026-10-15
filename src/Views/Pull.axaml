@@ -5,6 +5,7 @@
              xmlns:m="using:SourceGit.Models"
              xmlns:vm="using:SourceGit.ViewModels"
              xmlns:v="using:SourceGit.Views"
+             xmlns:ai="using:SourceGit.AI"
              mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
              x:Class="SourceGit.Views.Pull"
              x:DataType="vm:Pull">
@@ -76,7 +77,19 @@
       <CheckBox Grid.Row="4" Grid.Column="1"
                 Content="{DynamicResource Text.Pull.UseRebase}"
                 IsChecked="{Binding UseRebase, Mode=TwoWay}"
+                IsEnabled="{Binding !UseAI}"
                 ToolTip.Tip="--rebase"/>
     </Grid>
+    <StackPanel Margin="140,8,0,0" Spacing="6">
+      <CheckBox Content="{DynamicResource Text.AIConflict.Pull}" IsChecked="{Binding UseAI, Mode=TwoWay}"/>
+      <StackPanel IsVisible="{Binding UseAI}" Spacing="6">
+        <ComboBox ItemsSource="{Binding AIServices}" SelectedItem="{Binding SelectedAIService, Mode=TwoWay}" HorizontalAlignment="Stretch">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="ai:Service"><TextBlock Text="{Binding Name}"/></DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <CheckBox Content="{DynamicResource Text.AIConflict.AutoApply}" IsChecked="{Binding AutoApplyAI, Mode=TwoWay}"/>
+      </StackPanel>
+    </StackPanel>
   </StackPanel>
 </UserControl>

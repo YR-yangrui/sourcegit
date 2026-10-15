@@ -354,6 +354,21 @@ namespace SourceGit.ViewModels
             get => !IsBare && IsStashGroupExpanded;
         }
 
+        public bool IsUniversalStashGroupExpanded
+        {
+            get => _isUniversalStashGroupExpanded;
+            set
+            {
+                if (SetProperty(ref _isUniversalStashGroupExpanded, value))
+                    OnPropertyChanged(nameof(IsUniversalStashListVisible));
+            }
+        }
+
+        public bool IsUniversalStashListVisible
+        {
+            get => !IsBare && IsUniversalStashGroupExpanded;
+        }
+
         public bool IsTagGroupExpanded
         {
             get => _uiStates.IsTagsExpandedInSideBar;
@@ -3362,6 +3377,7 @@ namespace SourceGit.ViewModels
         private Histories _histories = null;
         private WorkingCopy _workingCopy = null;
         private StashesPage _stashesPage = null;
+        private bool _isUniversalStashGroupExpanded = true;
         private int _selectedViewIndex = 0;
         private int _isClosed = 1;
 

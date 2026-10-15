@@ -258,43 +258,21 @@ namespace SourceGit.Views
             if (DataContext is not ViewModels.CommitDetail { Repository: { } repo, Commit: { } commit } vm)
                 return null;
 
-            var openWith = new MenuItem();
-            openWith.Header = App.Text("Open");
-            openWith.Icon = this.CreateMenuIcon("Icons.OpenWith");
-            openWith.IsEnabled = change.Index != Models.ChangeState.Deleted;
-            if (openWith.IsEnabled)
-            {
-                var defaultEditor = new MenuItem();
-                defaultEditor.Header = App.Text("Open.SystemDefaultEditor");
-                defaultEditor.Click += async (_, ev) =>
-                {
-                    await vm.OpenRevisionFileAsync(change.Path, null);
-                    ev.Handled = true;
-                };
+            var openWith = CreateOpenRevisionFileMenuItem(
+                vm,
+                App.Text("Open"),
+                change.Path,
+                commit.SHA,
+                change.Index != Models.ChangeState.Deleted);
 
-                openWith.Items.Add(defaultEditor);
-
-                var tools = Native.OS.ExternalTools;
-                if (tools.Count > 0)
-                {
-                    openWith.Items.Add(new MenuItem() { Header = "-" });
-
-                    for (var i = 0; i < tools.Count; i++)
-                    {
-                        var tool = tools[i];
-                        var item = new MenuItem();
-                        item.Header = tool.Name;
-                        item.Icon = new Image { Width = 16, Height = 16, Source = tool.IconImage };
-                        item.Click += async (_, ev) =>
-                        {
-                            await vm.OpenRevisionFileAsync(change.Path, tool);
-                            ev.Handled = true;
-                        };
-
-                        openWith.Items.Add(item);
-                    }
-                }
-            }
+            // Renamed and copied entries read their left-side content from the original path.
+            var previousPath = string.IsNullOrEmpty(change.OriginalPath) ? change.Path : change.OriginalPath;
+            var openPreviousWith = CreateOpenRevisionFileMenuItem(
+                vm,
+                App.Text("ChangeCM.OpenFirstParentRevision"),
+                previousPath,
+                commit.Parents.Count > 0 ? commit.Parents[0] : string.Empty,
+                commit.Parents.Count > 0 && change.Index != Models.ChangeState.Added);
 
             var openWithMerger = new MenuItem();
             openWithMerger.Header = App.Text("OpenInExternalMergeTool");
@@ -369,6 +347,7 @@ namespace SourceGit.Views
 
             var menu = new ContextMenu();
             menu.Items.Add(openWith);
+            menu.Items.Add(openPreviousWith);
             menu.Items.Add(openWithMerger);
             menu.Items.Add(explore);
             menu.Items.Add(new MenuItem { Header = "-" });
@@ -520,6 +499,53 @@ namespace SourceGit.Views
             menu.Items.Add(copyPath);
             menu.Items.Add(copyFullPath);
             return menu;
+        }
+
+        private MenuItem CreateOpenRevisionFileMenuItem(
+            ViewModels.CommitDetail vm,
+            string header,
+            string path,
+            string revision,
+            bool isEnabled)
+        {
+            var openWith = new MenuItem();
+            openWith.Header = header;
+            openWith.Icon = this.CreateMenuIcon("Icons.OpenWith");
+            openWith.IsEnabled = isEnabled;
+            if (!isEnabled)
+                return openWith;
+
+            var defaultEditor = new MenuItem();
+            defaultEditor.Header = App.Text("Open.SystemDefaultEditor");
+            defaultEditor.Click += async (_, ev) =>
+            {
+                await vm.OpenRevisionFileAtRevisionAsync(path, revision, null);
+                ev.Handled = true;
+            };
+            openWith.Items.Add(defaultEditor);
+
+            var tools = Native.OS.ExternalTools;
+            if (tools.Count == 0)
+                return openWith;
+
+            openWith.Items.Add(new MenuItem { Header = "-" });
+
+            // Keep the configured external editor order consistent with the existing Open menu.
+            for (var i = 0; i < tools.Count; i++)
+            {
+                var tool = tools[i];
+                var item = new MenuItem();
+                item.Header = tool.Name;
+                item.Icon = new Image { Width = 16, Height = 16, Source = tool.IconImage };
+                item.Click += async (_, ev) =>
+                {
+                    await vm.OpenRevisionFileAtRevisionAsync(path, revision, tool);
+                    ev.Handled = true;
+                };
+                openWith.Items.Add(item);
+            }
+
+            return openWith;
         }
 
         private MenuItem CreateAIReviewMenuItem(ViewModels.Repository repo, Models.Commit commit, List<Models.Change> changes, string header)

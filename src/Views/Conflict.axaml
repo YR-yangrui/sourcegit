@@ -207,7 +207,15 @@
           </Grid>
         </Border>
 
+        <!-- Show the immutable index sides in-place. The worktree can contain partial manual edits,
+             so it must not be used as either side of an unresolved conflict preview. -->
+        <Grid Grid.Row="2" Margin="0,0,0,8" IsVisible="{Binding CanMerge}">
+          <v:DiffContentHostView DataContext="{Binding DiffHost}"/>
+        </Grid>
+
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+          <Button Classes="flat" Margin="0,0,8,0" Click="OnResolveWithAI"
+                  IsVisible="{Binding CanMerge}" Content="{DynamicResource Text.AIConflict.Title}"/>
           <Button Classes="flat" Click="OnUseMine">
             <StackPanel Orientation="Horizontal">
               <Path Width="12" Height="12" Data="{StaticResource Icons.Local}"/>

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -38,10 +38,54 @@ namespace SourceGit.Models
         public int Modified { get; set; } = 0;
         public List<StructuredDiffRow> Rows { get; set; } = [];
 
+        public StructuredDiffChangeKind Change { get; set; } = StructuredDiffChangeKind.None;
+        public bool IsAdded => Change == StructuredDiffChangeKind.Added;
+        public bool IsDeleted => Change == StructuredDiffChangeKind.Deleted;
+        public bool IsModified => Change == StructuredDiffChangeKind.Modified;
+        public bool HasChanges => Change != StructuredDiffChangeKind.None;
+
         public string Header => $"{Name}  +{Added} -{Deleted} ~{Modified}";
         public List<StructuredDiffCell> HeaderCells => Rows.Count > 0 ? Rows[0].Cells : [];
         public List<StructuredDiffRow> DataRows => Rows.Count > 1 ? Rows.GetRange(1, Rows.Count - 1) : [];
         public ObservableCollection<StructuredDiffRow> VisibleRows { get; } = [];
+
+        public List<bool> VisibleColumns
+        {
+            get
+            {
+                var columns = new List<bool>();
+                var headers = HeaderCells;
+                var firstDataColumn = headers.Count > 0 && headers[0].DisplayText == "#" ? 1 : 0;
+                // Keep the row label and first data column as context, including on empty sheets.
+                for (var i = 0; i < headers.Count; i++)
+                {
+                    var visible = !_showOnlyChangedRows || !_hideUnchangedColumns || i <= firstDataColumn ||
+                        headers[i].Change != StructuredDiffChangeKind.None;
+                    // Include every changed value, including fields that exist on only one side.
+                    foreach (var row in VisibleRows)
+                    {
+                        if (row[i].Change != StructuredDiffChangeKind.None)
+                        {
+                            visible = true;
+                            break;
+                        }
+                    }
+                    columns.Add(visible);
+                }
+                return columns;
+            }
+        }
+
+        public bool MergeChanges
+        {
+            get => _mergeChanges;
+            set => SetProperty(ref _mergeChanges, value);
+        }
+
+        public void SetHideUnchangedColumns(bool value)
+        {
+            SetProperty(ref _hideUnchangedColumns, value, nameof(VisibleColumns));
+        }
 
         public void SetShowOnlyChangedRows(bool value)
         {
@@ -64,11 +108,14 @@ namespace SourceGit.Models
             VisibleRows.Clear();
             foreach (var row in rows)
                 VisibleRows.Add(row);
+            OnPropertyChanged(nameof(VisibleColumns));
         }
 
         public bool ShowOnlyChangedRows => _showOnlyChangedRows;
 
         private bool _showOnlyChangedRows = false;
+        private bool _hideUnchangedColumns = false;
+        private bool _mergeChanges = false;
 
         private List<StructuredDiffRow> SortRows(List<StructuredDiffRow> rows)
         {
@@ -130,14 +177,14 @@ namespace SourceGit.Models
             get
             {
                 if (IsHeader)
-                    return OneLine(NewText);
+                    return OneLine(NewText.Length > 0 ? NewText : OldText);
 
                 return Change switch
                 {
                     StructuredDiffChangeKind.Added => OneLine(NewText),
                     StructuredDiffChangeKind.Deleted => OneLine(OldText),
-                    // Keep table rows compact; full old/new values remain available in Tooltip.
-                    StructuredDiffChangeKind.Modified => $"{OneLine(OldText)} => {OneLine(NewText)}",
+                    // Inline rendering highlights edits; the plain-text fallback stays on one line.
+                    StructuredDiffChangeKind.Modified => OneLine(NewText.Length > 0 ? NewText : OldText),
                     _ => OneLine(NewText.Length > 0 ? NewText : OldText),
                 };
             }
@@ -147,19 +194,19 @@ namespace SourceGit.Models
         {
             get
             {
-                if (Change == StructuredDiffChangeKind.Modified)
-                    return $"Old: {OldText}\nNew: {NewText}";
+                if (!IsHeader && OldText.Length > 0 && Change is StructuredDiffChangeKind.Modified or StructuredDiffChangeKind.Deleted)
+                    return $"old: {OldText}\nnew: {NewText}";
                 return DisplayText;
             }
         }
 
-        private static string OneLine(string value)
+        internal static string OneLine(string value)
         {
             if (string.IsNullOrEmpty(value))
                 return string.Empty;
 
             // JSON arrays/objects can arrive pretty-printed from flatc or Excel cells;
-            // table cells must stay single-line so brackets never force row breaks.
+            // keep each old/new value on its own line rather than introducing extra row breaks.
             return value.Replace("\r\n", " ", System.StringComparison.Ordinal)
                 .Replace('\r', ' ')
                 .Replace('\n', ' ');

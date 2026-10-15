@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SourceGit.ViewModels
 {
-    public class Conflict : ObservableObject
+    public class Conflict : ObservableObject, System.IDisposable
     {
         public string Marker
         {
@@ -48,6 +48,11 @@ namespace SourceGit.ViewModels
             get;
             private set;
         } = false;
+
+        public DiffContentHost DiffHost
+        {
+            get;
+        } = new();
 
         public bool UseHistoryPanel
         {
@@ -123,6 +128,9 @@ namespace SourceGit.ViewModels
             if (CanMerge)
                 IsResolved = new Commands.IsConflictResolved(repo.FullPath, change).GetResult();
 
+            if (CanMerge && !IsResolved)
+                DiffHost.ShowDiff(repo.FullPath, Models.DiffOption.ForConflict(change), "working_copy.conflict");
+
             _head = new Commands.QuerySingleCommit(repo.FullPath, "HEAD").GetResult() ?? new Models.Commit() { SHA = "HEAD" };
             var context = wc.InProgressContext;
             (Mine, Theirs) = context?.GetConflictSides(_head) ?? (_head, (object)"Stash or Patch");
@@ -145,6 +153,11 @@ namespace SourceGit.ViewModels
         public async Task UseTheirsAsync()
         {
             await _wc.UseTheirsAsync([_change]);
+        }
+
+        public async Task ResolveWithAIAsync()
+        {
+            await App.ResolveAIConflictsAsync(new AIConflictResolver(_repo, _change.Path));
         }
 
         public async Task UseMineAsync()
@@ -176,6 +189,12 @@ namespace SourceGit.ViewModels
                 _historyCache.PropertyChanged -= OnHistoryCachePropertyChanged;
                 _historyCache = null;
             }
+        }
+
+        public void Dispose()
+        {
+            DetachFromHistoryCache();
+            DiffHost.Dispose();
         }
 
         private void RefreshHistoriesFromCache()
